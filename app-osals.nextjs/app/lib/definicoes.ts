@@ -94,3 +94,114 @@ export type ContatoClienteResposta = {
   telefone: string | null
   email: string | null
 }
+
+// ===== Cadastro: Equipamento =====
+
+export type TipoEquipamento =
+  | 'SPLIT'
+  | 'MULTI_SPLIT'
+  | 'VRF'
+  | 'SELF'
+  | 'CHILLER'
+  | 'FAN_COIL'
+  | 'JANELA'
+  | 'OUTRO'
+
+export type StatusEquipamento = 'ATIVO' | 'EM_MANUTENCAO' | 'DESATIVADO'
+
+export type EquipamentoResposta = {
+  id: number
+  unidadeId: number
+  clienteId: number
+  marca: string | null
+  modelo: string | null
+  numeroSerie: string | null
+  tipo: TipoEquipamento
+  capacidadeBtus: number | null
+  capacidadeTr: number | null
+  localizacaoInterna: string | null
+  dataInstalacao: string | null
+  dataUltimaManutencao: string | null
+  status: StatusEquipamento
+  ativo: boolean
+}
+
+export type EquipamentoResumoDto = {
+  id: number
+  unidadeId: number
+  tipo: TipoEquipamento
+  marca: string | null
+  modelo: string | null
+  localizacaoInterna: string | null
+  status: StatusEquipamento
+  ativo: boolean
+}
+
+// ===== Cadastro: Veículo =====
+
+export type StatusVeiculo = 'ATIVO' | 'MANUTENCAO' | 'INATIVO'
+
+export type VeiculoResposta = {
+  id: number
+  placa: string
+  marca: string | null
+  modelo: string | null
+  ano: number | null
+  status: StatusVeiculo
+  ativo: boolean
+}
+
+export type VeiculoResumoDto = {
+  id: number
+  placa: string
+  modelo: string | null
+  status: StatusVeiculo
+}
+
+// ===== Cadastro: Técnico =====
+
+export type TecnicoResposta = {
+  id: number
+  nome: string
+  email: string
+  especialidade: string | null
+  telefone: string | null
+  valorHoraCentavos: number
+  ativo: boolean
+}
+
+export type TecnicoResumoDto = {
+  id: number
+  nome: string
+  especialidade: string | null
+  ativo: boolean
+}
+
+// ===== Cadastro: Peça =====
+
+export type PecaResposta = {
+  id: number
+  nome: string
+  descricao: string | null
+  unidadeMedidaId: number | null
+  unidadeMedidaSigla: string | null
+  ativo: boolean
+}
+
+export type UnidadeMedidaResposta = {
+  id: number
+  sigla: string
+  nome: string
+}
+
+// ===== Cadastro: Fornecedor =====
+
+export type FornecedorResposta = {
+  id: number
+  nome: string
+  tipoPessoa: TipoPessoa | null
+  documento: string | null
+  telefone: string | null
+  email: string | null
+  ativo: boolean
+}
