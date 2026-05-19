@@ -205,3 +205,35 @@ export type FornecedorResposta = {
   email: string | null
   ativo: boolean
 }
+
+// ===== Configuracoes =====
+
+export type TipoValorConfiguracao = 'NUMBER' | 'STRING' | 'BOOLEAN'
+
+export type ConfiguracaoResposta = {
+  chave: string
+  valor: string
+  tipo: TipoValorConfiguracao
+  descricao: string | null
+  updatedAt: string | null
+  updatedByNome: string | null
+}
+
+export type TipoServicoResposta = {
+  id: number
+  nome: string
+  ativo: boolean
+}
+
+export type TipoLancamentoCusto =
+  | 'ESTRUTURADO_MAO_OBRA'
+  | 'ESTRUTURADO_DESLOCAMENTO'
+  | 'LIVRE'
+
+export type CategoriaCustoResposta = {
+  id: number
+  codigo: string
+  nome: string
+  tipoLancamento: TipoLancamentoCusto
+  ativo: boolean
+}

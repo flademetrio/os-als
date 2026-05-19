@@ -9,7 +9,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { cookies } from 'next/headers'
-import { decodeJwt, jwtVerify, importSPKI, type KeyLike } from 'jose'
+import { decodeJwt, jwtVerify, importSPKI } from 'jose'
 import type { Papel, SessaoUsuario } from './definicoes'
 
 const COOKIE_ACCESS = 'osals_at'
@@ -41,9 +41,10 @@ export async function lerSessao(): Promise<SessaoUsuario | null> {
 }
 
 // Cache da chave publica em memoria (carrega 1x por processo).
-let chavePublicaCache: KeyLike | null = null
+type ChavePublica = Awaited<ReturnType<typeof importSPKI>>
+let chavePublicaCache: ChavePublica | null = null
 
-async function carregarChavePublica(): Promise<KeyLike> {
+async function carregarChavePublica(): Promise<ChavePublica> {
   if (chavePublicaCache) return chavePublicaCache
 
   const caminho = process.env.JWT_CHAVE_PUBLICA_CAMINHO ?? './keys/chave-publica.pem'

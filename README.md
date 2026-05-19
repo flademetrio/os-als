@@ -76,8 +76,14 @@ Pontos importantes:
 - ✅ Frontend — Fase 0 (esqueleto + login funcional)
 - ✅ Frontend — Fase 1 (jwtVerify RS256 + /sair handler)
 - ✅ Frontend — Fase 2 (Shell: Sidebar + Topbar + 14 componentes UI)
-- 🚧 Backend — Fase 2 (cadastros mestres)
+- ✅ Backend — Fase 2 (cadastros mestres completos)
   - ✅ 2a — Cliente + Unidade + ContatoCliente
-  - ⏳ 2b — Equipamento + Veículo
-  - ⏳ 2c — Técnico (endpoints)
-  - ⏳ 2d — Peças + UnidadeMedida + Fornecedor + listas auxiliares
+  - ✅ 2b — Equipamento + Veículo
+  - ✅ 2c — Técnico (com criação de usuário + redefinição de senha)
+  - ✅ 2d — Peças + UnidadeMedida + Fornecedor + TipoServiço + CategoriaCusto
+- ✅ Backend — Fase 3 (configurações: markup, valor/km)
+- ✅ Frontend — Fase 3 (telas de cadastros)
+  - ✅ 3a — Cliente (listagem + criar + detalhe com tabs)
+  - ✅ 3b — Veículo, Fornecedor, Peça, Técnico, Equipamento
+  - ✅ 3c — Configurações admin (financeiro, tipos de serviço, categorias de custo, unidades de medida)
+- ⏳ Backend — Fase 4 (Serviço — CRUD + ciclo de vida)

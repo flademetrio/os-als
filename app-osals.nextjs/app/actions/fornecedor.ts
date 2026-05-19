@@ -12,7 +12,7 @@ export type EstadoFornecedor = {
   sucesso?: boolean
 }
 
-function aplicarErros(parseError: { issues: { path: (string | number)[]; message: string }[] }) {
+function aplicarErros(parseError: { issues: ReadonlyArray<{ path: ReadonlyArray<PropertyKey>; message: string }> }) {
   const errosCampos: Record<string, string> = {}
   for (const issue of parseError.issues) {
     const campo = String(issue.path[0])
