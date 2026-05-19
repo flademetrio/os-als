@@ -47,7 +47,7 @@ public class ServicoEquipamento {
             Long clienteId, Long unidadeId, TipoEquipamento tipo, StatusEquipamento status,
             String busca, boolean apenasAtivos, Pageable pageable
     ) {
-        String b = (busca == null || busca.isBlank()) ? null : busca.trim();
+        String b = (busca == null || busca.isBlank()) ? "" : busca.trim();
         var page = repositorio.buscarFiltrado(clienteId, unidadeId, tipo, status, b, apenasAtivos, pageable);
         return PaginaResposta.de(page.map(mapper::paraEquipamentoResumo));
     }

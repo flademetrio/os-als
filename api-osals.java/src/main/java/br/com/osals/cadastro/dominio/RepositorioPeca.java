@@ -12,8 +12,8 @@ public interface RepositorioPeca extends JpaRepository<Peca, Long> {
             """
             SELECT p FROM Peca p
             WHERE (:apenasAtivos = FALSE OR p.ativo = TRUE)
-              AND (:busca IS NULL OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :busca, '%'))
-                                  OR LOWER(p.descricao) LIKE LOWER(CONCAT('%', :busca, '%')))
+              AND (:busca = '' OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :busca, '%'))
+                                OR LOWER(p.descricao) LIKE LOWER(CONCAT('%', :busca, '%')))
             ORDER BY p.nome
             """)
     Page<Peca> buscarFiltrado(

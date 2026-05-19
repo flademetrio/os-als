@@ -31,7 +31,7 @@ public class ServicoCliente {
     }
 
     public PaginaResposta<ClienteResumoDto> listar(String busca, boolean apenasAtivos, Pageable pageable) {
-        String buscaNormalizada = (busca == null || busca.isBlank()) ? null : busca.trim();
+        String buscaNormalizada = (busca == null || busca.isBlank()) ? "" : busca.trim();
         var page = repositorio.buscarFiltrado(buscaNormalizada, apenasAtivos, pageable);
         return PaginaResposta.de(page.map(mapper::paraClienteResumo));
     }

@@ -31,7 +31,7 @@ public class ServicoVeiculo {
 
     public PaginaResposta<VeiculoResumoDto> listar(StatusVeiculo status, String busca,
                                                    boolean apenasAtivos, Pageable pageable) {
-        String b = (busca == null || busca.isBlank()) ? null : busca.trim().toUpperCase();
+        String b = (busca == null || busca.isBlank()) ? "" : busca.trim().toUpperCase();
         var page = repositorio.buscarFiltrado(status, b, apenasAtivos, pageable);
         return PaginaResposta.de(page.map(mapper::paraVeiculoResumo));
     }

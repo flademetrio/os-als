@@ -17,8 +17,8 @@ public interface RepositorioCliente extends JpaRepository<Cliente, Long> {
             """
             SELECT c FROM Cliente c
             WHERE (:apenasAtivos = FALSE OR c.ativo = TRUE)
-              AND (:busca IS NULL OR LOWER(c.nome) LIKE LOWER(CONCAT('%', :busca, '%'))
-                                  OR c.documento LIKE CONCAT('%', :busca, '%'))
+              AND (:busca = '' OR LOWER(c.nome) LIKE LOWER(CONCAT('%', :busca, '%'))
+                                OR c.documento LIKE CONCAT('%', :busca, '%'))
             """)
     Page<Cliente> buscarFiltrado(
             @Param("busca") String busca,

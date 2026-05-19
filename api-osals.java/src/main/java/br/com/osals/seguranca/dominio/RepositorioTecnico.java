@@ -13,9 +13,9 @@ public interface RepositorioTecnico extends JpaRepository<Tecnico, Long> {
             SELECT t FROM Tecnico t
             JOIN t.usuario u
             WHERE (:apenasAtivos = FALSE OR u.ativo = TRUE)
-              AND (:busca IS NULL OR LOWER(u.nome) LIKE LOWER(CONCAT('%', :busca, '%'))
-                                  OR LOWER(u.email) LIKE LOWER(CONCAT('%', :busca, '%'))
-                                  OR LOWER(t.especialidade) LIKE LOWER(CONCAT('%', :busca, '%')))
+              AND (:busca = '' OR LOWER(u.nome) LIKE LOWER(CONCAT('%', :busca, '%'))
+                                OR LOWER(u.email) LIKE LOWER(CONCAT('%', :busca, '%'))
+                                OR LOWER(t.especialidade) LIKE LOWER(CONCAT('%', :busca, '%')))
             ORDER BY u.nome
             """)
     Page<Tecnico> buscarFiltrado(

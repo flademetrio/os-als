@@ -21,7 +21,7 @@ public class ServicoFornecedor {
     }
 
     public PaginaResposta<FornecedorResposta> listar(String busca, boolean apenasAtivos, Pageable pageable) {
-        String b = (busca == null || busca.isBlank()) ? null : busca.trim();
+        String b = (busca == null || busca.isBlank()) ? "" : busca.trim();
         var page = repositorio.buscarFiltrado(b, apenasAtivos, pageable);
         return PaginaResposta.de(page.map(this::paraResposta));
     }

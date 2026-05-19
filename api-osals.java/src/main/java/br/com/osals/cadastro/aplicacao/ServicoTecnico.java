@@ -39,7 +39,7 @@ public class ServicoTecnico {
     }
 
     public PaginaResposta<TecnicoResumoDto> listar(String busca, boolean apenasAtivos, Pageable pageable) {
-        String b = (busca == null || busca.isBlank()) ? null : busca.trim();
+        String b = (busca == null || busca.isBlank()) ? "" : busca.trim();
         var page = repositorioTecnico.buscarFiltrado(b, apenasAtivos, pageable);
         return PaginaResposta.de(page.map(this::paraResumo));
     }

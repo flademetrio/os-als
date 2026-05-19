@@ -18,9 +18,9 @@ public interface RepositorioVeiculo extends JpaRepository<Veiculo, Long> {
             SELECT v FROM Veiculo v
             WHERE (:apenasAtivos = FALSE OR v.ativo = TRUE)
               AND (:status IS NULL OR v.status = :status)
-              AND (:busca IS NULL OR LOWER(v.placa) LIKE LOWER(CONCAT('%', :busca, '%'))
-                                  OR LOWER(v.modelo) LIKE LOWER(CONCAT('%', :busca, '%'))
-                                  OR LOWER(v.marca) LIKE LOWER(CONCAT('%', :busca, '%')))
+              AND (:busca = '' OR LOWER(v.placa) LIKE LOWER(CONCAT('%', :busca, '%'))
+                                OR LOWER(v.modelo) LIKE LOWER(CONCAT('%', :busca, '%'))
+                                OR LOWER(v.marca) LIKE LOWER(CONCAT('%', :busca, '%')))
             """)
     Page<Veiculo> buscarFiltrado(
             @Param("status") StatusVeiculo status,

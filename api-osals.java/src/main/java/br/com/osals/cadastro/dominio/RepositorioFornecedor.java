@@ -12,8 +12,8 @@ public interface RepositorioFornecedor extends JpaRepository<Fornecedor, Long> {
             """
             SELECT f FROM Fornecedor f
             WHERE (:apenasAtivos = FALSE OR f.ativo = TRUE)
-              AND (:busca IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :busca, '%'))
-                                  OR f.documento LIKE CONCAT('%', :busca, '%'))
+              AND (:busca = '' OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :busca, '%'))
+                                OR f.documento LIKE CONCAT('%', :busca, '%'))
             ORDER BY f.nome
             """)
     Page<Fornecedor> buscarFiltrado(

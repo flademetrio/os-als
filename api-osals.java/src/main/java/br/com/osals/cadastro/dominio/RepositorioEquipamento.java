@@ -21,10 +21,10 @@ public interface RepositorioEquipamento extends JpaRepository<Equipamento, Long>
               AND (:unidadeId IS NULL OR e.unidade.id = :unidadeId)
               AND (:tipo IS NULL OR e.tipo = :tipo)
               AND (:status IS NULL OR e.status = :status)
-              AND (:busca IS NULL OR LOWER(e.marca) LIKE LOWER(CONCAT('%', :busca, '%'))
-                                  OR LOWER(e.modelo) LIKE LOWER(CONCAT('%', :busca, '%'))
-                                  OR LOWER(e.numeroSerie) LIKE LOWER(CONCAT('%', :busca, '%'))
-                                  OR LOWER(e.localizacaoInterna) LIKE LOWER(CONCAT('%', :busca, '%')))
+              AND (:busca = '' OR LOWER(e.marca) LIKE LOWER(CONCAT('%', :busca, '%'))
+                                OR LOWER(e.modelo) LIKE LOWER(CONCAT('%', :busca, '%'))
+                                OR LOWER(e.numeroSerie) LIKE LOWER(CONCAT('%', :busca, '%'))
+                                OR LOWER(e.localizacaoInterna) LIKE LOWER(CONCAT('%', :busca, '%')))
             """)
     Page<Equipamento> buscarFiltrado(
             @Param("clienteId") Long clienteId,
