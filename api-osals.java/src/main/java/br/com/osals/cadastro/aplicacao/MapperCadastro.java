@@ -3,10 +3,16 @@ package br.com.osals.cadastro.aplicacao;
 import br.com.osals.cadastro.aplicacao.dto.ClienteResposta;
 import br.com.osals.cadastro.aplicacao.dto.ClienteResumoDto;
 import br.com.osals.cadastro.aplicacao.dto.ContatoClienteResposta;
+import br.com.osals.cadastro.aplicacao.dto.EquipamentoResposta;
+import br.com.osals.cadastro.aplicacao.dto.EquipamentoResumoDto;
 import br.com.osals.cadastro.aplicacao.dto.UnidadeResposta;
+import br.com.osals.cadastro.aplicacao.dto.VeiculoResposta;
+import br.com.osals.cadastro.aplicacao.dto.VeiculoResumoDto;
 import br.com.osals.cadastro.dominio.Cliente;
 import br.com.osals.cadastro.dominio.ContatoCliente;
+import br.com.osals.cadastro.dominio.Equipamento;
 import br.com.osals.cadastro.dominio.Unidade;
+import br.com.osals.cadastro.dominio.Veiculo;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -54,5 +60,53 @@ public class MapperCadastro {
                 c.getTelefone(),
                 c.getEmail()
         );
+    }
+
+    public EquipamentoResposta paraEquipamentoResposta(Equipamento e) {
+        return new EquipamentoResposta(
+                e.getId(),
+                e.getUnidade().getId(),
+                e.getUnidade().getCliente().getId(),
+                e.getMarca(),
+                e.getModelo(),
+                e.getNumeroSerie(),
+                e.getTipo(),
+                e.getCapacidadeBtus(),
+                e.getCapacidadeTr(),
+                e.getLocalizacaoInterna(),
+                e.getDataInstalacao(),
+                e.getDataUltimaManutencao(),
+                e.getStatus(),
+                e.isAtivo()
+        );
+    }
+
+    public EquipamentoResumoDto paraEquipamentoResumo(Equipamento e) {
+        return new EquipamentoResumoDto(
+                e.getId(),
+                e.getUnidade().getId(),
+                e.getTipo(),
+                e.getMarca(),
+                e.getModelo(),
+                e.getLocalizacaoInterna(),
+                e.getStatus(),
+                e.isAtivo()
+        );
+    }
+
+    public VeiculoResposta paraVeiculoResposta(Veiculo v) {
+        return new VeiculoResposta(
+                v.getId(),
+                v.getPlaca(),
+                v.getMarca(),
+                v.getModelo(),
+                v.getAno(),
+                v.getStatus(),
+                v.isAtivo()
+        );
+    }
+
+    public VeiculoResumoDto paraVeiculoResumo(Veiculo v) {
+        return new VeiculoResumoDto(v.getId(), v.getPlaca(), v.getModelo(), v.getStatus());
     }
 }
