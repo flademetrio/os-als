@@ -75,6 +75,7 @@ export default async function EquipamentosPage({ searchParams }: Props) {
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50">
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Equipamento</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Cliente / Unidade</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Tipo</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Localizacao</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
@@ -87,6 +88,15 @@ export default async function EquipamentosPage({ searchParams }: Props) {
                       <Link href={`/equipamentos/${e.id}`} className="text-primary hover:underline font-medium">
                         {[e.marca, e.modelo].filter(Boolean).join(' ') || `#${e.id}`}
                       </Link>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/clientes/${e.clienteId}`}
+                        className="text-slate-700 hover:text-primary hover:underline font-medium"
+                      >
+                        {e.clienteNome}
+                      </Link>
+                      <span className="block text-xs text-slate-500">{e.identificacaoUnidade}</span>
                     </td>
                     <td className="px-4 py-3 text-slate-700">{TIPOS_EQUIPAMENTO_LABEL[e.tipo]}</td>
                     <td className="px-4 py-3 text-slate-600">{e.localizacaoInterna ?? '-'}</td>

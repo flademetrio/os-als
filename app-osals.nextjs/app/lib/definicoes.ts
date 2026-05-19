@@ -129,6 +129,9 @@ export type EquipamentoResposta = {
 export type EquipamentoResumoDto = {
   id: number
   unidadeId: number
+  identificacaoUnidade: string
+  clienteId: number
+  clienteNome: string
   tipo: TipoEquipamento
   marca: string | null
   modelo: string | null

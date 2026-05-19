@@ -82,9 +82,14 @@ public class MapperCadastro {
     }
 
     public EquipamentoResumoDto paraEquipamentoResumo(Equipamento e) {
+        var unidade = e.getUnidade();
+        var cliente = unidade.getCliente();
         return new EquipamentoResumoDto(
                 e.getId(),
-                e.getUnidade().getId(),
+                unidade.getId(),
+                unidade.getIdentificacaoInterna(),
+                cliente.getId(),
+                cliente.getNome(),
                 e.getTipo(),
                 e.getMarca(),
                 e.getModelo(),

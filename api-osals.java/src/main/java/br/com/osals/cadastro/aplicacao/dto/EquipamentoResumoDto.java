@@ -7,6 +7,9 @@ import br.com.osals.cadastro.dominio.TipoEquipamento;
 public record EquipamentoResumoDto(
         Long id,
         Long unidadeId,
+        String identificacaoUnidade,
+        Long clienteId,
+        String clienteNome,
         TipoEquipamento tipo,
         String marca,
         String modelo,
