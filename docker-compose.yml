@@ -1,0 +1,83 @@
+# =====================================================================
+# Docker Compose do OS-ALS — desenvolvimento local.
+# Servicos:
+#   - postgres   : banco PostgreSQL 16 com volume persistente
+#   - backend    : api-osals (Spring Boot)
+#   - frontend   : app-osals (Next.js)
+#
+# Modo padrao para dev: subir apenas o postgres e rodar back/front nativos
+# (hot reload). Para smoke test ou onboarding, "docker compose up -d --build".
+#
+# Credenciais do postgres ficam hardcoded aqui (dev local). O backend ja le
+# isso atraves do .env em api-osals.java/.env (mesmas credenciais — manter
+# sincronizado).
+# =====================================================================
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: osals-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: osals
+      POSTGRES_PASSWORD: osals-dev
+      POSTGRES_DB: osals
+    # Host 5433 -> container 5432. Evita conflito com PostgreSQL nativo
+    # rodando no host em 5432 (comum em maquinas de dev).
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U osals -d osals"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./api-osals.java
+      dockerfile: Dockerfile
+    container_name: osals-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./api-osals.java/.env
+    environment:
+      # Override do BD_URL para apontar ao servico postgres dentro da rede do Compose
+      BD_URL: jdbc:postgresql://postgres:5432/osals
+      ANEXOS_DIR: /var/os-als/anexos
+      LOGS_DIR: /var/log/os-als
+    ports:
+      - "8080:8080"
+    volumes:
+      - anexos:/var/os-als/anexos
+      - logs:/var/log/os-als
+
+  frontend:
+    build:
+      context: ./app-osals.nextjs
+      dockerfile: Dockerfile
+    container_name: osals-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    env_file:
+      - ./app-osals.nextjs/.env.local
+    environment:
+      # Override para apontar ao servico backend dentro da rede do Compose
+      API_BASE_URL: http://backend:8080
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres-data:
+    driver: local
+  anexos:
+    driver: local
+  logs:
+    driver: local

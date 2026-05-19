@@ -1,0 +1,99 @@
+spring:
+  application:
+    name: api-osals
+
+  main:
+    banner-mode: off
+
+  # Le o .env como arquivo .properties (sintaxe nativa do Spring Boot 4).
+  # O [.properties] forca a interpretacao do formato.
+  config:
+    import: optional:file:./.env[.properties]
+
+  # Autenticacao e feita via filtro JWT proprio (sera implementado na Fase 1).
+  # Sem este exclude, o auto-config gera uma senha aleatoria a cada boot.
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+
+  datasource:
+    url: ${BD_URL}
+    username: ${BD_USUARIO}
+    password: ${BD_SENHA}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+    show-sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+server:
+  port: ${APP_PORTA:8080}
+
+app:
+  url-base: ${APP_URL_BASE:http://localhost:8080}
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+
+  jwt:
+    chave-privada-caminho: ${JWT_CHAVE_PRIVADA_CAMINHO:./keys/chave-privada.pem}
+    chave-publica-caminho: ${JWT_CHAVE_PUBLICA_CAMINHO:./keys/chave-publica.pem}
+    emissor: ${JWT_EMISSOR:os-als}
+    audience: ${JWT_AUDIENCE:tenant}
+    expiracao-minutos: ${JWT_EXPIRACAO_MINUTOS:1440}
+    refresh-expiracao-dias: ${JWT_REFRESH_EXPIRACAO_DIAS:30}
+
+  seguranca:
+    bcrypt-forca: ${BCRYPT_FORCA:10}
+    login-max-tentativas: ${LOGIN_MAX_TENTATIVAS:5}
+    login-bloqueio-minutos: ${LOGIN_BLOQUEIO_MINUTOS:15}
+
+  cors:
+    origens-permitidas: ${CORS_ORIGENS_PERMITIDAS:http://localhost:3000}
+    metodos-permitidos: ${CORS_METODOS_PERMITIDOS:GET,POST,PUT,DELETE,PATCH,OPTIONS}
+    headers-permitidos: ${CORS_HEADERS_PERMITIDOS:Authorization,Content-Type}
+
+  anexos:
+    dir: ${ANEXOS_DIR:./anexos-local}
+    tamanho-max-mb: ${ANEXO_TAMANHO_MAX_MB:10}
+
+  custos:
+    markup-padrao: ${MARKUP_PADRAO:30.00}
+    valor-km-centavos-padrao: ${VALOR_KM_CENTAVOS_PADRAO:150}
+
+  bootstrap:
+    admin-email: ${BOOTSTRAP_ADMIN_EMAIL:}
+    admin-senha: ${BOOTSTRAP_ADMIN_SENHA:}
+    admin-nome: ${BOOTSTRAP_ADMIN_NOME:}
+
+logging:
+  level:
+    root: WARN
+    br.com.osals: INFO
+    org.hibernate.SQL: WARN
+    org.springframework.security: INFO
+
+# Springdoc / Swagger UI
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
