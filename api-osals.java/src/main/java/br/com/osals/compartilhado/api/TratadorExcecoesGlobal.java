@@ -10,9 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * Handler global de excecoes da API. Converte tudo em {@link ErroResposta}.
@@ -60,6 +62,17 @@ public class TratadorExcecoesGlobal {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErroResposta> tratar(AccessDeniedException ex) {
         return ResponseEntity.status(403).body(new ErroResposta(403, "Sem permissao para esta operacao."));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErroResposta> tratar(NoResourceFoundException ex) {
+        return ResponseEntity.status(404).body(new ErroResposta(404, "Recurso nao encontrado."));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErroResposta> tratar(HttpRequestMethodNotSupportedException ex) {
+        return ResponseEntity.status(405).body(new ErroResposta(405,
+                "Metodo " + ex.getMethod() + " nao permitido neste endpoint."));
     }
 
     @ExceptionHandler(Exception.class)
