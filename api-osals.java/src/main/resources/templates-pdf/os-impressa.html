@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="'OS ' + ${codigo}">Ordem de Servico</title>
+    <style>/*<![CDATA[*/
+        @page { size: A4; margin: 1.5cm; }
+        * { box-sizing: border-box; }
+        body { font-family: sans-serif; font-size: 10pt; color: #1e293b; margin: 0; }
+        .empresa { border-bottom: 2px solid #0ea5e9; padding-bottom: 6px; margin-bottom: 10px; }
+        .empresa .razao { font-size: 13pt; font-weight: bold; color: #0c4a6e; }
+        .empresa .linha { font-size: 8pt; color: #475569; }
+        .titulo-os { background: #0c4a6e; color: #ffffff; padding: 6px 10px;
+                     font-size: 12pt; font-weight: bold; }
+        .titulo-os .codigo { float: right; }
+        .meta { font-size: 9pt; color: #334155; margin: 6px 0 12px 0; }
+        .secao { border: 1px solid #cbd5e1; margin-bottom: 10px; }
+        .secao h2 { background: #f1f5f9; margin: 0; padding: 4px 8px;
+                    font-size: 9pt; text-transform: uppercase; color: #0c4a6e;
+                    border-bottom: 1px solid #cbd5e1; }
+        .secao .conteudo { padding: 8px; }
+        .campo { margin-bottom: 4px; }
+        .rotulo { font-weight: bold; color: #475569; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #cbd5e1; padding: 4px 6px; font-size: 9pt; text-align: left; }
+        th { background: #f8fafc; }
+        .linha-preench { border-bottom: 1px solid #94a3b8; height: 16px; }
+        .caixa-preench { border: 1px solid #cbd5e1; height: 70px; }
+        .assinaturas { margin-top: 24px; }
+        .assinaturas td { border: none; text-align: center; padding-top: 24px; }
+        .assinaturas .linha-ass { border-top: 1px solid #334155; padding-top: 3px; font-size: 8pt; }
+        .vazio { color: #94a3b8; }
+    /*]]>*/</style>
+</head>
+<body>
+
+    <div class="empresa">
+        <div class="razao" th:text="${empresa.razaoSocial}">Razao Social</div>
+        <div class="linha" th:text="'CNPJ: ' + ${empresa.cnpj}">CNPJ</div>
+        <div class="linha" th:text="${empresa.endereco}">Endereco</div>
+        <div class="linha" th:text="${empresa.contato}">Contato</div>
+    </div>
+
+    <div class="titulo-os">
+        ORDEM DE SERVICO
+        <span class="codigo" th:text="'No: ' + ${codigo}">No: 0001-00001</span>
+    </div>
+    <div class="meta">
+        Servico pai: <span th:text="${servicoNumero}">0001</span>
+        &#183; Tipo: <span th:text="${tipoServico}">Tipo</span>
+        &#183; Data de abertura: <span th:text="${dataAbertura}">00/00/0000</span>
+    </div>
+
+    <div class="secao">
+        <h2>Cliente e unidade</h2>
+        <div class="conteudo">
+            <div class="campo">
+                <span class="rotulo">Cliente: </span>
+                <span th:text="${clienteNome}">Cliente</span>
+            </div>
+            <div class="campo" th:each="u : ${unidades}">
+                <span class="rotulo">Unidade: </span>
+                <span th:text="${u.identificacao}">Unidade</span>
+                <span th:text="' — ' + ${u.endereco}"> — Endereco</span>
+            </div>
+            <div class="campo">
+                <span class="rotulo">Contato local: </span>
+                <span class="linha-preench" style="display: inline-block; width: 60%;">&#160;</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="secao">
+        <h2>Equipamentos atendidos</h2>
+        <div class="conteudo">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Marca / Modelo</th>
+                        <th style="width: 30%;">No de serie</th>
+                        <th style="width: 30%;">Localizacao interna</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="e : ${equipamentos}">
+                        <td th:text="${e.descricao}">Marca Modelo</td>
+                        <td th:text="${e.numeroSerie}">Serie</td>
+                        <td th:text="${e.localizacao}">Local</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="secao">
+        <h2>Atividade prevista</h2>
+        <div class="conteudo">
+            <span th:text="${descricaoAtividade}">Descricao da atividade</span>
+        </div>
+    </div>
+
+    <div class="secao">
+        <h2>Equipe</h2>
+        <div class="conteudo">
+            <div class="campo">
+                <span class="rotulo">Tecnico(s): </span>
+                <span th:text="${#strings.listJoin(tecnicos, ', ')}">Tecnicos</span>
+            </div>
+            <div class="campo">
+                <span class="rotulo">Veiculo(s): </span>
+                <span th:if="${#lists.isEmpty(veiculos)}" class="vazio">Nenhum veiculo informado</span>
+                <span th:unless="${#lists.isEmpty(veiculos)}"
+                      th:text="${#strings.listJoin(veiculos, ', ')}">Veiculos</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="secao">
+        <h2>Execucao (preenchimento manual da equipe)</h2>
+        <div class="conteudo">
+            <div class="campo">
+                <span class="rotulo">Hora inicio: </span>
+                <span class="linha-preench" style="display: inline-block; width: 20%;">&#160;</span>
+                <span class="rotulo">&#160;&#160;&#160;Hora fim: </span>
+                <span class="linha-preench" style="display: inline-block; width: 20%;">&#160;</span>
+            </div>
+            <div class="campo"><span class="rotulo">O que foi feito:</span></div>
+            <div class="caixa-preench">&#160;</div>
+            <div class="campo" style="margin-top: 6px;"><span class="rotulo">Observacoes:</span></div>
+            <div class="caixa-preench" style="height: 40px;">&#160;</div>
+            <div class="campo" style="margin-top: 6px;"><span class="rotulo">Impedimentos:</span></div>
+            <div class="caixa-preench" style="height: 40px;">&#160;</div>
+        </div>
+    </div>
+
+    <table class="assinaturas">
+        <tr>
+            <td style="width: 50%;">
+                <div class="linha-ass">Tecnico responsavel</div>
+            </td>
+            <td style="width: 50%;">
+                <div class="linha-ass">Cliente / Responsavel local</div>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

@@ -65,6 +65,12 @@ app:
     dir: ${ANEXOS_DIR:./anexos-local}
     tamanho-max-mb: ${ANEXO_TAMANHO_MAX_MB:10}
 
+  empresa:
+    razao-social: ${EMPRESA_RAZAO_SOCIAL:ALS Industria de Refrigeracao Ltda}
+    cnpj: ${EMPRESA_CNPJ:12.345.678/0001-90}
+    endereco: ${EMPRESA_ENDERECO:Rua Exemplo, 100 - Centro - Cidade/UF}
+    contato: ${EMPRESA_CONTATO:(00) 0000-0000 - contato@alsindustria.com.br}
+
   custos:
     markup-padrao: ${MARKUP_PADRAO:30.00}
     valor-km-centavos-padrao: ${VALOR_KM_CENTAVOS_PADRAO:150}

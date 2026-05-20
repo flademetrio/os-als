@@ -20,6 +20,7 @@
 		<jjwt.version>0.12.6</jjwt.version>
 		<springdoc.version>2.8.6</springdoc.version>
 		<testcontainers.version>1.20.4</testcontainers.version>
+		<openhtmltopdf.version>1.0.10</openhtmltopdf.version>
 	</properties>
 
 	<dependencies>
@@ -109,6 +110,19 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${springdoc.version}</version>
+		</dependency>
+
+		<!-- Thymeleaf — template do PDF da OS impressa -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+
+		<!-- OpenHTMLtoPDF — renderiza o HTML do template para PDF -->
+		<dependency>
+			<groupId>com.openhtmltopdf</groupId>
+			<artifactId>openhtmltopdf-pdfbox</artifactId>
+			<version>${openhtmltopdf.version}</version>
 		</dependency>
 
 		<!-- Testes -->
