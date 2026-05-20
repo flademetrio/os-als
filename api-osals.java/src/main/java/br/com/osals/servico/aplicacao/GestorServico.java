@@ -1,0 +1,135 @@
+package br.com.osals.servico.aplicacao;
+
+import br.com.osals.cadastro.dominio.Cliente;
+import br.com.osals.cadastro.dominio.RepositorioCliente;
+import br.com.osals.cadastro.dominio.RepositorioTipoServico;
+import br.com.osals.cadastro.dominio.TipoServico;
+import br.com.osals.compartilhado.api.PaginaResposta;
+import br.com.osals.compartilhado.excecoes.NegocioException;
+import br.com.osals.compartilhado.excecoes.RecursoNaoEncontradoException;
+import br.com.osals.seguranca.dominio.Usuario;
+import br.com.osals.servico.aplicacao.dto.AtualizacaoServicoRequisicao;
+import br.com.osals.servico.aplicacao.dto.CriacaoServicoRequisicao;
+import br.com.osals.servico.aplicacao.dto.ServicoResposta;
+import br.com.osals.servico.aplicacao.dto.ServicoResumoDto;
+import br.com.osals.servico.dominio.RepositorioServico;
+import br.com.osals.servico.dominio.Servico;
+import br.com.osals.servico.dominio.StatusServico;
+import java.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Orquestra o ciclo de vida do Servico: criacao, edicao e transicoes de status.
+ * A validacao de transicoes vive na entidade Servico / enum StatusServico.
+ */
+@Service
+@Transactional(readOnly = true)
+public class GestorServico {
+
+    private static final Logger log = LoggerFactory.getLogger(GestorServico.class);
+
+    private final RepositorioServico repositorio;
+    private final RepositorioCliente repositorioCliente;
+    private final RepositorioTipoServico repositorioTipoServico;
+    private final MapperServico mapper;
+
+    public GestorServico(RepositorioServico repositorio,
+                         RepositorioCliente repositorioCliente,
+                         RepositorioTipoServico repositorioTipoServico,
+                         MapperServico mapper) {
+        this.repositorio = repositorio;
+        this.repositorioCliente = repositorioCliente;
+        this.repositorioTipoServico = repositorioTipoServico;
+        this.mapper = mapper;
+    }
+
+    public PaginaResposta<ServicoResumoDto> listar(StatusServico status, Long clienteId,
+                                                   Integer tipoServicoId, LocalDate inicio,
+                                                   LocalDate fim, String busca, Pageable pageable) {
+        String b = (busca == null || busca.isBlank()) ? "" : busca.trim();
+        var page = repositorio.buscarFiltrado(status, clienteId, tipoServicoId, inicio, fim, b, pageable);
+        return PaginaResposta.de(page.map(mapper::paraResumo));
+    }
+
+    public ServicoResposta buscarPorId(Long id) {
+        return mapper.paraResposta(obrigatorio(id));
+    }
+
+    @Transactional
+    public ServicoResposta criar(CriacaoServicoRequisicao req, Usuario autor) {
+        Cliente cliente = repositorioCliente.findById(req.clienteId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Cliente nao encontrado."));
+        if (!cliente.isAtivo()) {
+            throw new NegocioException("Nao e possivel abrir Servico para cliente inativo.");
+        }
+        TipoServico tipo = tipoServicoAtivo(req.tipoServicoId());
+        validarDatas(req.dataInicioPrevista(), req.dataFimPrevista());
+
+        int numero = repositorio.proximoNumero().intValue();
+        var servico = new Servico(numero, cliente, tipo, req.descricao().trim(),
+                req.dataInicioPrevista(), req.dataFimPrevista(), autor);
+        var salvo = repositorio.save(servico);
+        log.info("Servico criado: id={} numero={} cliente={}",
+                salvo.getId(), salvo.getNumero(), cliente.getId());
+        return mapper.paraResposta(salvo);
+    }
+
+    @Transactional
+    public ServicoResposta atualizar(Long id, AtualizacaoServicoRequisicao req, Usuario autor) {
+        var s = obrigatorio(id);
+        TipoServico tipo = tipoServicoAtivo(req.tipoServicoId());
+        validarDatas(req.dataInicioPrevista(), req.dataFimPrevista());
+        s.atualizarDados(tipo, req.descricao().trim(),
+                req.dataInicioPrevista(), req.dataFimPrevista(), autor);
+        return mapper.paraResposta(s);
+    }
+
+    @Transactional
+    public ServicoResposta mudarStatus(Long id, StatusServico destino, Usuario autor) {
+        var s = obrigatorio(id);
+        s.mudarStatus(destino, autor);
+        log.info("Servico {} mudou para status {}", id, destino);
+        return mapper.paraResposta(s);
+    }
+
+    @Transactional
+    public ServicoResposta finalizar(Long id, Usuario autor) {
+        var s = obrigatorio(id);
+        s.finalizar(autor);
+        log.info("Servico {} finalizado por usuario {}", id, autor.getId());
+        return mapper.paraResposta(s);
+    }
+
+    @Transactional
+    public ServicoResposta cancelar(Long id, Usuario autor) {
+        var s = obrigatorio(id);
+        s.cancelar(autor);
+        log.info("Servico {} cancelado por usuario {}", id, autor.getId());
+        return mapper.paraResposta(s);
+    }
+
+    Servico obrigatorio(Long id) {
+        return repositorio.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Servico nao encontrado."));
+    }
+
+    private TipoServico tipoServicoAtivo(Integer id) {
+        TipoServico tipo = repositorioTipoServico.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Tipo de servico nao encontrado."));
+        if (!tipo.isAtivo()) {
+            throw new NegocioException("Tipo de servico inativo.");
+        }
+        return tipo;
+    }
+
+    private static void validarDatas(LocalDate inicio, LocalDate fim) {
+        if (inicio != null && fim != null && fim.isBefore(inicio)) {
+            throw new NegocioException(
+                    "A data de fim prevista nao pode ser anterior a data de inicio.");
+        }
+    }
+}
