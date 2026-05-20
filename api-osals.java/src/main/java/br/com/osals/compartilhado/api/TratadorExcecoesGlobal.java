@@ -1,5 +1,7 @@
 package br.com.osals.compartilhado.api;
 
+import br.com.osals.compartilhado.excecoes.ArquivoGrandeDemaisException;
+import br.com.osals.compartilhado.excecoes.ArquivoInvalidoException;
 import br.com.osals.compartilhado.excecoes.CredenciaisInvalidasException;
 import br.com.osals.compartilhado.excecoes.DuplicidadeException;
 import br.com.osals.compartilhado.excecoes.NegocioException;
@@ -14,6 +16,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
@@ -62,6 +65,22 @@ public class TratadorExcecoesGlobal {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErroResposta> tratar(AccessDeniedException ex) {
         return ResponseEntity.status(403).body(new ErroResposta(403, "Sem permissao para esta operacao."));
+    }
+
+    @ExceptionHandler(ArquivoInvalidoException.class)
+    public ResponseEntity<ErroResposta> tratar(ArquivoInvalidoException ex) {
+        return ResponseEntity.badRequest().body(new ErroResposta(400, ex.getMessage()));
+    }
+
+    @ExceptionHandler(ArquivoGrandeDemaisException.class)
+    public ResponseEntity<ErroResposta> tratar(ArquivoGrandeDemaisException ex) {
+        return ResponseEntity.status(413).body(new ErroResposta(413, ex.getMessage()));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErroResposta> tratar(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(413).body(new ErroResposta(413,
+                "Arquivo excede o tamanho maximo permitido."));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

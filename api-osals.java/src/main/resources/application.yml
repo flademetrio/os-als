@@ -36,6 +36,13 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  # Limite acima do teto da aplicacao (10 MB) — assim a validacao do app
+  # produz o 413 com mensagem clara antes do container barrar.
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
+
 server:
   port: ${APP_PORTA:8080}
 
