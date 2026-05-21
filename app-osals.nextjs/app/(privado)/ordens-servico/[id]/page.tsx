@@ -28,7 +28,7 @@ export default async function OrdemServicoDetalhePage({ params }: Props) {
   const podeAlterarAnexo = !encerrada || ehGestor
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="space-y-6">
       <Link
         href={`/servicos/${os.servicoId}`}
         className="text-sm text-slate-500 hover:text-slate-700"

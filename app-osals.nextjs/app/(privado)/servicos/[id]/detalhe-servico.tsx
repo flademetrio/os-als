@@ -58,7 +58,7 @@ export function DetalheServico({
         <Tabs
           tabs={[
             { id: 'dados', label: 'Dados' },
-            { id: 'os', label: 'Ordens de servico', count: ordens.length },
+            { id: 'os', label: 'OS', count: ordens.length },
             { id: 'custos', label: 'Custos', count: custos.length },
             { id: 'anexos', label: 'Anexos', count: anexos.length },
           ]}

@@ -18,6 +18,7 @@ import { badgeStatusServico } from '@/app/lib/esquemas/servico'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { AcoesCabecalhoServico } from './acoes-cabecalho-servico'
+import { BotaoAbrirOs } from './botao-abrir-os'
 import { DetalheServico } from './detalhe-servico'
 
 type Props = { params: Promise<{ id: string }> }
@@ -91,7 +92,17 @@ export default async function ServicoDetalhePage({ params }: Props) {
               </p>
             )}
           </div>
-          <AcoesCabecalhoServico servico={servico} />
+          <div className="flex items-center gap-2 shrink-0">
+            {!encerrado && (
+              <BotaoAbrirOs
+                servicoId={servico.id}
+                tecnicos={tecnicos.conteudo}
+                veiculos={veiculos.conteudo}
+                equipamentos={equipamentos.conteudo}
+              />
+            )}
+            <AcoesCabecalhoServico servico={servico} />
+          </div>
         </div>
       </Card>
 
