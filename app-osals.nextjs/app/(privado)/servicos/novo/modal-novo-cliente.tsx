@@ -9,6 +9,7 @@ import type { ClienteResposta } from '@/app/lib/definicoes'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { InputDocumento } from '@/components/ui/InputDocumento'
 import { Modal } from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Select'
 
@@ -50,14 +51,7 @@ export function ModalNovoCliente({ onCriado, onClose }: Props) {
           <option value="PF">PF — Pessoa Fisica</option>
         </Select>
 
-        <Input
-          label={tipoPessoa === 'PJ' ? 'CNPJ' : 'CPF'}
-          name="documento"
-          required
-          placeholder={tipoPessoa === 'PJ' ? '14 digitos' : '11 digitos'}
-          error={estado.errosCampos?.documento}
-          fullWidth
-        />
+        <InputDocumento tipoPessoa={tipoPessoa} error={estado.errosCampos?.documento} />
 
         <Input
           label={tipoPessoa === 'PJ' ? 'Razao social' : 'Nome completo'}

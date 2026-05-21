@@ -6,6 +6,7 @@ import { criarCliente, type EstadoCriacaoCliente } from '@/app/actions/cliente'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { InputDocumento } from '@/components/ui/InputDocumento'
 import { Select } from '@/components/ui/Select'
 
 const ESTADO_INICIAL: EstadoCriacaoCliente = {}
@@ -42,13 +43,9 @@ export function FormularioNovoCliente({ onCancelar }: Props = {}) {
         </Select>
 
         <div className="sm:col-span-2">
-          <Input
-            label={tipoPessoa === 'PJ' ? 'CNPJ' : 'CPF'}
-            name="documento"
-            required
-            placeholder={tipoPessoa === 'PJ' ? '14 digitos' : '11 digitos'}
+          <InputDocumento
+            tipoPessoa={tipoPessoa}
             error={estado.errosCampos?.documento}
-            fullWidth
           />
         </div>
       </div>
