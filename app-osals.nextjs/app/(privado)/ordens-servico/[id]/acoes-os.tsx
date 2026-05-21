@@ -9,7 +9,17 @@ import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { ModalDigitarExecucao } from './modal-digitar-execucao'
 
-export function AcoesOs({ os }: { os: OrdemServicoResposta }) {
+type Props = {
+  os: OrdemServicoResposta
+  /**
+   * Chamado quando a OS e concluida pela digitacao de execucao. Em modal
+   * (detalhe da OS dentro do servico), fecha o drawer; sem callback, navega
+   * para a tela do servico.
+   */
+  onConcluido?: () => void
+}
+
+export function AcoesOs({ os, onConcluido }: Props) {
   const router = useRouter()
   const [confirmarCancelar, setConfirmarCancelar] = useState(false)
   const [digitando, setDigitando] = useState(false)
@@ -19,6 +29,16 @@ export function AcoesOs({ os }: { os: OrdemServicoResposta }) {
 
   const encerrada = os.status === 'CONCLUIDA' || os.status === 'CANCELADA'
   const podeDigitar = os.status === 'IMPRESSA' || os.status === 'PENDENTE_DIGITACAO'
+
+  /** Apos concluir a OS: fecha o modal de digitacao e leva o usuario ao servico. */
+  function execucaoConcluida() {
+    setDigitando(false)
+    if (onConcluido) {
+      onConcluido()
+    } else {
+      router.push(`/servicos/${os.servicoId}`)
+    }
+  }
 
   async function imprimir() {
     setErro(null)
@@ -70,7 +90,11 @@ export function AcoesOs({ os }: { os: OrdemServicoResposta }) {
       )}
 
       {digitando && (
-        <ModalDigitarExecucao os={os} onClose={() => setDigitando(false)} />
+        <ModalDigitarExecucao
+          os={os}
+          onClose={() => setDigitando(false)}
+          onConcluido={execucaoConcluida}
+        />
       )}
 
       <Modal

@@ -86,7 +86,7 @@ export function ModalDetalheOs({ osId, ehGestor, onClose }: Props) {
                 {os.dataImpressao ? ` · Impressa em ${dataHora(os.dataImpressao)}` : ''}
               </p>
             </div>
-            <AcoesOs os={os} />
+            <AcoesOs os={os} onConcluido={onClose} />
           </div>
 
           {/* Dados — grade de 2 colunas */}

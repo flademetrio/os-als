@@ -23,16 +23,20 @@ function paraDatetimeLocal(iso: string | null): string {
 export function ModalDigitarExecucao({
   os,
   onClose,
+  onConcluido,
 }: {
   os: OrdemServicoResposta
+  /** Fecha o modal sem concluir (botao Cancelar / X). */
   onClose: () => void
+  /** Chamado quando a execucao e salva com sucesso (a OS e concluida). */
+  onConcluido: () => void
 }) {
   const acao = digitarExecucaoOs.bind(null, os.id)
   const [estado, dispatch, pendente] = useActionState(acao, ESTADO_INICIAL)
 
   useEffect(() => {
-    if (estado.sucesso) onClose()
-  }, [estado.sucesso, onClose])
+    if (estado.sucesso) onConcluido()
+  }, [estado.sucesso, onConcluido])
 
   return (
     <Modal open onClose={onClose} title="Digitar execucao da OS" size="lg">
