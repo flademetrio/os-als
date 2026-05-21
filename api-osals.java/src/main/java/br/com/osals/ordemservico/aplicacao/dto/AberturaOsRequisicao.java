@@ -6,7 +6,7 @@ import java.util.Set;
 
 /**
  * Dados para abrir uma OS dentro de um Servico.
- * Tecnicos e equipamentos sao obrigatorios (1..N); veiculos sao opcionais.
+ * Tecnicos sao obrigatorios (1..N); equipamentos e veiculos sao opcionais.
  */
 public record AberturaOsRequisicao(
 
@@ -16,7 +16,6 @@ public record AberturaOsRequisicao(
         @NotEmpty(message = "informe ao menos um tecnico")
         Set<Long> tecnicoIds,
 
-        @NotEmpty(message = "informe ao menos um equipamento")
         Set<Long> equipamentoIds,
 
         Set<Long> veiculoIds

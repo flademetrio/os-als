@@ -67,8 +67,7 @@ export function ModalAbrirOs({ servicoId, tecnicos, veiculos, equipamentos, onCl
         </ListaSelecao>
 
         <ListaSelecao
-          titulo="Equipamentos atendidos"
-          erro={estado.errosCampos?.equipamentoIds}
+          titulo="Equipamentos atendidos (opcional)"
           vazio="O cliente deste servico nao tem equipamentos cadastrados."
         >
           {equipamentos.map((e) => (

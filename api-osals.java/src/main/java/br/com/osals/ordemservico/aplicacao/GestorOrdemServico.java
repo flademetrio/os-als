@@ -153,8 +153,11 @@ public class GestorOrdemServico {
     }
 
     private Set<Equipamento> resolverEquipamentos(Set<Long> ids, Servico servico) {
-        Long clienteServico = servico.getCliente().getId();
         var encontrados = new LinkedHashSet<Equipamento>();
+        if (ids == null) {
+            return encontrados;
+        }
+        Long clienteServico = servico.getCliente().getId();
         for (Long id : ids) {
             Equipamento e = repositorioEquipamento.findById(id)
                     .orElseThrow(() -> new RecursoNaoEncontradoException(

@@ -1,10 +1,10 @@
 import { z } from 'zod'
 
-/** Esquema de abertura de OS. Tecnicos e equipamentos sao obrigatorios (1..N). */
+/** Esquema de abertura de OS. Tecnicos sao obrigatorios; equipamentos e veiculos opcionais. */
 export const aberturaOsSchema = z.object({
   descricaoAtividade: z.string().trim().min(1, 'Descreva a atividade'),
   tecnicoIds: z.array(z.number()).min(1, 'Selecione ao menos um tecnico'),
-  equipamentoIds: z.array(z.number()).min(1, 'Selecione ao menos um equipamento'),
+  equipamentoIds: z.array(z.number()),
   veiculoIds: z.array(z.number()),
 })
 
