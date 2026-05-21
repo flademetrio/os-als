@@ -11,7 +11,8 @@ export function SeletorVista({ vista }: { vista: Vista }) {
 
   function mudar(nova: Vista) {
     const next = new URLSearchParams(params.toString())
-    if (nova === 'lista') next.delete('vista')
+    // "cards" e o padrao da pagina — dispensa o parametro na URL.
+    if (nova === 'cards') next.delete('vista')
     else next.set('vista', nova)
     router.push(`/servicos?${next.toString()}`)
   }
