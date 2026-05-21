@@ -1,15 +1,18 @@
 'use client'
 
-import { ReactNode, useEffect, useRef } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 
 type Tamanho = 'sm' | 'md' | 'lg' | 'xl'
 
+/** Largura do painel lateral por tamanho. */
 const classesTamanho: Record<Tamanho, string> = {
   sm: 'max-w-sm',
-  md: 'max-w-lg',
-  lg: 'max-w-2xl',
-  xl: 'max-w-4xl',
+  md: 'max-w-md',
+  lg: 'max-w-xl',
+  xl: 'max-w-3xl',
 }
+
+const DURACAO_MS = 300
 
 type Props = {
   open: boolean
@@ -20,8 +23,27 @@ type Props = {
   footer?: ReactNode
 }
 
+/**
+ * Painel lateral (drawer): desliza da borda direita para a esquerda ao abrir
+ * e volta ao fechar. Substitui o modal centralizado em todo o sistema.
+ */
 export function Modal({ open, onClose, title, size = 'md', children, footer }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null)
+  // "renderizar" mantem o painel no DOM durante a animacao de saida;
+  // "visivel" controla o transform que produz o deslize.
+  const [renderizar, setRenderizar] = useState(open)
+  const [visivel, setVisivel] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setRenderizar(true)
+      const id = requestAnimationFrame(() => setVisivel(true))
+      return () => cancelAnimationFrame(id)
+    }
+    setVisivel(false)
+    const t = setTimeout(() => setRenderizar(false), DURACAO_MS)
+    return () => clearTimeout(t)
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -37,14 +59,20 @@ export function Modal({ open, onClose, title, size = 'md', children, footer }: P
   }, [open, onClose])
 
   useEffect(() => {
-    if (open) dialogRef.current?.focus()
-  }, [open])
+    if (visivel) dialogRef.current?.focus()
+  }, [visivel])
 
-  if (!open) return null
+  if (!renderizar) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-50 flex">
+      <div
+        className={[
+          'absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300',
+          visivel ? 'opacity-100' : 'opacity-0',
+        ].join(' ')}
+        onClick={onClose}
+      />
       <div
         ref={dialogRef}
         role="dialog"
@@ -52,7 +80,9 @@ export function Modal({ open, onClose, title, size = 'md', children, footer }: P
         aria-label={title}
         tabIndex={-1}
         className={[
-          'relative bg-surface rounded-2xl shadow-2xl w-full flex flex-col max-h-[90vh] focus:outline-none',
+          'relative ml-auto h-full w-full bg-surface shadow-2xl flex flex-col',
+          'transition-transform duration-300 ease-out focus:outline-none',
+          visivel ? 'translate-x-0' : 'translate-x-full',
           classesTamanho[size],
         ].join(' ')}
       >
