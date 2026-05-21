@@ -55,22 +55,26 @@ export default async function ServicosPage({ searchParams }: Props) {
 
   return (
     <div className="max-w-6xl mx-auto space-y-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Servicos</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            {dados.totalElementos} {dados.totalElementos === 1 ? 'servico' : 'servicos'}
-          </p>
+      <Card padding="md">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-900">Servicos</h1>
+            <p className="text-sm text-slate-500 mt-0.5">
+              {dados.totalElementos} {dados.totalElementos === 1 ? 'servico' : 'servicos'}
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <SeletorVista vista={vista} />
+            <Link href="/servicos/novo">
+              <Button variant="primary">+ Novo servico</Button>
+            </Link>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <SeletorVista vista={vista} />
-          <Link href="/servicos/novo">
-            <Button variant="primary">+ Novo servico</Button>
-          </Link>
-        </div>
-      </div>
 
-      <FiltrosServicos busca={busca} situacao={situacao} inicio={inicio} fim={fim} />
+        <div className="mt-4 pt-4 border-t border-slate-100">
+          <FiltrosServicos busca={busca} situacao={situacao} inicio={inicio} fim={fim} />
+        </div>
+      </Card>
 
       {vazio ? (
         <Card padding="md">
