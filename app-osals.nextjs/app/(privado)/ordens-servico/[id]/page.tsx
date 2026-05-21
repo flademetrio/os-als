@@ -1,10 +1,12 @@
 import Link from 'next/link'
-import { clienteApi } from '@/app/lib/cliente-api'
-import type { OrdemServicoResposta } from '@/app/lib/definicoes'
+import { clienteApi, ErroApi } from '@/app/lib/cliente-api'
+import { lerSessao } from '@/app/lib/sessao'
+import type { AnexoOsResposta, OrdemServicoResposta } from '@/app/lib/definicoes'
 import { badgeStatusOs } from '@/app/lib/esquemas/ordem-servico'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { AcoesOs } from './acoes-os'
+import { AnexoOsCard } from './anexo-os-card'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -12,6 +14,18 @@ export default async function OrdemServicoDetalhePage({ params }: Props) {
   const { id } = await params
   const os = await clienteApi<OrdemServicoResposta>(`/ordens-servico/${id}`)
   const digitada = os.status === 'CONCLUIDA'
+
+  let anexo: AnexoOsResposta | null = null
+  try {
+    anexo = await clienteApi<AnexoOsResposta>(`/ordens-servico/${id}/anexo`)
+  } catch (err) {
+    if (!(err instanceof ErroApi && err.status === 404)) throw err
+  }
+
+  const sessao = await lerSessao()
+  const encerrada = os.status === 'CONCLUIDA' || os.status === 'CANCELADA'
+  const ehGestor = sessao?.papel === 'GERENTE' || sessao?.papel === 'ADMIN'
+  const podeAlterarAnexo = !encerrada || ehGestor
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -133,6 +147,8 @@ export default async function OrdemServicoDetalhePage({ params }: Props) {
           </div>
         </Card>
       )}
+
+      <AnexoOsCard osId={os.id} anexo={anexo} podeAlterar={podeAlterarAnexo} />
     </div>
   )
 }

@@ -392,3 +392,25 @@ export type OrdemServicoResumoDto = {
   statusRotulo: string
   dataAbertura: string
 }
+
+// ===== Anexos =====
+
+export type AnexoServicoResposta = {
+  id: number
+  servicoId: number
+  nomeArquivo: string
+  descricao: string | null
+  contentType: string
+  tamanhoBytes: number
+  createdAt: string
+  createdByNome: string | null
+}
+
+export type AnexoOsResposta = {
+  osId: number
+  nomeArquivo: string
+  contentType: string
+  tamanhoBytes: number
+  createdAt: string
+  createdByNome: string | null
+}

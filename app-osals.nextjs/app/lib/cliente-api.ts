@@ -106,6 +106,48 @@ export async function clienteApi<T>(caminho: string, opcoes: OpcoesClienteApi = 
 }
 
 /**
+ * Envia multipart/form-data (upload de arquivos) e retorna o Response bruto.
+ *
+ * Nao define Content-Type manualmente — o fetch monta o cabecalho com o
+ * boundary correto a partir do FormData. Injeta os cookies de sessao.
+ */
+export async function clienteApiUpload(
+  caminho: string,
+  formData: FormData,
+): Promise<Response> {
+  const url = `${API_BASE_URL}${caminho.startsWith('/') ? caminho : '/' + caminho}`
+
+  const cookieStore = await cookies()
+  const todosCookies = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join('; ')
+
+  const headers: Record<string, string> = { Accept: 'application/json' }
+  if (todosCookies) headers.Cookie = todosCookies
+
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
+
+  try {
+    return await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+      signal: controller.signal,
+      cache: 'no-store',
+    })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new ErroConexao('Timeout ao conectar a API.')
+    }
+    throw new ErroConexao('Falha de conexao com a API.')
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+/**
  * Versao bruta que retorna o Response completo (uteis para login/refresh,
  * onde precisamos repassar os cookies Set-Cookie do back para o navegador).
  */

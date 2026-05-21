@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type {
+  AnexoServicoResposta,
   CategoriaCustoResposta,
   EquipamentoResumoDto,
   LancamentoCustoResposta,
@@ -14,6 +15,7 @@ import type {
 } from '@/app/lib/definicoes'
 import { Card } from '@/components/ui/Card'
 import { Tabs } from '@/components/ui/Tabs'
+import { TabAnexos } from './tab-anexos'
 import { TabCustos } from './tab-custos'
 import { TabDados } from './tab-dados'
 import { TabOs } from './tab-os'
@@ -31,6 +33,7 @@ type Props = {
   resumo: ResumoFinanceiroServico
   categorias: CategoriaCustoResposta[]
   podeAlterarCustos: boolean
+  anexos: AnexoServicoResposta[]
 }
 
 export function DetalheServico({
@@ -44,6 +47,7 @@ export function DetalheServico({
   resumo,
   categorias,
   podeAlterarCustos,
+  anexos,
 }: Props) {
   const [aba, setAba] = useState<AbaId>('dados')
   const encerrado = servico.status === 'CONCLUIDO' || servico.status === 'CANCELADO'
@@ -56,7 +60,7 @@ export function DetalheServico({
             { id: 'dados', label: 'Dados' },
             { id: 'os', label: 'Ordens de servico', count: ordens.length },
             { id: 'custos', label: 'Custos', count: custos.length },
-            { id: 'anexos', label: 'Anexos' },
+            { id: 'anexos', label: 'Anexos', count: anexos.length },
           ]}
           ativa={aba}
           onMudar={(id) => setAba(id as AbaId)}
@@ -85,16 +89,14 @@ export function DetalheServico({
             tecnicos={tecnicos}
           />
         )}
-        {aba === 'anexos' && <EmBreve recurso="Anexos" />}
+        {aba === 'anexos' && (
+          <TabAnexos
+            servicoId={servico.id}
+            podeRemover={podeAlterarCustos}
+            anexos={anexos}
+          />
+        )}
       </div>
     </Card>
-  )
-}
-
-function EmBreve({ recurso }: { recurso: string }) {
-  return (
-    <div className="py-10 text-center">
-      <p className="text-slate-500">{recurso} estarao disponiveis em breve.</p>
-    </div>
   )
 }
