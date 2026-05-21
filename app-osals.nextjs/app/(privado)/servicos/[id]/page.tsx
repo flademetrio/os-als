@@ -1,6 +1,14 @@
 import Link from 'next/link'
 import { clienteApi } from '@/app/lib/cliente-api'
-import type { ServicoResposta, TipoServicoResposta } from '@/app/lib/definicoes'
+import type {
+  EquipamentoResumoDto,
+  OrdemServicoResumoDto,
+  PaginaResposta,
+  ServicoResposta,
+  TecnicoResumoDto,
+  TipoServicoResposta,
+  VeiculoResumoDto,
+} from '@/app/lib/definicoes'
 import { badgeStatusServico } from '@/app/lib/esquemas/servico'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
@@ -11,9 +19,16 @@ type Props = { params: Promise<{ id: string }> }
 
 export default async function ServicoDetalhePage({ params }: Props) {
   const { id } = await params
-  const [servico, tipos] = await Promise.all([
-    clienteApi<ServicoResposta>(`/servicos/${id}`),
+  const servico = await clienteApi<ServicoResposta>(`/servicos/${id}`)
+
+  const [tipos, ordens, tecnicos, veiculos, equipamentos] = await Promise.all([
     clienteApi<TipoServicoResposta[]>('/tipos-servico?apenasAtivos=true'),
+    clienteApi<OrdemServicoResumoDto[]>(`/servicos/${id}/ordens-servico`),
+    clienteApi<PaginaResposta<TecnicoResumoDto>>('/tecnicos?apenasAtivos=true&tamanho=200'),
+    clienteApi<PaginaResposta<VeiculoResumoDto>>('/veiculos?apenasAtivos=true&tamanho=200'),
+    clienteApi<PaginaResposta<EquipamentoResumoDto>>(
+      `/equipamentos?clienteId=${servico.clienteId}&apenasAtivos=true&tamanho=200`,
+    ),
   ])
 
   return (
@@ -55,7 +70,14 @@ export default async function ServicoDetalhePage({ params }: Props) {
         </div>
       </Card>
 
-      <DetalheServico servico={servico} tipos={tipos} />
+      <DetalheServico
+        servico={servico}
+        tipos={tipos}
+        ordens={ordens}
+        tecnicos={tecnicos.conteudo}
+        veiculos={veiculos.conteudo}
+        equipamentos={equipamentos.conteudo}
+      />
     </div>
   )
 }

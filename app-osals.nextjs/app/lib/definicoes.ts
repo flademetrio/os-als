@@ -282,3 +282,75 @@ export type ServicoResumoDto = {
   status: StatusServico
   statusRotulo: string
 }
+
+// ===== Ordem de Servico =====
+
+export type StatusOrdemServico =
+  | 'ABERTA'
+  | 'IMPRESSA'
+  | 'PENDENTE_DIGITACAO'
+  | 'CONCLUIDA'
+  | 'CANCELADA'
+
+export type OsTecnicoDto = {
+  id: number
+  nome: string
+  especialidade: string | null
+}
+
+export type OsVeiculoDto = {
+  id: number
+  placa: string
+  marca: string | null
+  modelo: string | null
+}
+
+export type OsEquipamentoDto = {
+  id: number
+  marca: string | null
+  modelo: string | null
+  numeroSerie: string | null
+  localizacaoInterna: string | null
+}
+
+export type OrdemServicoResposta = {
+  id: number
+  numero: number
+  codigoExibicao: string
+  servicoId: number
+  servicoNumero: number
+  servicoNumeroFormatado: string
+  clienteId: number
+  clienteNome: string
+  tipoServicoNome: string
+  descricaoAtividade: string
+  status: StatusOrdemServico
+  statusRotulo: string
+  dataAbertura: string
+  dataImpressao: string | null
+  horaInicioExecucao: string | null
+  horaFimExecucao: string | null
+  oQueFoiFeito: string | null
+  observacoes: string | null
+  impedimentos: string | null
+  digitadoEm: string | null
+  digitadoPorNome: string | null
+  createdAt: string
+  createdByNome: string | null
+  tecnicos: OsTecnicoDto[]
+  veiculos: OsVeiculoDto[]
+  equipamentos: OsEquipamentoDto[]
+}
+
+export type OrdemServicoResumoDto = {
+  id: number
+  numero: number
+  codigoExibicao: string
+  servicoId: number
+  clienteId: number
+  clienteNome: string
+  descricaoAtividade: string
+  status: StatusOrdemServico
+  statusRotulo: string
+  dataAbertura: string
+}
