@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { FiltrosServicos } from './filtros'
 import { LinkPaginacao } from './link-paginacao'
+import { SeletorVista } from './seletor-vista'
 
 type Props = {
   searchParams: Promise<{
@@ -22,6 +23,7 @@ type Props = {
     inicio?: string
     fim?: string
     pagina?: string
+    vista?: string
   }>
 }
 
@@ -34,6 +36,7 @@ export default async function ServicosPage({ searchParams }: Props) {
   const inicio = p.inicio ?? ''
   const fim = p.fim ?? ''
   const pagina = Number(p.pagina ?? '0')
+  const vista: 'lista' | 'cards' = p.vista === 'cards' ? 'cards' : 'lista'
 
   const q = new URLSearchParams()
   if (busca) q.set('busca', busca)
@@ -51,7 +54,8 @@ export default async function ServicosPage({ searchParams }: Props) {
     clienteApi<TipoServicoResposta[]>('/tipos-servico?apenasAtivos=true'),
   ])
 
-  const base = { busca, status, clienteId, tipoServicoId, inicio, fim }
+  const base = { busca, status, clienteId, tipoServicoId, inicio, fim, vista }
+  const vazio = dados.conteudo.length === 0
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -62,9 +66,12 @@ export default async function ServicosPage({ searchParams }: Props) {
             {dados.totalElementos} {dados.totalElementos === 1 ? 'servico' : 'servicos'}
           </p>
         </div>
-        <Link href="/servicos/novo">
-          <Button variant="primary">+ Novo servico</Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <SeletorVista vista={vista} />
+          <Link href="/servicos/novo">
+            <Button variant="primary">+ Novo servico</Button>
+          </Link>
+        </div>
       </div>
 
       <Card padding="md">
@@ -80,15 +87,40 @@ export default async function ServicosPage({ searchParams }: Props) {
         />
       </Card>
 
-      <Card padding="none">
-        {dados.conteudo.length === 0 ? (
-          <div className="p-10 text-center">
+      {vazio ? (
+        <Card padding="md">
+          <div className="p-6 text-center">
             <p className="text-slate-500">Nenhum servico encontrado.</p>
             <Link href="/servicos/novo" className="inline-block mt-4">
               <Button size="sm">Cadastrar o primeiro servico</Button>
             </Link>
           </div>
-        ) : (
+        </Card>
+      ) : vista === 'cards' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {dados.conteudo.map((s) => (
+            <Link key={s.id} href={`/servicos/${s.id}`} className="block">
+              <Card padding="md" hover>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono font-semibold text-primary">
+                    {s.numeroFormatado}
+                  </span>
+                  <Badge variant={badgeStatusServico(s.status)} dot size="sm">
+                    {s.statusRotulo}
+                  </Badge>
+                </div>
+                <p className="text-sm font-medium text-slate-800 mt-2">{s.clienteNome}</p>
+                <p className="text-xs text-slate-500">{s.tipoServicoNome}</p>
+                <p className="text-sm text-slate-600 mt-2 line-clamp-2">{s.descricao}</p>
+                <p className="text-xs text-slate-400 mt-3">
+                  Inicio previsto: {formatarData(s.dataInicioPrevista)}
+                </p>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <Card padding="none">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -129,29 +161,29 @@ export default async function ServicosPage({ searchParams }: Props) {
               </tbody>
             </table>
           </div>
-        )}
+        </Card>
+      )}
 
-        {dados.totalPaginas > 1 && (
-          <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm">
-            <span className="text-slate-500">
-              Pagina <span className="font-medium text-slate-900">{dados.pagina + 1}</span> de{' '}
-              <span className="font-medium text-slate-900">{dados.totalPaginas}</span>
-            </span>
-            <div className="flex gap-2">
-              <LinkPaginacao pagina={dados.pagina - 1} desabilitado={dados.pagina === 0} base={base}>
-                Anterior
-              </LinkPaginacao>
-              <LinkPaginacao
-                pagina={dados.pagina + 1}
-                desabilitado={dados.pagina >= dados.totalPaginas - 1}
-                base={base}
-              >
-                Proxima
-              </LinkPaginacao>
-            </div>
+      {dados.totalPaginas > 1 && (
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-slate-500">
+            Pagina <span className="font-medium text-slate-900">{dados.pagina + 1}</span> de{' '}
+            <span className="font-medium text-slate-900">{dados.totalPaginas}</span>
+          </span>
+          <div className="flex gap-2">
+            <LinkPaginacao pagina={dados.pagina - 1} desabilitado={dados.pagina === 0} base={base}>
+              Anterior
+            </LinkPaginacao>
+            <LinkPaginacao
+              pagina={dados.pagina + 1}
+              desabilitado={dados.pagina >= dados.totalPaginas - 1}
+              base={base}
+            >
+              Proxima
+            </LinkPaginacao>
           </div>
-        )}
-      </Card>
+        </div>
+      )}
     </div>
   )
 }
