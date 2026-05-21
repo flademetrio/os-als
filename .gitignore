@@ -83,31 +83,24 @@ logs/
 anexos-local/
 
 # ---------------------------------------------------------------------
-# IDEs e editores
+# IDEs e editores — o projeto e desenvolvido em VS Code e IntelliJ IDEA
 # ---------------------------------------------------------------------
-# IntelliJ IDEA
+# IntelliJ IDEA — ignora a config local da IDE por inteiro
 .idea/
 *.iml
 *.iws
 *.ipr
 
-# Eclipse / STS
-.apt_generated/
-.classpath
-.factorypath
-.project
-.settings/
-.springBeans
-.sts4-cache/
-
-# NetBeans
-nbproject/private/
-nbbuild/
-nbdist/
-.nb-gradle/
-
-# VS Code
-.vscode/
+# VS Code — ignora o ruido local, mas permite versionar a config
+# compartilhada do time (extensoes recomendadas, tasks, launch, etc.)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+*.code-workspace
+.history/
 
 # ---------------------------------------------------------------------
 # Claude Code — configuracao local do agente
