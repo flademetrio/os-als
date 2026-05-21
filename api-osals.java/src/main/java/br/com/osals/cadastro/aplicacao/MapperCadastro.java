@@ -32,7 +32,8 @@ public class MapperCadastro {
     }
 
     public ClienteResumoDto paraClienteResumo(Cliente c) {
-        return new ClienteResumoDto(c.getId(), c.getTipoPessoa(), c.getDocumento(), c.getNome(), c.isAtivo());
+        return new ClienteResumoDto(c.getId(), c.getTipoPessoa(), c.getDocumento(),
+                c.getNome(), c.getNomeFantasia(), c.isAtivo());
     }
 
     public UnidadeResposta paraUnidadeResposta(Unidade u) {

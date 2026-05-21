@@ -36,6 +36,7 @@ export function FormularioNovoServico({ clientes: clientesIniciais, tipos }: Pro
       tipoPessoa: c.tipoPessoa,
       documento: c.documento,
       nome: c.nome,
+      nomeFantasia: c.nomeFantasia,
       ativo: true,
     }
     setClientes((lista) => [novo, ...lista.filter((x) => x.id !== c.id)])

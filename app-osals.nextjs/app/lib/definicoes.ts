@@ -69,6 +69,7 @@ export type ClienteResumoDto = {
   tipoPessoa: TipoPessoa
   documento: string
   nome: string
+  nomeFantasia: string | null
   ativo: boolean
 }
 

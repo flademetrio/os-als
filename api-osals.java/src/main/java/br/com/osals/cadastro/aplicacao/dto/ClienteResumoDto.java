@@ -8,6 +8,7 @@ public record ClienteResumoDto(
         TipoPessoa tipoPessoa,
         String documento,
         String nome,
+        String nomeFantasia,
         boolean ativo
 ) {
 }

@@ -26,10 +26,12 @@ export function ComboboxCliente({ clientes, value, onChange, onNovoCliente, erro
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase()
     if (!termo) return clientes
+    const digitos = termo.replace(/\D/g, '')
     return clientes.filter(
       (c) =>
         c.nome.toLowerCase().includes(termo) ||
-        c.documento.replace(/\D/g, '').includes(termo.replace(/\D/g, '')),
+        (c.nomeFantasia ?? '').toLowerCase().includes(termo) ||
+        (digitos !== '' && c.documento.replace(/\D/g, '').includes(digitos)),
     )
   }, [clientes, busca])
 
@@ -103,11 +105,23 @@ export function ComboboxCliente({ clientes, value, onChange, onNovoCliente, erro
                       type="button"
                       onClick={() => selecionar(c.id)}
                       className={[
-                        'w-full text-left px-3 py-2 text-sm transition-colors hover:bg-slate-50',
-                        c.id === value ? 'bg-slate-50 font-medium text-primary' : 'text-slate-700',
+                        'w-full text-left px-3 py-2 transition-colors hover:bg-slate-50',
+                        c.id === value ? 'bg-slate-50' : '',
                       ].join(' ')}
                     >
-                      {c.nome}
+                      <span
+                        className={[
+                          'block text-sm leading-tight',
+                          c.id === value ? 'font-medium text-primary' : 'text-slate-700',
+                        ].join(' ')}
+                      >
+                        {c.nome}
+                      </span>
+                      {c.nomeFantasia && c.nomeFantasia !== c.nome && (
+                        <span className="block text-xs text-slate-400 leading-tight truncate">
+                          {c.nomeFantasia}
+                        </span>
+                      )}
                     </button>
                   </li>
                 ))
