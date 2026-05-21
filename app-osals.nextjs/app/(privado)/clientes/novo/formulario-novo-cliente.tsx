@@ -1,24 +1,44 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState, useState } from 'react'
-import { criarCliente, type EstadoCriacaoCliente } from '@/app/actions/cliente'
+import { useRouter } from 'next/navigation'
+import { useActionState, useEffect, useState } from 'react'
+import {
+  criarClienteRetornando,
+  type EstadoNovoClienteModal,
+} from '@/app/actions/cliente'
+import type { ClienteResposta } from '@/app/lib/definicoes'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { InputDocumento } from '@/components/ui/InputDocumento'
 import { Select } from '@/components/ui/Select'
 
-const ESTADO_INICIAL: EstadoCriacaoCliente = {}
+const ESTADO_INICIAL: EstadoNovoClienteModal = {}
 
 type Props = {
   /** Quando informado, "Cancelar" vira um botao que fecha o modal (em vez de Link). */
   onCancelar?: () => void
+  /**
+   * Chamado apos criar o cliente. Quando informado (drawer), o pai decide o
+   * que fazer (ex.: fechar o modal); sem ele, navega para o detalhe do cliente.
+   */
+  onCriado?: (cliente: ClienteResposta) => void
 }
 
-export function FormularioNovoCliente({ onCancelar }: Props = {}) {
-  const [estado, dispatch, pendente] = useActionState(criarCliente, ESTADO_INICIAL)
+export function FormularioNovoCliente({ onCancelar, onCriado }: Props = {}) {
+  const router = useRouter()
+  const [estado, dispatch, pendente] = useActionState(criarClienteRetornando, ESTADO_INICIAL)
   const [tipoPessoa, setTipoPessoa] = useState<'PF' | 'PJ'>('PJ')
+
+  useEffect(() => {
+    if (!estado.cliente) return
+    if (onCriado) {
+      onCriado(estado.cliente)
+    } else {
+      router.push(`/clientes/${estado.cliente.id}`)
+    }
+  }, [estado.cliente, onCriado, router])
 
   return (
     <form action={dispatch} className="space-y-4">
