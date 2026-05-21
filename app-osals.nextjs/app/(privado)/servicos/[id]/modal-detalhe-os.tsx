@@ -48,7 +48,7 @@ export function ModalDetalheOs({ osId, ehGestor, onClose }: Props) {
       open
       onClose={onClose}
       title={os ? `OS ${os.codigoExibicao}` : 'Ordem de servico'}
-      size="lg"
+      size="meio"
     >
       {erro && <Alert variant="danger">{erro}</Alert>}
 
@@ -58,8 +58,9 @@ export function ModalDetalheOs({ osId, ehGestor, onClose }: Props) {
 
       {os && (
         <div className="space-y-5">
-          <div className="flex items-start justify-between gap-3 flex-wrap">
-            <div>
+          {/* Cabecalho — status, identificacao e acoes */}
+          <div className="flex items-start justify-between gap-4 flex-wrap rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant={badgeStatusOs(os.status)} dot>
                   {os.statusRotulo}
@@ -71,10 +72,11 @@ export function ModalDetalheOs({ osId, ehGestor, onClose }: Props) {
                   abrir em pagina inteira →
                 </Link>
               </div>
-              <p className="text-sm text-slate-500 mt-1">
-                {os.clienteNome} · {os.tipoServicoNome} · Servico {os.servicoNumeroFormatado}
+              <p className="text-sm font-medium text-slate-800 mt-2">{os.clienteNome}</p>
+              <p className="text-xs text-slate-500">
+                {os.tipoServicoNome} · Servico {os.servicoNumeroFormatado}
               </p>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-400 mt-1">
                 Aberta em {dataHora(os.dataAbertura)}
                 {os.dataImpressao ? ` · Impressa em ${dataHora(os.dataImpressao)}` : ''}
               </p>
@@ -82,65 +84,65 @@ export function ModalDetalheOs({ osId, ehGestor, onClose }: Props) {
             <AcoesOs os={os} />
           </div>
 
-          <Secao titulo="Atividade prevista">
-            <p className="text-sm text-slate-700 whitespace-pre-wrap">{os.descricaoAtividade}</p>
-          </Secao>
+          {/* Dados — grade de 2 colunas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Bloco titulo="Atividade prevista" largo>
+              <p className="text-sm text-slate-700 whitespace-pre-wrap">
+                {os.descricaoAtividade}
+              </p>
+            </Bloco>
 
-          <Secao titulo="Tecnicos">
-            <Lista
-              itens={os.tecnicos.map((t) =>
-                t.especialidade ? `${t.nome} — ${t.especialidade}` : t.nome,
-              )}
-            />
-          </Secao>
-
-          <Secao titulo="Veiculos">
-            <Lista
-              itens={os.veiculos.map((v) =>
-                [v.placa, v.marca, v.modelo].filter(Boolean).join(' '),
-              )}
-            />
-          </Secao>
-
-          <Secao titulo="Equipamentos atendidos">
-            <Lista
-              itens={os.equipamentos.map((e) =>
-                [
-                  [e.marca, e.modelo].filter(Boolean).join(' ') || `Equipamento #${e.id}`,
-                  e.localizacaoInterna,
-                ]
-                  .filter(Boolean)
-                  .join(' — '),
-              )}
-            />
-          </Secao>
-
-          {os.status === 'CONCLUIDA' && (
-            <Secao titulo="Execucao">
-              <div className="text-sm text-slate-700 space-y-1">
-                <p>
-                  <span className="text-slate-500">Periodo: </span>
-                  {dataHora(os.horaInicioExecucao)} — {dataHora(os.horaFimExecucao)}
-                </p>
-                <p className="whitespace-pre-wrap">
-                  <span className="text-slate-500">O que foi feito: </span>
-                  {os.oQueFoiFeito ?? '-'}
-                </p>
-                {os.observacoes && (
-                  <p className="whitespace-pre-wrap">
-                    <span className="text-slate-500">Observacoes: </span>
-                    {os.observacoes}
-                  </p>
+            <Bloco titulo={`Tecnicos (${os.tecnicos.length})`}>
+              <Lista
+                itens={os.tecnicos.map((t) =>
+                  t.especialidade ? `${t.nome} — ${t.especialidade}` : t.nome,
                 )}
-                {os.impedimentos && (
-                  <p className="whitespace-pre-wrap">
-                    <span className="text-slate-500">Impedimentos: </span>
-                    {os.impedimentos}
-                  </p>
+              />
+            </Bloco>
+
+            <Bloco titulo={`Veiculos (${os.veiculos.length})`}>
+              <Lista
+                itens={os.veiculos.map((v) =>
+                  [v.placa, v.marca, v.modelo].filter(Boolean).join(' '),
                 )}
-              </div>
-            </Secao>
-          )}
+              />
+            </Bloco>
+
+            <Bloco titulo={`Equipamentos atendidos (${os.equipamentos.length})`} largo>
+              <Lista
+                itens={os.equipamentos.map((e) =>
+                  [
+                    [e.marca, e.modelo].filter(Boolean).join(' ') || `Equipamento #${e.id}`,
+                    e.localizacaoInterna,
+                  ]
+                    .filter(Boolean)
+                    .join(' — '),
+                )}
+              />
+            </Bloco>
+
+            {os.status === 'CONCLUIDA' && (
+              <Bloco titulo="Execucao" largo>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-slate-700">
+                  <Linha rotulo="Hora inicio" valor={dataHora(os.horaInicioExecucao)} />
+                  <Linha rotulo="Hora fim" valor={dataHora(os.horaFimExecucao)} />
+                  <div className="sm:col-span-2">
+                    <Linha rotulo="O que foi feito" valor={os.oQueFoiFeito ?? '-'} />
+                  </div>
+                  {os.observacoes && (
+                    <div className="sm:col-span-2">
+                      <Linha rotulo="Observacoes" valor={os.observacoes} />
+                    </div>
+                  )}
+                  {os.impedimentos && (
+                    <div className="sm:col-span-2">
+                      <Linha rotulo="Impedimentos" valor={os.impedimentos} />
+                    </div>
+                  )}
+                </div>
+              </Bloco>
+            )}
+          </div>
 
           <AnexoOsCard
             osId={os.id}
@@ -153,10 +155,23 @@ export function ModalDetalheOs({ osId, ehGestor, onClose }: Props) {
   )
 }
 
-function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
+function Bloco({
+  titulo,
+  largo,
+  children,
+}: {
+  titulo: string
+  largo?: boolean
+  children: React.ReactNode
+}) {
   return (
-    <div>
-      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+    <div
+      className={[
+        'rounded-xl border border-slate-200 p-3',
+        largo ? 'sm:col-span-2' : '',
+      ].join(' ')}
+    >
+      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
         {titulo}
       </p>
       {children}
@@ -164,14 +179,26 @@ function Secao({ titulo, children }: { titulo: string; children: React.ReactNode
   )
 }
 
+function Linha({ rotulo, valor }: { rotulo: string; valor: string }) {
+  return (
+    <p className="whitespace-pre-wrap">
+      <span className="text-slate-500">{rotulo}: </span>
+      {valor}
+    </p>
+  )
+}
+
 function Lista({ itens }: { itens: string[] }) {
   if (itens.length === 0) {
-    return <p className="text-sm text-slate-400">-</p>
+    return <p className="text-sm text-slate-400">Nenhum.</p>
   }
   return (
-    <ul className="text-sm text-slate-700 list-disc list-inside">
+    <ul className="text-sm text-slate-700 space-y-0.5">
       {itens.map((t, i) => (
-        <li key={i}>{t}</li>
+        <li key={i} className="flex gap-1.5">
+          <span className="text-slate-300">•</span>
+          <span>{t}</span>
+        </li>
       ))}
     </ul>
   )

@@ -2,14 +2,18 @@
 
 import { ReactNode, useEffect, useRef, useState } from 'react'
 
-type Tamanho = 'sm' | 'md' | 'lg' | 'xl'
+type Tamanho = 'sm' | 'md' | 'lg' | 'xl' | 'meio'
 
-/** Largura do painel lateral por tamanho. */
+/**
+ * Largura do painel lateral por tamanho. "meio" ocupa metade da tela em
+ * telas medias/grandes (a borda esquerda do painel chega ao centro).
+ */
 const classesTamanho: Record<Tamanho, string> = {
   sm: 'max-w-sm',
   md: 'max-w-md',
   lg: 'max-w-xl',
   xl: 'max-w-3xl',
+  meio: 'sm:max-w-[50vw]',
 }
 
 const DURACAO_MS = 300
