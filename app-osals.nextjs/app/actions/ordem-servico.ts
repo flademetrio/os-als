@@ -50,6 +50,7 @@ export async function abrirOrdemServico(
     tecnicoIds: idsDe(formData, 'tecnicoIds'),
     equipamentoIds: idsDe(formData, 'equipamentoIds'),
     veiculoIds: idsDe(formData, 'veiculoIds'),
+    contatoIds: idsDe(formData, 'contatoIds'),
   })
   if (!parse.success) return aplicarErros(parse.error)
 

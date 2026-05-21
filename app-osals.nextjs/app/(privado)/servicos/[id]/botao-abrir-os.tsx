@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type {
+  ContatoClienteResposta,
   EquipamentoResumoDto,
   TecnicoResumoDto,
   VeiculoResumoDto,
@@ -14,10 +15,17 @@ type Props = {
   tecnicos: TecnicoResumoDto[]
   veiculos: VeiculoResumoDto[]
   equipamentos: EquipamentoResumoDto[]
+  contatos: ContatoClienteResposta[]
 }
 
 /** Botao do cabecalho do servico para abrir uma nova OS — sempre visivel. */
-export function BotaoAbrirOs({ servicoId, tecnicos, veiculos, equipamentos }: Props) {
+export function BotaoAbrirOs({
+  servicoId,
+  tecnicos,
+  veiculos,
+  equipamentos,
+  contatos,
+}: Props) {
   const [aberto, setAberto] = useState(false)
 
   return (
@@ -31,6 +39,7 @@ export function BotaoAbrirOs({ servicoId, tecnicos, veiculos, equipamentos }: Pr
           tecnicos={tecnicos}
           veiculos={veiculos}
           equipamentos={equipamentos}
+          contatos={contatos}
           onClose={() => setAberto(false)}
         />
       )}

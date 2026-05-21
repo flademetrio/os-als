@@ -313,6 +313,14 @@ export type OsEquipamentoDto = {
   localizacaoInterna: string | null
 }
 
+export type OsContatoDto = {
+  id: number
+  nome: string
+  funcao: string | null
+  telefone: string | null
+  email: string | null
+}
+
 export type OrdemServicoResposta = {
   id: number
   numero: number
@@ -341,6 +349,7 @@ export type OrdemServicoResposta = {
   tecnicos: OsTecnicoDto[]
   veiculos: OsVeiculoDto[]
   equipamentos: OsEquipamentoDto[]
+  contatos: OsContatoDto[]
 }
 
 // ===== Custos do Servico =====

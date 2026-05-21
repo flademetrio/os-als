@@ -75,7 +75,7 @@ public class GeradorPdfOS {
         ctx.setVariable("clienteNome", servico.getCliente().getNome());
         ctx.setVariable("descricaoAtividade", os.getDescricaoAtividade());
         ctx.setVariable("unidades", unidadesDoCliente(clienteId));
-        ctx.setVariable("contatos", contatosDoCliente(clienteId));
+        ctx.setVariable("contatos", contatosDaOs(os, clienteId));
         ctx.setVariable("equipamentos", equipamentos(os));
         ctx.setVariable("tecnicos", tecnicos(os));
         ctx.setVariable("veiculos", veiculos(os));
@@ -112,10 +112,22 @@ public class GeradorPdfOS {
         return lista;
     }
 
-    /** Contatos do cliente formatados como "Nome (Funcao) — Telefone". */
-    private List<String> contatosDoCliente(Long clienteId) {
+    /**
+     * Contatos a exibir na impressao: os selecionados na abertura da OS;
+     * se nenhum foi selecionado, usa o contato principal do cliente (o
+     * primeiro cadastrado). Formatados como "Nome (Funcao) — Telefone".
+     */
+    private List<String> contatosDaOs(OrdemServico os, Long clienteId) {
+        List<ContatoCliente> origem;
+        if (!os.getContatos().isEmpty()) {
+            origem = new ArrayList<>(os.getContatos());
+        } else {
+            origem = repositorioContato.findByClienteIdOrderByNome(clienteId).stream()
+                    .limit(1)
+                    .toList();
+        }
         var lista = new ArrayList<String>();
-        for (ContatoCliente c : repositorioContato.findByClienteIdOrderByNome(clienteId)) {
+        for (ContatoCliente c : origem) {
             String nomeFuncao = (c.getFuncao() == null || c.getFuncao().isBlank())
                     ? c.getNome()
                     : c.getNome() + " (" + c.getFuncao().trim() + ")";

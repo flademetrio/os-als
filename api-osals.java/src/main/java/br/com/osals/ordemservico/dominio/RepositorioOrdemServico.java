@@ -16,7 +16,7 @@ public interface RepositorioOrdemServico extends JpaRepository<OrdemServico, Lon
     Long proximoNumero();
 
     /** Carrega a OS com todas as colecoes — usado na geracao do PDF e no detalhe. */
-    @EntityGraph(attributePaths = {"tecnicos", "veiculos", "equipamentos",
+    @EntityGraph(attributePaths = {"tecnicos", "veiculos", "equipamentos", "contatos",
             "servico", "servico.cliente", "servico.tipoServico"})
     Optional<OrdemServico> findWithRelacionamentosById(Long id);
 

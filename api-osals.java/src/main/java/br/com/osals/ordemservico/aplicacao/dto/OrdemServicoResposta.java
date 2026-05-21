@@ -36,6 +36,7 @@ public record OrdemServicoResposta(
         String createdByNome,
         List<OsTecnicoDto> tecnicos,
         List<OsVeiculoDto> veiculos,
-        List<OsEquipamentoDto> equipamentos
+        List<OsEquipamentoDto> equipamentos,
+        List<OsContatoDto> contatos
 ) {
 }

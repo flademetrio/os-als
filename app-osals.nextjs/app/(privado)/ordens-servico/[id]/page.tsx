@@ -124,6 +124,21 @@ export default async function OrdemServicoDetalhePage({ params }: Props) {
               </ul>
             )}
           </Campo>
+
+          <Campo titulo="Contatos do cliente">
+            {os.contatos.length === 0 ? (
+              <Vazio />
+            ) : (
+              <ul className="text-sm text-slate-700 list-disc list-inside">
+                {os.contatos.map((c) => (
+                  <li key={c.id}>
+                    {[c.nome, c.funcao].filter(Boolean).join(' — ')}
+                    {c.telefone ? ` · ${c.telefone}` : ''}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Campo>
         </div>
       </Card>
 

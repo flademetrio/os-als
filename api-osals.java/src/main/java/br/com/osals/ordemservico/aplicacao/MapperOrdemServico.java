@@ -1,9 +1,11 @@
 package br.com.osals.ordemservico.aplicacao;
 
+import br.com.osals.cadastro.dominio.ContatoCliente;
 import br.com.osals.cadastro.dominio.Equipamento;
 import br.com.osals.cadastro.dominio.Veiculo;
 import br.com.osals.ordemservico.aplicacao.dto.OrdemServicoResposta;
 import br.com.osals.ordemservico.aplicacao.dto.OrdemServicoResumoDto;
+import br.com.osals.ordemservico.aplicacao.dto.OsContatoDto;
 import br.com.osals.ordemservico.aplicacao.dto.OsEquipamentoDto;
 import br.com.osals.ordemservico.aplicacao.dto.OsTecnicoDto;
 import br.com.osals.ordemservico.aplicacao.dto.OsVeiculoDto;
@@ -47,7 +49,8 @@ public class MapperOrdemServico {
                 nomeDe(os.getCreatedBy()),
                 os.getTecnicos().stream().map(MapperOrdemServico::paraTecnicoDto).toList(),
                 os.getVeiculos().stream().map(MapperOrdemServico::paraVeiculoDto).toList(),
-                os.getEquipamentos().stream().map(MapperOrdemServico::paraEquipamentoDto).toList()
+                os.getEquipamentos().stream().map(MapperOrdemServico::paraEquipamentoDto).toList(),
+                os.getContatos().stream().map(MapperOrdemServico::paraContatoDto).toList()
         );
     }
 
@@ -84,6 +87,11 @@ public class MapperOrdemServico {
     static OsEquipamentoDto paraEquipamentoDto(Equipamento e) {
         return new OsEquipamentoDto(e.getId(), e.getMarca(), e.getModelo(),
                 e.getNumeroSerie(), e.getLocalizacaoInterna());
+    }
+
+    static OsContatoDto paraContatoDto(ContatoCliente c) {
+        return new OsContatoDto(c.getId(), c.getNome(), c.getFuncao(),
+                c.getTelefone(), c.getEmail());
     }
 
     public List<OsEquipamentoDto> equipamentosDto(OrdemServico os) {

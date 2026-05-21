@@ -7,6 +7,7 @@ export const aberturaOsSchema = z.object({
   tecnicoIds: z.array(z.number()).min(1, 'Selecione ao menos um tecnico'),
   equipamentoIds: z.array(z.number()),
   veiculoIds: z.array(z.number()),
+  contatoIds: z.array(z.number()),
 })
 
 export type AberturaOsEntrada = z.infer<typeof aberturaOsSchema>

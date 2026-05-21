@@ -1,5 +1,6 @@
 package br.com.osals.ordemservico.dominio;
 
+import br.com.osals.cadastro.dominio.ContatoCliente;
 import br.com.osals.cadastro.dominio.Equipamento;
 import br.com.osals.cadastro.dominio.Veiculo;
 import br.com.osals.compartilhado.excecoes.NegocioException;
@@ -110,6 +111,13 @@ public class OrdemServico {
             inverseJoinColumns = @JoinColumn(name = "equipamento_id"))
     private Set<Equipamento> equipamentos = new LinkedHashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "os_contato",
+            joinColumns = @JoinColumn(name = "os_id"),
+            inverseJoinColumns = @JoinColumn(name = "contato_id"))
+    private Set<ContatoCliente> contatos = new LinkedHashSet<>();
+
     protected OrdemServico() {
         // JPA
     }
@@ -134,6 +142,11 @@ public class OrdemServico {
         this.tecnicos = new LinkedHashSet<>(tecnicos);
         this.veiculos = new LinkedHashSet<>(veiculos);
         this.equipamentos = new LinkedHashSet<>(equipamentos);
+    }
+
+    /** Contatos do cliente que devem sair na OS e na impressao (0..N). */
+    public void definirContatos(Set<ContatoCliente> contatos) {
+        this.contatos = new LinkedHashSet<>(contatos);
     }
 
     /**
@@ -210,4 +223,5 @@ public class OrdemServico {
     public Set<Tecnico> getTecnicos() { return tecnicos; }
     public Set<Veiculo> getVeiculos() { return veiculos; }
     public Set<Equipamento> getEquipamentos() { return equipamentos; }
+    public Set<ContatoCliente> getContatos() { return contatos; }
 }

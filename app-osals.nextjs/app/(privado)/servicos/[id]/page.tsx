@@ -4,6 +4,7 @@ import { lerSessao } from '@/app/lib/sessao'
 import type {
   AnexoServicoResposta,
   CategoriaCustoResposta,
+  ContatoClienteResposta,
   EquipamentoResumoDto,
   LancamentoCustoResposta,
   OrdemServicoResumoDto,
@@ -33,6 +34,7 @@ export default async function ServicoDetalhePage({ params }: Props) {
     tecnicos,
     veiculos,
     equipamentos,
+    contatos,
     custos,
     resumo,
     categorias,
@@ -46,6 +48,7 @@ export default async function ServicoDetalhePage({ params }: Props) {
     clienteApi<PaginaResposta<EquipamentoResumoDto>>(
       `/equipamentos?clienteId=${servico.clienteId}&apenasAtivos=true&tamanho=200`,
     ),
+    clienteApi<ContatoClienteResposta[]>(`/clientes/${servico.clienteId}/contatos`),
     clienteApi<LancamentoCustoResposta[]>(`/servicos/${id}/custos`),
     clienteApi<ResumoFinanceiroServico>(`/servicos/${id}/resumo-financeiro`),
     clienteApi<CategoriaCustoResposta[]>('/categorias-custo?apenasAtivos=true'),
@@ -99,6 +102,7 @@ export default async function ServicoDetalhePage({ params }: Props) {
                 tecnicos={tecnicos.conteudo}
                 veiculos={veiculos.conteudo}
                 equipamentos={equipamentos.conteudo}
+                contatos={contatos}
               />
             )}
             <AcoesCabecalhoServico servico={servico} />

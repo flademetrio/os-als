@@ -1,6 +1,8 @@
 package br.com.osals.ordemservico.aplicacao;
 
+import br.com.osals.cadastro.dominio.ContatoCliente;
 import br.com.osals.cadastro.dominio.Equipamento;
+import br.com.osals.cadastro.dominio.RepositorioContatoCliente;
 import br.com.osals.cadastro.dominio.RepositorioEquipamento;
 import br.com.osals.cadastro.dominio.RepositorioVeiculo;
 import br.com.osals.cadastro.dominio.Veiculo;
@@ -42,6 +44,7 @@ public class GestorOrdemServico {
     private final RepositorioTecnico repositorioTecnico;
     private final RepositorioVeiculo repositorioVeiculo;
     private final RepositorioEquipamento repositorioEquipamento;
+    private final RepositorioContatoCliente repositorioContato;
     private final MapperOrdemServico mapper;
 
     public GestorOrdemServico(RepositorioOrdemServico repositorio,
@@ -49,12 +52,14 @@ public class GestorOrdemServico {
                               RepositorioTecnico repositorioTecnico,
                               RepositorioVeiculo repositorioVeiculo,
                               RepositorioEquipamento repositorioEquipamento,
+                              RepositorioContatoCliente repositorioContato,
                               MapperOrdemServico mapper) {
         this.repositorio = repositorio;
         this.repositorioServico = repositorioServico;
         this.repositorioTecnico = repositorioTecnico;
         this.repositorioVeiculo = repositorioVeiculo;
         this.repositorioEquipamento = repositorioEquipamento;
+        this.repositorioContato = repositorioContato;
         this.mapper = mapper;
     }
 
@@ -86,11 +91,13 @@ public class GestorOrdemServico {
         Set<Tecnico> tecnicos = resolverTecnicos(req.tecnicoIds());
         Set<Equipamento> equipamentos = resolverEquipamentos(req.equipamentoIds(), servico);
         Set<Veiculo> veiculos = resolverVeiculos(req.veiculoIds());
+        Set<ContatoCliente> contatos = resolverContatos(req.contatoIds(), servico);
 
         int numero = repositorio.proximoNumero().intValue();
         var os = new OrdemServico(numero, servico, req.descricaoAtividade().trim(),
                 req.dataAgendada(), autor);
         os.definirEquipe(tecnicos, veiculos, equipamentos);
+        os.definirContatos(contatos);
         var salva = repositorio.save(os);
         log.info("OS aberta: id={} numero={} servico={}", salva.getId(), salva.getNumero(), servicoId);
         return mapper.paraResposta(salva);
@@ -183,6 +190,25 @@ public class GestorOrdemServico {
                     .orElseThrow(() -> new RecursoNaoEncontradoException(
                             "Veiculo nao encontrado: id=" + id));
             encontrados.add(v);
+        }
+        return encontrados;
+    }
+
+    private Set<ContatoCliente> resolverContatos(Set<Long> ids, Servico servico) {
+        var encontrados = new LinkedHashSet<ContatoCliente>();
+        if (ids == null) {
+            return encontrados;
+        }
+        Long clienteServico = servico.getCliente().getId();
+        for (Long id : ids) {
+            ContatoCliente c = repositorioContato.findById(id)
+                    .orElseThrow(() -> new RecursoNaoEncontradoException(
+                            "Contato nao encontrado: id=" + id));
+            if (!c.getCliente().getId().equals(clienteServico)) {
+                throw new NegocioException(
+                        "Contato id=" + id + " nao pertence ao cliente do Servico.");
+            }
+            encontrados.add(c);
         }
         return encontrados;
     }

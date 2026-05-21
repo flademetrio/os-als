@@ -8,8 +8,8 @@ import java.util.Set;
 
 /**
  * Dados para abrir uma OS dentro de um Servico.
- * Tecnicos sao obrigatorios (1..N); equipamentos e veiculos sao opcionais.
- * dataAgendada e o dia previsto da visita da equipe ao cliente.
+ * Tecnicos sao obrigatorios (1..N); equipamentos, veiculos e contatos sao
+ * opcionais. dataAgendada e o dia previsto da visita da equipe ao cliente.
  */
 public record AberturaOsRequisicao(
 
@@ -24,6 +24,8 @@ public record AberturaOsRequisicao(
 
         Set<Long> equipamentoIds,
 
-        Set<Long> veiculoIds
+        Set<Long> veiculoIds,
+
+        Set<Long> contatoIds
 ) {
 }

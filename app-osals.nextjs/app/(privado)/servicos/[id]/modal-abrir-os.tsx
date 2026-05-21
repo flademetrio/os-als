@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from 'react'
 import { abrirOrdemServico, type EstadoOrdemServico } from '@/app/actions/ordem-servico'
 import type {
+  ContatoClienteResposta,
   EquipamentoResumoDto,
   TecnicoResumoDto,
   VeiculoResumoDto,
@@ -21,10 +22,18 @@ type Props = {
   tecnicos: TecnicoResumoDto[]
   veiculos: VeiculoResumoDto[]
   equipamentos: EquipamentoResumoDto[]
+  contatos: ContatoClienteResposta[]
   onClose: () => void
 }
 
-export function ModalAbrirOs({ servicoId, tecnicos, veiculos, equipamentos, onClose }: Props) {
+export function ModalAbrirOs({
+  servicoId,
+  tecnicos,
+  veiculos,
+  equipamentos,
+  contatos,
+  onClose,
+}: Props) {
   const acao = abrirOrdemServico.bind(null, servicoId)
   const [estado, dispatch, pendente] = useActionState(acao, ESTADO_INICIAL)
 
@@ -107,6 +116,26 @@ export function ModalAbrirOs({ servicoId, tecnicos, veiculos, equipamentos, onCl
           ))}
         </ListaSelecao>
 
+        <ListaSelecao
+          titulo="Contatos do cliente (opcional)"
+          vazio="Este cliente nao tem contatos cadastrados."
+          nota="Os contatos marcados saem na OS e na impressao. Sem marcar nenhum, sai o contato principal."
+        >
+          {contatos.map((c, i) => (
+            <Checkbox
+              key={c.id}
+              id={`con-${c.id}`}
+              name="contatoIds"
+              value={c.id}
+              label={
+                [c.nome, c.funcao].filter(Boolean).join(' — ') +
+                (i === 0 ? ' (principal)' : '') +
+                (c.telefone ? ` · ${c.telefone}` : '')
+              }
+            />
+          ))}
+        </ListaSelecao>
+
         <div className="flex items-center justify-end gap-3 pt-2">
           <Button type="button" variant="ghost" onClick={onClose} disabled={pendente}>
             Cancelar
@@ -124,11 +153,13 @@ function ListaSelecao({
   titulo,
   erro,
   vazio,
+  nota,
   children,
 }: {
   titulo: string
   erro?: string
   vazio: string
+  nota?: string
   children: React.ReactNode
 }) {
   const vazioLista = Array.isArray(children) && children.length === 0
@@ -142,6 +173,7 @@ function ListaSelecao({
           children
         )}
       </div>
+      {nota && <p className="text-xs text-slate-500 mt-1">{nota}</p>}
       {erro && <p className="text-xs text-red-600 mt-1">{erro}</p>}
     </div>
   )

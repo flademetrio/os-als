@@ -126,6 +126,19 @@ export function ModalDetalheOs({ osId, ehGestor, onClose }: Props) {
               />
             </Bloco>
 
+            <Bloco titulo={`Contatos do cliente (${os.contatos.length})`} largo>
+              <Lista
+                itens={os.contatos.map((c) =>
+                  [
+                    [c.nome, c.funcao].filter(Boolean).join(' — '),
+                    c.telefone,
+                  ]
+                    .filter(Boolean)
+                    .join(' · '),
+                )}
+              />
+            </Bloco>
+
             {os.status === 'CONCLUIDA' && (
               <Bloco titulo="Execucao" largo>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-slate-700">
