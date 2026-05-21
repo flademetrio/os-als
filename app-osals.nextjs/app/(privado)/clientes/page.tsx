@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type { ClienteResumoDto, PaginaResposta } from '@/app/lib/definicoes'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { BotaoNovoCliente } from './botao-novo-cliente'
 import { FiltrosClientes } from './filtros'
 import { LinkPaginacao } from './link-paginacao'
 
@@ -41,11 +41,7 @@ export default async function ClientesPage({ searchParams }: Props) {
             {apenasAtivos ? ' ativos' : ' no total'}
           </p>
         </div>
-        <Link href="/clientes/novo">
-          <Button variant="primary" size="md">
-            + Novo cliente
-          </Button>
-        </Link>
+        <BotaoNovoCliente />
       </div>
 
       <Card padding="md">
@@ -62,9 +58,9 @@ export default async function ClientesPage({ searchParams }: Props) {
               </p>
             )}
             {!busca && (
-              <Link href="/clientes/novo" className="inline-block mt-4">
-                <Button size="sm">Cadastrar o primeiro cliente</Button>
-              </Link>
+              <div className="mt-4">
+                <BotaoNovoCliente rotulo="Cadastrar o primeiro cliente" size="sm" />
+              </div>
             )}
           </div>
         ) : (

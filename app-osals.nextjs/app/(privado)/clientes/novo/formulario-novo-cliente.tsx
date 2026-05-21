@@ -10,7 +10,12 @@ import { Select } from '@/components/ui/Select'
 
 const ESTADO_INICIAL: EstadoCriacaoCliente = {}
 
-export function FormularioNovoCliente() {
+type Props = {
+  /** Quando informado, "Cancelar" vira um botao que fecha o modal (em vez de Link). */
+  onCancelar?: () => void
+}
+
+export function FormularioNovoCliente({ onCancelar }: Props = {}) {
   const [estado, dispatch, pendente] = useActionState(criarCliente, ESTADO_INICIAL)
   const [tipoPessoa, setTipoPessoa] = useState<'PF' | 'PJ'>('PJ')
 
@@ -67,11 +72,17 @@ export function FormularioNovoCliente() {
       )}
 
       <div className="flex items-center justify-end gap-3 pt-2">
-        <Link href="/clientes">
-          <Button type="button" variant="ghost">
+        {onCancelar ? (
+          <Button type="button" variant="ghost" onClick={onCancelar} disabled={pendente}>
             Cancelar
           </Button>
-        </Link>
+        ) : (
+          <Link href="/clientes">
+            <Button type="button" variant="ghost">
+              Cancelar
+            </Button>
+          </Link>
+        )}
         <Button type="submit" variant="primary" loading={pendente}>
           {pendente ? 'Salvando...' : 'Criar cliente'}
         </Button>
