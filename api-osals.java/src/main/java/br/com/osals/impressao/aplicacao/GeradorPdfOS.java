@@ -1,6 +1,9 @@
 package br.com.osals.impressao.aplicacao;
 
+import br.com.osals.cadastro.dominio.ContatoCliente;
 import br.com.osals.cadastro.dominio.Equipamento;
+import br.com.osals.cadastro.dominio.RepositorioContatoCliente;
+import br.com.osals.cadastro.dominio.RepositorioUnidade;
 import br.com.osals.cadastro.dominio.Unidade;
 import br.com.osals.cadastro.dominio.Veiculo;
 import br.com.osals.compartilhado.excecoes.NegocioException;
@@ -37,13 +40,19 @@ public class GeradorPdfOS {
     private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final RepositorioOrdemServico repositorio;
+    private final RepositorioUnidade repositorioUnidade;
+    private final RepositorioContatoCliente repositorioContato;
     private final TemplateEngine templateEnginePdf;
     private final PropriedadesEmpresa empresa;
 
     public GeradorPdfOS(RepositorioOrdemServico repositorio,
+                        RepositorioUnidade repositorioUnidade,
+                        RepositorioContatoCliente repositorioContato,
                         TemplateEngine templateEnginePdf,
                         PropriedadesEmpresa empresa) {
         this.repositorio = repositorio;
+        this.repositorioUnidade = repositorioUnidade;
+        this.repositorioContato = repositorioContato;
         this.templateEnginePdf = templateEnginePdf;
         this.empresa = empresa;
     }
@@ -54,15 +63,19 @@ public class GeradorPdfOS {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Ordem de servico nao encontrada."));
         Servico servico = os.getServico();
 
+        Long clienteId = servico.getCliente().getId();
+
         var ctx = new Context();
         ctx.setVariable("empresa", empresa);
         ctx.setVariable("codigo", String.format("%04d-%05d", servico.getNumero(), os.getNumero()));
-        ctx.setVariable("servicoNumero", String.format("%04d", servico.getNumero()));
+        ctx.setVariable("descricaoServico", textoOuTraco(servico.getDescricao()));
         ctx.setVariable("tipoServico", servico.getTipoServico().getNome());
-        ctx.setVariable("dataAbertura", os.getDataAbertura().format(DATA));
+        ctx.setVariable("dataAgendamento",
+                os.getDataAgendada() == null ? "-" : os.getDataAgendada().format(DATA));
         ctx.setVariable("clienteNome", servico.getCliente().getNome());
         ctx.setVariable("descricaoAtividade", os.getDescricaoAtividade());
-        ctx.setVariable("unidades", unidades(os));
+        ctx.setVariable("unidades", unidadesDoCliente(clienteId));
+        ctx.setVariable("contatos", contatosDoCliente(clienteId));
         ctx.setVariable("equipamentos", equipamentos(os));
         ctx.setVariable("tecnicos", tecnicos(os));
         ctx.setVariable("veiculos", veiculos(os));
@@ -87,16 +100,28 @@ public class GeradorPdfOS {
         }
     }
 
-    /** Unidades distintas dos equipamentos atendidos (identificacao + endereco). */
-    private static List<Map<String, String>> unidades(OrdemServico os) {
-        var porId = new LinkedHashMap<Long, Map<String, String>>();
-        for (Equipamento e : os.getEquipamentos()) {
-            Unidade u = e.getUnidade();
-            porId.computeIfAbsent(u.getId(), k -> Map.of(
+    /** Unidades ativas do cliente (identificacao + endereco). */
+    private List<Map<String, String>> unidadesDoCliente(Long clienteId) {
+        var lista = new ArrayList<Map<String, String>>();
+        for (Unidade u : repositorioUnidade
+                .findByClienteIdAndAtivoTrueOrderByIdentificacaoInterna(clienteId)) {
+            lista.add(Map.of(
                     "identificacao", textoOuTraco(u.getIdentificacaoInterna()),
                     "endereco", enderecoCompleto(u)));
         }
-        return new ArrayList<>(porId.values());
+        return lista;
+    }
+
+    /** Contatos do cliente formatados como "Nome (Funcao) — Telefone". */
+    private List<String> contatosDoCliente(Long clienteId) {
+        var lista = new ArrayList<String>();
+        for (ContatoCliente c : repositorioContato.findByClienteIdOrderByNome(clienteId)) {
+            String nomeFuncao = (c.getFuncao() == null || c.getFuncao().isBlank())
+                    ? c.getNome()
+                    : c.getNome() + " (" + c.getFuncao().trim() + ")";
+            lista.add(juntar(" — ", nomeFuncao, c.getTelefone()));
+        }
+        return lista;
     }
 
     private static List<Map<String, String>> equipamentos(OrdemServico os) {

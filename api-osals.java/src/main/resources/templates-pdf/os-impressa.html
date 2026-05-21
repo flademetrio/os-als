@@ -46,9 +46,9 @@
         <span class="codigo" th:text="'No: ' + ${codigo}">No: 0001-00001</span>
     </div>
     <div class="meta">
-        Servico pai: <span th:text="${servicoNumero}">0001</span>
+        Servico: <span th:text="${descricaoServico}">Descricao do servico</span>
         &#183; Tipo: <span th:text="${tipoServico}">Tipo</span>
-        &#183; Data de abertura: <span th:text="${dataAbertura}">00/00/0000</span>
+        &#183; Data de agendamento: <span th:text="${dataAgendamento}">00/00/0000</span>
     </div>
 
     <div class="secao">
@@ -59,18 +59,26 @@
                 <span th:text="${clienteNome}">Cliente</span>
             </div>
             <div class="campo" th:each="u : ${unidades}">
-                <span class="rotulo">Unidade: </span>
+                <span class="rotulo">Endereco: </span>
                 <span th:text="${u.identificacao}">Unidade</span>
                 <span th:text="' — ' + ${u.endereco}"> — Endereco</span>
             </div>
-            <div class="campo">
+            <div class="campo" th:if="${#lists.isEmpty(unidades)}">
+                <span class="rotulo">Endereco: </span>
+                <span class="vazio">Nao informado</span>
+            </div>
+            <div class="campo" th:each="c : ${contatos}">
+                <span class="rotulo">Contato: </span>
+                <span th:text="${c}">Contato</span>
+            </div>
+            <div class="campo" th:if="${#lists.isEmpty(contatos)}">
                 <span class="rotulo">Contato local: </span>
                 <span class="linha-preench" style="display: inline-block; width: 60%;">&#160;</span>
             </div>
         </div>
     </div>
 
-    <div class="secao">
+    <div class="secao" th:if="${not #lists.isEmpty(equipamentos)}">
         <h2>Equipamentos atendidos</h2>
         <div class="conteudo">
             <table>
