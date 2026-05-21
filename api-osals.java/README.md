@@ -34,10 +34,12 @@ docker compose up -d postgres
 # 2. Configurar variaveis de ambiente do back
 cd api-osals.java
 cp .env.example .env
-# Editar .env: BD_URL=jdbc:postgresql://localhost:5432/osals
-# (em dev nativo o host e 'localhost', nao 'postgres')
+# Editar .env: BD_URL=jdbc:postgresql://localhost:5433/osals
+# (em dev nativo o host e 'localhost'; a porta 5433 e o mapeamento do compose)
 
-# 3. Rodar o backend
+# 3. Gerar as chaves RSA do JWT (ver secao "Geracao de chaves JWT")
+
+# 4. Rodar o backend
 ./mvnw spring-boot:run
 ```
 
@@ -137,15 +139,30 @@ src/main/java/br/com/osals/
 
 ## Geracao de chaves JWT
 
-```bash
-# Privada
-openssl genrsa -out chave-privada.pem 2048
+O JWT usa RS256. As chaves ficam em `keys/` (gitignored). A chave privada
+**precisa estar em PKCS#8** (`-----BEGIN PRIVATE KEY-----`) — use `genpkey`,
+nao `genrsa`:
 
-# Publica
-openssl rsa -in chave-privada.pem -pubout -out chave-publica.pem
+```bash
+mkdir -p keys
+# Privada (PKCS#8)
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out keys/chave-privada.pem
+# Publica (X.509)
+openssl rsa -pubout -in keys/chave-privada.pem -out keys/chave-publica.pem
 ```
 
-Conteudo dos `.pem` vai inteiro nas variaveis `JWT_CHAVE_PRIVADA` / `JWT_CHAVE_PUBLICA` do `.env`.
+O `.env` aponta para os **caminhos** dos arquivos, nao para o conteudo:
+`JWT_CHAVE_PRIVADA_CAMINHO=./keys/chave-privada.pem` e
+`JWT_CHAVE_PUBLICA_CAMINHO=./keys/chave-publica.pem` (defaults em `application.yml`).
+
+## Testes e CI
+
+`./mvnw verify` roda o teste de contexto contra um Postgres efemero do
+Testcontainers — nao precisa de banco externo, so de Docker. O workflow
+`.github/workflows/back.yml` gera as chaves e roda `verify` em cada PR.
+
+O smoke test de ponta a ponta (`scripts/smoke.sh` na raiz do monorepo)
+sobe o compose, espera o healthcheck, faz login e lista clientes.
 
 ## Convencoes
 

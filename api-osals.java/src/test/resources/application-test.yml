@@ -1,0 +1,12 @@
+# Perfil "test": usado pelos testes de integracao (@ActiveProfiles("test")).
+#
+# O datasource aponta para um Postgres efemero gerenciado pelo Testcontainers
+# via a URL JDBC especial "jdbc:tc:" — um container sobe automaticamente ao
+# abrir a conexao e e descartado ao fim. Nao depende de .env nem de um
+# Postgres externo, entao "./mvnw test" roda em qualquer maquina com Docker.
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:16-alpine:///osals
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: test
+    password: test
