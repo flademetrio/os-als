@@ -240,3 +240,45 @@ export type CategoriaCustoResposta = {
   tipoLancamento: TipoLancamentoCusto
   ativo: boolean
 }
+
+// ===== Servico =====
+
+export type StatusServico =
+  | 'EM_ABERTO'
+  | 'EM_EXECUCAO'
+  | 'AGUARDANDO'
+  | 'CONCLUIDO'
+  | 'CANCELADO'
+
+export type ServicoResposta = {
+  id: number
+  numero: number
+  numeroFormatado: string
+  clienteId: number
+  clienteNome: string
+  tipoServicoId: number
+  tipoServicoNome: string
+  descricao: string
+  dataInicioPrevista: string | null
+  dataFimPrevista: string | null
+  status: StatusServico
+  statusRotulo: string
+  finalizadoEm: string | null
+  finalizadoPorNome: string | null
+  createdAt: string
+  createdByNome: string | null
+  updatedAt: string | null
+}
+
+export type ServicoResumoDto = {
+  id: number
+  numero: number
+  numeroFormatado: string
+  clienteId: number
+  clienteNome: string
+  tipoServicoNome: string
+  descricao: string
+  dataInicioPrevista: string | null
+  status: StatusServico
+  statusRotulo: string
+}
