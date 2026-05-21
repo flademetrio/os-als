@@ -1,19 +1,31 @@
 'use client'
 
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import type { OrdemServicoResumoDto } from '@/app/lib/definicoes'
 import { badgeStatusOs } from '@/app/lib/esquemas/ordem-servico'
 import { Badge } from '@/components/ui/Badge'
+import { ModalDetalheOs } from './modal-detalhe-os'
 
 type Props = {
   ordens: OrdemServicoResumoDto[]
+  ehGestor: boolean
 }
 
 /**
- * Lista as OS do servico. A abertura de nova OS fica no botao "+ Nova OS"
- * do cabecalho do servico.
+ * Lista as OS do servico. Clicar numa linha abre o detalhe da OS num modal
+ * lateral, sem sair da tela do servico.
  */
-export function TabOs({ ordens }: Props) {
+export function TabOs({ ordens, ehGestor }: Props) {
+  const router = useRouter()
+  const [osAberta, setOsAberta] = useState<number | null>(null)
+
+  function fechar() {
+    setOsAberta(null)
+    // a OS pode ter mudado (impressa, concluida, cancelada) — atualiza a lista
+    router.refresh()
+  }
+
   return (
     <div className="space-y-4">
       <p className="text-sm text-slate-500">
@@ -36,14 +48,13 @@ export function TabOs({ ordens }: Props) {
             </thead>
             <tbody>
               {ordens.map((os) => (
-                <tr key={os.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                  <td className="px-5 py-2.5">
-                    <Link
-                      href={`/ordens-servico/${os.id}`}
-                      className="text-primary hover:underline font-medium font-mono"
-                    >
-                      {os.codigoExibicao}
-                    </Link>
+                <tr
+                  key={os.id}
+                  onClick={() => setOsAberta(os.id)}
+                  className="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer"
+                >
+                  <td className="px-5 py-2.5 font-medium font-mono text-primary">
+                    {os.codigoExibicao}
                   </td>
                   <td className="px-5 py-2.5 text-slate-600">
                     <span className="block truncate max-w-md">{os.descricaoAtividade}</span>
@@ -58,6 +69,10 @@ export function TabOs({ ordens }: Props) {
             </tbody>
           </table>
         </div>
+      )}
+
+      {osAberta != null && (
+        <ModalDetalheOs osId={osAberta} ehGestor={ehGestor} onClose={fechar} />
       )}
     </div>
   )

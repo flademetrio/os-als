@@ -30,6 +30,7 @@ type Props = {
   categorias: CategoriaCustoResposta[]
   podeAlterarCustos: boolean
   anexos: AnexoServicoResposta[]
+  ehGestor: boolean
 }
 
 export function DetalheServico({
@@ -42,6 +43,7 @@ export function DetalheServico({
   categorias,
   podeAlterarCustos,
   anexos,
+  ehGestor,
 }: Props) {
   const [aba, setAba] = useState<AbaId>('dados')
 
@@ -62,7 +64,7 @@ export function DetalheServico({
 
       <div className="p-5">
         {aba === 'dados' && <TabDados servico={servico} tipos={tipos} />}
-        {aba === 'os' && <TabOs ordens={ordens} />}
+        {aba === 'os' && <TabOs ordens={ordens} ehGestor={ehGestor} />}
         {aba === 'custos' && (
           <TabCustos
             servicoId={servico.id}

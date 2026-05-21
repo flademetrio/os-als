@@ -116,6 +116,7 @@ export default async function ServicoDetalhePage({ params }: Props) {
         categorias={categorias}
         podeAlterarCustos={podeAlterarCustos}
         anexos={anexos}
+        ehGestor={ehGestor}
       />
     </div>
   )
