@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -46,9 +47,10 @@ public class ControladorServico {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Lista Servicos com filtros (status, cliente, tipo, periodo) e paginacao.")
+    @Operation(summary = "Lista Servicos com filtros (status, cliente, tipo, periodo) e paginacao. "
+            + "O parametro status aceita multiplos valores.")
     public ResponseEntity<PaginaResposta<ServicoResumoDto>> listar(
-            @RequestParam(required = false) StatusServico status,
+            @RequestParam(required = false) List<StatusServico> status,
             @RequestParam(required = false) Long clienteId,
             @RequestParam(required = false) Integer tipoServicoId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,

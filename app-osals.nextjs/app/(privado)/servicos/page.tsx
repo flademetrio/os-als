@@ -1,11 +1,6 @@
 import Link from 'next/link'
 import { clienteApi } from '@/app/lib/cliente-api'
-import type {
-  ClienteResumoDto,
-  PaginaResposta,
-  ServicoResumoDto,
-  TipoServicoResposta,
-} from '@/app/lib/definicoes'
+import type { PaginaResposta, ServicoResumoDto } from '@/app/lib/definicoes'
 import { badgeStatusServico } from '@/app/lib/esquemas/servico'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -14,12 +9,21 @@ import { FiltrosServicos } from './filtros'
 import { LinkPaginacao } from './link-paginacao'
 import { SeletorVista } from './seletor-vista'
 
+/** Situacao do filtro -> lista de status enviada ao backend. */
+const STATUS_POR_SITUACAO: Record<string, string[]> = {
+  andamento: ['EM_ABERTO', 'EM_EXECUCAO'],
+  EM_ABERTO: ['EM_ABERTO'],
+  EM_EXECUCAO: ['EM_EXECUCAO'],
+  AGUARDANDO: ['AGUARDANDO'],
+  CONCLUIDO: ['CONCLUIDO'],
+  CANCELADO: ['CANCELADO'],
+  todos: [],
+}
+
 type Props = {
   searchParams: Promise<{
     busca?: string
-    status?: string
-    clienteId?: string
-    tipoServicoId?: string
+    situacao?: string
     inicio?: string
     fim?: string
     pagina?: string
@@ -30,35 +34,27 @@ type Props = {
 export default async function ServicosPage({ searchParams }: Props) {
   const p = await searchParams
   const busca = p.busca ?? ''
-  const status = p.status ?? ''
-  const clienteId = p.clienteId ?? ''
-  const tipoServicoId = p.tipoServicoId ?? ''
+  const situacao = p.situacao && p.situacao in STATUS_POR_SITUACAO ? p.situacao : 'andamento'
   const inicio = p.inicio ?? ''
   const fim = p.fim ?? ''
   const pagina = Number(p.pagina ?? '0')
-  const vista: 'lista' | 'cards' = p.vista === 'cards' ? 'cards' : 'lista'
+  const vista: 'lista' | 'cards' = p.vista === 'lista' ? 'lista' : 'cards'
 
   const q = new URLSearchParams()
   if (busca) q.set('busca', busca)
-  if (status) q.set('status', status)
-  if (clienteId) q.set('clienteId', clienteId)
-  if (tipoServicoId) q.set('tipoServicoId', tipoServicoId)
+  for (const s of STATUS_POR_SITUACAO[situacao]) q.append('status', s)
   if (inicio) q.set('inicio', inicio)
   if (fim) q.set('fim', fim)
   q.set('pagina', String(pagina))
   q.set('tamanho', '20')
 
-  const [dados, clientes, tipos] = await Promise.all([
-    clienteApi<PaginaResposta<ServicoResumoDto>>(`/servicos?${q.toString()}`),
-    clienteApi<PaginaResposta<ClienteResumoDto>>('/clientes?tamanho=200&apenasAtivos=true'),
-    clienteApi<TipoServicoResposta[]>('/tipos-servico?apenasAtivos=true'),
-  ])
+  const dados = await clienteApi<PaginaResposta<ServicoResumoDto>>(`/servicos?${q.toString()}`)
 
-  const base = { busca, status, clienteId, tipoServicoId, inicio, fim, vista }
+  const base = { busca, situacao, inicio, fim, vista }
   const vazio = dados.conteudo.length === 0
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-5">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">Servicos</h1>
@@ -74,18 +70,7 @@ export default async function ServicosPage({ searchParams }: Props) {
         </div>
       </div>
 
-      <Card padding="md">
-        <FiltrosServicos
-          busca={busca}
-          status={status}
-          clienteId={clienteId}
-          tipoServicoId={tipoServicoId}
-          inicio={inicio}
-          fim={fim}
-          clientes={clientes.conteudo}
-          tipos={tipos}
-        />
-      </Card>
+      <FiltrosServicos busca={busca} situacao={situacao} inicio={inicio} fim={fim} />
 
       {vazio ? (
         <Card padding="md">

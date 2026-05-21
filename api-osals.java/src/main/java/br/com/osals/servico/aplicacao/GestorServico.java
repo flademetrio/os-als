@@ -16,6 +16,7 @@ import br.com.osals.servico.dominio.RepositorioServico;
 import br.com.osals.servico.dominio.Servico;
 import br.com.osals.servico.dominio.StatusServico;
 import java.time.LocalDate;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -47,11 +48,15 @@ public class GestorServico {
         this.mapper = mapper;
     }
 
-    public PaginaResposta<ServicoResumoDto> listar(StatusServico status, Long clienteId,
+    public PaginaResposta<ServicoResumoDto> listar(List<StatusServico> status, Long clienteId,
                                                    Integer tipoServicoId, LocalDate inicio,
                                                    LocalDate fim, String busca, Pageable pageable) {
         String b = (busca == null || busca.isBlank()) ? "" : busca.trim();
-        var page = repositorio.buscarFiltrado(status, clienteId, tipoServicoId, inicio, fim, b, pageable);
+        // Sem filtro de status -> considera todos (evita IN com lista vazia).
+        List<StatusServico> statusFiltro =
+                (status == null || status.isEmpty()) ? List.of(StatusServico.values()) : status;
+        var page = repositorio.buscarFiltrado(
+                statusFiltro, clienteId, tipoServicoId, inicio, fim, b, pageable);
         return PaginaResposta.de(page.map(mapper::paraResumo));
     }
 
