@@ -57,7 +57,7 @@ export default async function ServicoDetalhePage({ params }: Props) {
   const podeAlterarCustos = !encerrado || ehGestor
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="space-y-6">
       <Link href="/servicos" className="text-sm text-slate-500 hover:text-slate-700">
         ← Voltar para servicos
       </Link>

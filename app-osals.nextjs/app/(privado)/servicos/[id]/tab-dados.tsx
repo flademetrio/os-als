@@ -1,103 +1,84 @@
 'use client'
 
-import { useActionState } from 'react'
-import { atualizarServico, type EstadoServico } from '@/app/actions/servico'
+import { useState } from 'react'
 import type { ServicoResposta, TipoServicoResposta } from '@/app/lib/definicoes'
-import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Select } from '@/components/ui/Select'
-import { Textarea } from '@/components/ui/Textarea'
-
-const ESTADO_INICIAL: EstadoServico = {}
+import { ModalEditarServico } from './modal-editar-servico'
 
 type Props = {
   servico: ServicoResposta
   tipos: TipoServicoResposta[]
 }
 
+/** Exibe os dados do servico como texto. A edicao acontece via modal. */
 export function TabDados({ servico, tipos }: Props) {
-  const acao = atualizarServico.bind(null, servico.id)
-  const [estado, dispatch, pendente] = useActionState(acao, ESTADO_INICIAL)
-
+  const [editando, setEditando] = useState(false)
   const encerrado = servico.status === 'CONCLUIDO' || servico.status === 'CANCELADO'
 
   return (
-    <form action={dispatch} className="space-y-4">
-      {estado.erro && (
-        <Alert variant="danger" dismissible>
-          {estado.erro}
-        </Alert>
-      )}
-      {estado.sucesso && (
-        <Alert variant="success" dismissible>
-          Dados atualizados.
-        </Alert>
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input label="Cliente" value={servico.clienteNome} fullWidth disabled readOnly />
-        <Select
-          label="Tipo de servico"
-          name="tipoServicoId"
-          required
-          defaultValue={String(servico.tipoServicoId)}
-          error={estado.errosCampos?.tipoServicoId}
-          disabled={encerrado}
-          fullWidth
-        >
-          {tipos.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.nome}
-            </option>
-          ))}
-        </Select>
-      </div>
-
-      <Textarea
-        label="Descricao"
-        name="descricao"
-        required
-        rows={4}
-        defaultValue={servico.descricao}
-        error={estado.errosCampos?.descricao}
-        disabled={encerrado}
-        fullWidth
-      />
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input
-          label="Data de inicio prevista"
-          name="dataInicioPrevista"
-          type="date"
-          defaultValue={servico.dataInicioPrevista ?? ''}
-          error={estado.errosCampos?.dataInicioPrevista}
-          disabled={encerrado}
-          fullWidth
-        />
-        <Input
-          label="Data de fim prevista"
-          name="dataFimPrevista"
-          type="date"
-          defaultValue={servico.dataFimPrevista ?? ''}
-          error={estado.errosCampos?.dataFimPrevista}
-          disabled={encerrado}
-          fullWidth
-        />
-      </div>
-
-      {!encerrado && (
-        <div className="flex justify-end pt-2">
-          <Button type="submit" variant="primary" loading={pendente}>
-            {pendente ? 'Salvando...' : 'Salvar alteracoes'}
+    <div className="space-y-5">
+      <div className="flex items-start justify-between gap-4">
+        <h2 className="text-sm font-semibold text-slate-700">Dados do servico</h2>
+        {!encerrado && (
+          <Button variant="secondary" size="sm" onClick={() => setEditando(true)}>
+            Editar
           </Button>
+        )}
+      </div>
+
+      <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+        <Campo titulo="Cliente" valor={servico.clienteNome} />
+        <Campo titulo="Tipo de servico" valor={servico.tipoServicoNome} />
+        <Campo titulo="Status" valor={servico.statusRotulo} />
+        <Campo titulo="Data de inicio prevista" valor={formatarData(servico.dataInicioPrevista)} />
+        <Campo titulo="Data de fim prevista" valor={formatarData(servico.dataFimPrevista)} />
+        <Campo titulo="Criado em" valor={formatarDataHora(servico.createdAt)} />
+        <div className="sm:col-span-2 lg:col-span-3">
+          <dt className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+            Descricao
+          </dt>
+          <dd className="text-sm text-slate-700 whitespace-pre-wrap">{servico.descricao}</dd>
         </div>
-      )}
+      </dl>
+
       {encerrado && (
         <p className="text-xs text-slate-500">
           Servico {servico.statusRotulo.toLowerCase()} — os dados nao podem mais ser editados.
         </p>
       )}
-    </form>
+
+      {editando && (
+        <ModalEditarServico
+          servico={servico}
+          tipos={tipos}
+          onClose={() => setEditando(false)}
+        />
+      )}
+    </div>
   )
+}
+
+function Campo({ titulo, valor }: { titulo: string; valor: string }) {
+  return (
+    <div>
+      <dt className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+        {titulo}
+      </dt>
+      <dd className="text-sm text-slate-700">{valor}</dd>
+    </div>
+  )
+}
+
+function formatarData(iso: string | null): string {
+  if (!iso) return '-'
+  const [ano, mes, dia] = iso.split('-')
+  return dia && mes && ano ? `${dia}/${mes}/${ano}` : iso
+}
+
+function formatarDataHora(iso: string | null): string {
+  if (!iso) return '-'
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime())
+    ? iso
+    : d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
 }
