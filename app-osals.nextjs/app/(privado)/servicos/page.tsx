@@ -5,9 +5,8 @@ import { badgeStatusServico } from '@/app/lib/esquemas/servico'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import { FiltrosServicos } from './filtros'
+import { CabecalhoServicos } from './cabecalho-servicos'
 import { LinkPaginacao } from './link-paginacao'
-import { SeletorVista } from './seletor-vista'
 
 /** Situacao do filtro -> lista de status enviada ao backend. */
 const STATUS_POR_SITUACAO: Record<string, string[]> = {
@@ -52,29 +51,20 @@ export default async function ServicosPage({ searchParams }: Props) {
 
   const base = { busca, situacao, inicio, fim, vista }
   const vazio = dados.conteudo.length === 0
+  const temFiltroAtivo =
+    busca !== '' || inicio !== '' || fim !== '' || situacao !== 'andamento'
 
   return (
     <div className="max-w-6xl mx-auto space-y-5">
-      <Card padding="md">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Servicos</h1>
-            <p className="text-sm text-slate-500 mt-0.5">
-              {dados.totalElementos} {dados.totalElementos === 1 ? 'servico' : 'servicos'}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <SeletorVista vista={vista} />
-            <Link href="/servicos/novo">
-              <Button variant="primary">+ Novo servico</Button>
-            </Link>
-          </div>
-        </div>
-
-        <div className="mt-4 pt-4 border-t border-slate-100">
-          <FiltrosServicos busca={busca} situacao={situacao} inicio={inicio} fim={fim} />
-        </div>
-      </Card>
+      <CabecalhoServicos
+        total={dados.totalElementos}
+        vista={vista}
+        busca={busca}
+        situacao={situacao}
+        inicio={inicio}
+        fim={fim}
+        temFiltroAtivo={temFiltroAtivo}
+      />
 
       {vazio ? (
         <Card padding="md">
