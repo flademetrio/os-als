@@ -38,12 +38,26 @@ export function TabOs({
         <p className="text-sm text-slate-500">
           {ordens.length} {ordens.length === 1 ? 'ordem de servico' : 'ordens de servico'}
         </p>
-        {!servicoEncerrado && (
-          <Button variant="primary" size="sm" onClick={() => setModalAberto(true)}>
-            + Abrir OS
-          </Button>
-        )}
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setModalAberto(true)}
+          disabled={servicoEncerrado}
+          title={
+            servicoEncerrado
+              ? 'Servico encerrado — nao e possivel abrir novas OS'
+              : undefined
+          }
+        >
+          + Adicionar OS
+        </Button>
       </div>
+
+      {servicoEncerrado && (
+        <p className="text-xs text-slate-500">
+          Servico encerrado — nao e possivel abrir novas ordens de servico.
+        </p>
+      )}
 
       {ordens.length === 0 ? (
         <div className="py-8 text-center">
