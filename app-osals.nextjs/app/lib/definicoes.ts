@@ -342,6 +342,44 @@ export type OrdemServicoResposta = {
   equipamentos: OsEquipamentoDto[]
 }
 
+// ===== Custos do Servico =====
+
+export type LancamentoCustoResposta = {
+  id: number
+  servicoId: number
+  categoriaCustoId: number
+  categoriaCodigo: string
+  categoriaNome: string
+  tipoLancamento: TipoLancamentoCusto
+  descricao: string | null
+  valorTotalCentavos: number
+  tecnicoId: number | null
+  tecnicoNome: string | null
+  horas: number | null
+  valorHoraSnapshotCentavos: number | null
+  km: number | null
+  valorKmSnapshotCentavos: number | null
+  createdAt: string
+  createdByNome: string | null
+  updatedAt: string | null
+}
+
+export type CustoPorCategoria = {
+  categoriaCustoId: number
+  categoriaCodigo: string
+  categoriaNome: string
+  quantidadeLancamentos: number
+  subtotalCentavos: number
+}
+
+export type ResumoFinanceiroServico = {
+  servicoId: number
+  custosPorCategoria: CustoPorCategoria[]
+  custoTotalCentavos: number
+  markupPercentual: number
+  precoVendaCentavos: number
+}
+
 export type OrdemServicoResumoDto = {
   id: number
   numero: number

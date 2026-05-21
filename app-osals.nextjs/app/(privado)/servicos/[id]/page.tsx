@@ -1,9 +1,13 @@
 import Link from 'next/link'
 import { clienteApi } from '@/app/lib/cliente-api'
+import { lerSessao } from '@/app/lib/sessao'
 import type {
+  CategoriaCustoResposta,
   EquipamentoResumoDto,
+  LancamentoCustoResposta,
   OrdemServicoResumoDto,
   PaginaResposta,
+  ResumoFinanceiroServico,
   ServicoResposta,
   TecnicoResumoDto,
   TipoServicoResposta,
@@ -21,15 +25,24 @@ export default async function ServicoDetalhePage({ params }: Props) {
   const { id } = await params
   const servico = await clienteApi<ServicoResposta>(`/servicos/${id}`)
 
-  const [tipos, ordens, tecnicos, veiculos, equipamentos] = await Promise.all([
-    clienteApi<TipoServicoResposta[]>('/tipos-servico?apenasAtivos=true'),
-    clienteApi<OrdemServicoResumoDto[]>(`/servicos/${id}/ordens-servico`),
-    clienteApi<PaginaResposta<TecnicoResumoDto>>('/tecnicos?apenasAtivos=true&tamanho=200'),
-    clienteApi<PaginaResposta<VeiculoResumoDto>>('/veiculos?apenasAtivos=true&tamanho=200'),
-    clienteApi<PaginaResposta<EquipamentoResumoDto>>(
-      `/equipamentos?clienteId=${servico.clienteId}&apenasAtivos=true&tamanho=200`,
-    ),
-  ])
+  const [tipos, ordens, tecnicos, veiculos, equipamentos, custos, resumo, categorias, sessao] =
+    await Promise.all([
+      clienteApi<TipoServicoResposta[]>('/tipos-servico?apenasAtivos=true'),
+      clienteApi<OrdemServicoResumoDto[]>(`/servicos/${id}/ordens-servico`),
+      clienteApi<PaginaResposta<TecnicoResumoDto>>('/tecnicos?apenasAtivos=true&tamanho=200'),
+      clienteApi<PaginaResposta<VeiculoResumoDto>>('/veiculos?apenasAtivos=true&tamanho=200'),
+      clienteApi<PaginaResposta<EquipamentoResumoDto>>(
+        `/equipamentos?clienteId=${servico.clienteId}&apenasAtivos=true&tamanho=200`,
+      ),
+      clienteApi<LancamentoCustoResposta[]>(`/servicos/${id}/custos`),
+      clienteApi<ResumoFinanceiroServico>(`/servicos/${id}/resumo-financeiro`),
+      clienteApi<CategoriaCustoResposta[]>('/categorias-custo?apenasAtivos=true'),
+      lerSessao(),
+    ])
+
+  const encerrado = servico.status === 'CONCLUIDO' || servico.status === 'CANCELADO'
+  const ehGestor = sessao?.papel === 'GERENTE' || sessao?.papel === 'ADMIN'
+  const podeAlterarCustos = !encerrado || ehGestor
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -77,6 +90,10 @@ export default async function ServicoDetalhePage({ params }: Props) {
         tecnicos={tecnicos.conteudo}
         veiculos={veiculos.conteudo}
         equipamentos={equipamentos.conteudo}
+        custos={custos}
+        resumo={resumo}
+        categorias={categorias}
+        podeAlterarCustos={podeAlterarCustos}
       />
     </div>
   )

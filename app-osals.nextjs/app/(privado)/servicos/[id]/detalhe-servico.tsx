@@ -2,8 +2,11 @@
 
 import { useState } from 'react'
 import type {
+  CategoriaCustoResposta,
   EquipamentoResumoDto,
+  LancamentoCustoResposta,
   OrdemServicoResumoDto,
+  ResumoFinanceiroServico,
   ServicoResposta,
   TecnicoResumoDto,
   TipoServicoResposta,
@@ -11,6 +14,7 @@ import type {
 } from '@/app/lib/definicoes'
 import { Card } from '@/components/ui/Card'
 import { Tabs } from '@/components/ui/Tabs'
+import { TabCustos } from './tab-custos'
 import { TabDados } from './tab-dados'
 import { TabOs } from './tab-os'
 
@@ -23,6 +27,10 @@ type Props = {
   tecnicos: TecnicoResumoDto[]
   veiculos: VeiculoResumoDto[]
   equipamentos: EquipamentoResumoDto[]
+  custos: LancamentoCustoResposta[]
+  resumo: ResumoFinanceiroServico
+  categorias: CategoriaCustoResposta[]
+  podeAlterarCustos: boolean
 }
 
 export function DetalheServico({
@@ -32,6 +40,10 @@ export function DetalheServico({
   tecnicos,
   veiculos,
   equipamentos,
+  custos,
+  resumo,
+  categorias,
+  podeAlterarCustos,
 }: Props) {
   const [aba, setAba] = useState<AbaId>('dados')
   const encerrado = servico.status === 'CONCLUIDO' || servico.status === 'CANCELADO'
@@ -43,7 +55,7 @@ export function DetalheServico({
           tabs={[
             { id: 'dados', label: 'Dados' },
             { id: 'os', label: 'Ordens de servico', count: ordens.length },
-            { id: 'custos', label: 'Custos' },
+            { id: 'custos', label: 'Custos', count: custos.length },
             { id: 'anexos', label: 'Anexos' },
           ]}
           ativa={aba}
@@ -63,7 +75,16 @@ export function DetalheServico({
             equipamentos={equipamentos}
           />
         )}
-        {aba === 'custos' && <EmBreve recurso="Custos" />}
+        {aba === 'custos' && (
+          <TabCustos
+            servicoId={servico.id}
+            podeAlterar={podeAlterarCustos}
+            resumo={resumo}
+            lancamentos={custos}
+            categorias={categorias}
+            tecnicos={tecnicos}
+          />
+        )}
         {aba === 'anexos' && <EmBreve recurso="Anexos" />}
       </div>
     </Card>
