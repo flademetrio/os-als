@@ -36,6 +36,14 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  # Paginacao: o frontend envia os parametros em pt-BR (pagina/tamanho),
+  # entao o resolver de Pageable precisa ler esses nomes.
+  data:
+    web:
+      pageable:
+        page-parameter: pagina
+        size-parameter: tamanho
+
   # Limite acima do teto da aplicacao (10 MB) — assim a validacao do app
   # produz o 413 com mensagem clara antes do container barrar.
   servlet:
