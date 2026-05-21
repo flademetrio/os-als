@@ -15,7 +15,7 @@ import org.springframework.validation.annotation.Validated;
 public record PropriedadesEmpresa(
         @NotBlank String razaoSocial,
         @NotBlank String cnpj,
-        @NotBlank String endereco,
-        @NotBlank String contato
+        @NotBlank String inscricaoEstadual,
+        @NotBlank String endereco
 ) {
 }

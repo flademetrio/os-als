@@ -73,10 +73,10 @@ app:
     tamanho-max-mb: ${ANEXO_TAMANHO_MAX_MB:10}
 
   empresa:
-    razao-social: ${EMPRESA_RAZAO_SOCIAL:ALS Industria de Refrigeracao Ltda}
-    cnpj: ${EMPRESA_CNPJ:12.345.678/0001-90}
-    endereco: ${EMPRESA_ENDERECO:Rua Exemplo, 100 - Centro - Cidade/UF}
-    contato: ${EMPRESA_CONTATO:(00) 0000-0000 - contato@alsindustria.com.br}
+    razao-social: ${EMPRESA_RAZAO_SOCIAL:Als Industria e Comercio LTDA}
+    cnpj: ${EMPRESA_CNPJ:22.720.490/0001-33}
+    inscricao-estadual: ${EMPRESA_INSCRICAO_ESTADUAL:669.910.623.118}
+    endereco: ${EMPRESA_ENDERECO:Avenida Victor Andrew, 415 - Galpao 4 - Zona Industrial - Sorocaba/SP - CEP 18086-390}
 
   custos:
     markup-padrao: ${MARKUP_PADRAO:30.00}

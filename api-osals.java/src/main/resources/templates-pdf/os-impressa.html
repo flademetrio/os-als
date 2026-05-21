@@ -36,9 +36,9 @@
 
     <div class="empresa">
         <div class="razao" th:text="${empresa.razaoSocial}">Razao Social</div>
-        <div class="linha" th:text="'CNPJ: ' + ${empresa.cnpj}">CNPJ</div>
+        <div class="linha"
+             th:text="'CNPJ: ' + ${empresa.cnpj} + '  -  Inscricao Estadual: ' + ${empresa.inscricaoEstadual}">CNPJ</div>
         <div class="linha" th:text="${empresa.endereco}">Endereco</div>
-        <div class="linha" th:text="${empresa.contato}">Contato</div>
     </div>
 
     <div class="titulo-os">
