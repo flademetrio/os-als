@@ -1,33 +1,127 @@
 # =====================================================================
-# .gitignore da raiz do monorepo OS-ALS.
-# Cada subprojeto tem seu proprio .gitignore tambem.
+# .gitignore do monorepo OS-ALS
+# Cobre as duas stacks: Next.js (app-osals.nextjs) e Spring Boot
+# (api-osals.java). Cada subprojeto mantem o seu proprio .gitignore;
+# este arquivo da raiz e completo e funciona por conta propria.
 # =====================================================================
 
-# Ambientes
+# ---------------------------------------------------------------------
+# Ambientes e segredos
+# ---------------------------------------------------------------------
 .env
 .env.local
 .env.*.local
 !.env.example
+!.env.local.example
 
+# Chaves (JWT RS256, certificados)
+keys/
+*.pem
+*.key
+*.p12
+*.jks
+
+# ---------------------------------------------------------------------
+# Node.js / Next.js
+# ---------------------------------------------------------------------
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Build e cache do Next.js
+.next/
+out/
+build/
+dist/
+.turbo/
+.swc/
+
+# Testes
+coverage/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs do gerenciador de pacotes
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Deploy
+.vercel
+
+# ---------------------------------------------------------------------
+# Java / Spring Boot / Maven
+# ---------------------------------------------------------------------
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.class
+HELP.md
+dependency-reduced-pom.xml
+
+# Maven Wrapper (o jar e baixado; os scripts mvnw sao versionados)
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle (caso seja usado)
+.gradle/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ---------------------------------------------------------------------
 # Logs e anexos locais
+# ---------------------------------------------------------------------
 logs/
-anexos-local/
 *.log
+anexos-local/
 
-# IDEs
+# ---------------------------------------------------------------------
+# IDEs e editores
+# ---------------------------------------------------------------------
+# IntelliJ IDEA
 .idea/
-.vscode/
 *.iml
 *.iws
 *.ipr
 
+# Eclipse / STS
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# VS Code
+.vscode/
+
+# ---------------------------------------------------------------------
 # Claude Code — configuracao local do agente
+# ---------------------------------------------------------------------
 .claude/
 
-# Sistema
+# ---------------------------------------------------------------------
+# Sistema operacional
+# ---------------------------------------------------------------------
 .DS_Store
 Thumbs.db
 desktop.ini
 
+# ---------------------------------------------------------------------
 # Docker
+# ---------------------------------------------------------------------
 docker-compose.override.yml
