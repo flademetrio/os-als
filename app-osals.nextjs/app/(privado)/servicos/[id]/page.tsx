@@ -88,6 +88,11 @@ export default async function ServicoDetalhePage({ params }: Props) {
                 {servico.clienteNome}
               </Link>
             </p>
+            {servico.descricao && (
+              <p className="text-xs text-slate-500 mt-1 whitespace-pre-wrap">
+                {servico.descricao}
+              </p>
+            )}
             {servico.finalizadoEm && (
               <p className="text-xs text-slate-400 mt-1">
                 Encerrado em {formatarDataHora(servico.finalizadoEm)}
