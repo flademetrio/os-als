@@ -49,6 +49,50 @@ export async function criarCliente(
   redirect(`/clientes/${criado.id}`)
 }
 
+export type EstadoNovoClienteModal = {
+  erro?: string
+  errosCampos?: Record<string, string>
+  cliente?: ClienteResposta
+}
+
+/**
+ * Cria um cliente e devolve o registro criado, sem redirecionar — usado
+ * pelo modal de "Novo cliente" dentro do formulario de novo servico.
+ */
+export async function criarClienteRetornando(
+  _estado: EstadoNovoClienteModal,
+  formData: FormData,
+): Promise<EstadoNovoClienteModal> {
+  const dados = Object.fromEntries(formData)
+  const parse = criacaoClienteSchema.safeParse(dados)
+  if (!parse.success) {
+    const errosCampos: Record<string, string> = {}
+    for (const issue of parse.error.issues) {
+      const campo = String(issue.path[0])
+      if (campo && !errosCampos[campo]) errosCampos[campo] = issue.message
+    }
+    return { errosCampos }
+  }
+
+  let criado: ClienteResposta
+  try {
+    criado = await clienteApi<ClienteResposta>('/clientes', {
+      method: 'POST',
+      body: parse.data,
+    })
+  } catch (err) {
+    if (err instanceof ErroApi) {
+      if (err.status === 409) return { erro: 'Ja existe cliente com este documento.' }
+      if (err.status === 422 || err.status === 400) return { erro: err.body.mensagem }
+    }
+    if (err instanceof ErroConexao) return { erro: 'Falha de conexao com a API.' }
+    return { erro: 'Erro ao criar cliente.' }
+  }
+
+  revalidatePath('/clientes')
+  return { cliente: criado }
+}
+
 export type EstadoAtualizacaoCliente = {
   erro?: string
   errosCampos?: Record<string, string>
