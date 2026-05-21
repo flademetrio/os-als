@@ -414,3 +414,59 @@ export type AnexoOsResposta = {
   createdAt: string
   createdByNome: string | null
 }
+
+// ===== Relatorios =====
+
+export type ContagemStatus = {
+  status: StatusOrdemServico
+  statusRotulo: string
+  quantidade: number
+}
+
+export type RelatorioOsItem = {
+  osId: number
+  codigoExibicao: string
+  servicoId: number
+  clienteId: number
+  clienteNome: string
+  tecnicos: string
+  dataAbertura: string
+  dataFimPrevista: string | null
+  status: StatusOrdemServico
+  statusRotulo: string
+}
+
+export type OsPorStatusRelatorio = {
+  contagemPorStatus: ContagemStatus[]
+  totalOs: number
+  itens: PaginaResposta<RelatorioOsItem>
+}
+
+export type CustosPorServicoItem = {
+  servicoId: number
+  numero: number
+  numeroFormatado: string
+  clienteId: number
+  clienteNome: string
+  descricao: string
+  status: StatusServico
+  statusRotulo: string
+  maoObraCentavos: number
+  deslocamentoCentavos: number
+  pecasCentavos: number
+  terceirosCentavos: number
+  hospedagemCentavos: number
+  custoTotalCentavos: number
+  markupPercentual: number
+  precoVendaCentavos: number
+}
+
+export type CustosPorClienteItem = {
+  clienteId: number
+  clienteNome: string
+  quantidadeServicos: number
+  quantidadeOs: number
+  custoTotalCentavos: number
+  markupPercentual: number
+  precoVendaCentavos: number
+}
