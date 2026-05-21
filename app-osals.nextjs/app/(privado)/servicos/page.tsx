@@ -1,10 +1,15 @@
 import Link from 'next/link'
 import { clienteApi } from '@/app/lib/cliente-api'
-import type { PaginaResposta, ServicoResumoDto } from '@/app/lib/definicoes'
+import type {
+  ClienteResumoDto,
+  PaginaResposta,
+  ServicoResumoDto,
+  TipoServicoResposta,
+} from '@/app/lib/definicoes'
 import { badgeStatusServico } from '@/app/lib/esquemas/servico'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { BotaoNovoServico } from './botao-novo-servico'
 import { CabecalhoServicos } from './cabecalho-servicos'
 import { LinkPaginacao } from './link-paginacao'
 
@@ -47,7 +52,11 @@ export default async function ServicosPage({ searchParams }: Props) {
   q.set('pagina', String(pagina))
   q.set('tamanho', '20')
 
-  const dados = await clienteApi<PaginaResposta<ServicoResumoDto>>(`/servicos?${q.toString()}`)
+  const [dados, clientes, tipos] = await Promise.all([
+    clienteApi<PaginaResposta<ServicoResumoDto>>(`/servicos?${q.toString()}`),
+    clienteApi<PaginaResposta<ClienteResumoDto>>('/clientes?tamanho=200&apenasAtivos=true'),
+    clienteApi<TipoServicoResposta[]>('/tipos-servico?apenasAtivos=true'),
+  ])
 
   const base = { busca, situacao, inicio, fim, vista }
   const vazio = dados.conteudo.length === 0
@@ -64,15 +73,20 @@ export default async function ServicosPage({ searchParams }: Props) {
         inicio={inicio}
         fim={fim}
         temFiltroAtivo={temFiltroAtivo}
+        clientes={clientes.conteudo}
+        tipos={tipos}
       />
 
       {vazio ? (
         <Card padding="md">
           <div className="p-6 text-center">
-            <p className="text-slate-500">Nenhum servico encontrado.</p>
-            <Link href="/servicos/novo" className="inline-block mt-4">
-              <Button size="sm">Cadastrar o primeiro servico</Button>
-            </Link>
+            <p className="text-slate-500 mb-4">Nenhum servico encontrado.</p>
+            <BotaoNovoServico
+              clientes={clientes.conteudo}
+              tipos={tipos}
+              rotulo="Cadastrar o primeiro servico"
+              size="sm"
+            />
           </div>
         </Card>
       ) : vista === 'cards' ? (

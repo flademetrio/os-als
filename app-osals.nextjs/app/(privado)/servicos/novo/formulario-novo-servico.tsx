@@ -21,9 +21,15 @@ const ESTADO_INICIAL: EstadoServico = {}
 type Props = {
   clientes: ClienteResumoDto[]
   tipos: TipoServicoResposta[]
+  /** Quando informado, "Cancelar" vira um botao que fecha o modal (em vez de Link). */
+  onCancelar?: () => void
 }
 
-export function FormularioNovoServico({ clientes: clientesIniciais, tipos }: Props) {
+export function FormularioNovoServico({
+  clientes: clientesIniciais,
+  tipos,
+  onCancelar,
+}: Props) {
   const [estado, dispatch, pendente] = useActionState(criarServico, ESTADO_INICIAL)
   const [clientes, setClientes] = useState(clientesIniciais)
   const [clienteId, setClienteId] = useState<number | null>(null)
@@ -105,11 +111,17 @@ export function FormularioNovoServico({ clientes: clientesIniciais, tipos }: Pro
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-2">
-          <Link href="/servicos">
-            <Button type="button" variant="ghost">
+          {onCancelar ? (
+            <Button type="button" variant="ghost" onClick={onCancelar} disabled={pendente}>
               Cancelar
             </Button>
-          </Link>
+          ) : (
+            <Link href="/servicos">
+              <Button type="button" variant="ghost">
+                Cancelar
+              </Button>
+            </Link>
+          )}
           <Button type="submit" variant="primary" loading={pendente}>
             {pendente ? 'Criando...' : 'Criar servico'}
           </Button>

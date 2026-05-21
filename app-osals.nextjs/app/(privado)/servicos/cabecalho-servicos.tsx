@@ -1,10 +1,10 @@
 'use client'
 
-import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
-import { Button } from '@/components/ui/Button'
+import type { ClienteResumoDto, TipoServicoResposta } from '@/app/lib/definicoes'
 import { Card } from '@/components/ui/Card'
+import { BotaoNovoServico } from './botao-novo-servico'
 import { FiltrosServicos } from './filtros'
 import { SeletorVista } from './seletor-vista'
 
@@ -17,6 +17,8 @@ type Props = {
   fim: string
   /** Indica se ha algum filtro aplicado (define se o painel ja abre aberto). */
   temFiltroAtivo: boolean
+  clientes: ClienteResumoDto[]
+  tipos: TipoServicoResposta[]
 }
 
 /**
@@ -34,6 +36,8 @@ export function CabecalhoServicos({
   inicio,
   fim,
   temFiltroAtivo,
+  clientes,
+  tipos,
 }: Props) {
   const router = useRouter()
   const params = useSearchParams()
@@ -65,9 +69,7 @@ export function CabecalhoServicos({
             <Segmento ativo={aberto} onClick={() => setAberto(true)} rotulo="Com filtro" />
           </div>
           <SeletorVista vista={vista} />
-          <Link href="/servicos/novo">
-            <Button variant="primary">+ Novo servico</Button>
-          </Link>
+          <BotaoNovoServico clientes={clientes} tipos={tipos} />
         </div>
       </div>
 
