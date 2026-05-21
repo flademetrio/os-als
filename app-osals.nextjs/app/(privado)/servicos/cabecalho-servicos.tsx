@@ -60,12 +60,9 @@ export function CabecalhoServicos({
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="inline-flex items-center gap-2">
-            <span className="text-xs font-medium text-slate-500">Filtro</span>
-            <div className="inline-flex rounded-lg border border-slate-200 p-0.5">
-              <Segmento ativo={!aberto} onClick={fecharLimpar} rotulo="Nao" />
-              <Segmento ativo={aberto} onClick={() => setAberto(true)} rotulo="Sim" />
-            </div>
+          <div className="inline-flex rounded-lg border border-slate-200 p-0.5">
+            <Segmento ativo={!aberto} onClick={fecharLimpar} rotulo="Sem filtro" />
+            <Segmento ativo={aberto} onClick={() => setAberto(true)} rotulo="Com filtro" />
           </div>
           <SeletorVista vista={vista} />
           <Link href="/servicos/novo">
