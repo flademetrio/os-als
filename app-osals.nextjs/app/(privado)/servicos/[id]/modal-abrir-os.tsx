@@ -10,6 +10,7 @@ import type {
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
+import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { Textarea } from '@/components/ui/Textarea'
 
@@ -47,6 +48,16 @@ export function ModalAbrirOs({ servicoId, tecnicos, veiculos, equipamentos, onCl
           rows={3}
           hint="O que sera executado nesta OS"
           error={estado.errosCampos?.descricaoAtividade}
+          fullWidth
+        />
+
+        <Input
+          label="Data agendada"
+          name="dataAgendada"
+          type="date"
+          required
+          hint="Dia previsto da visita da equipe ao cliente"
+          error={estado.errosCampos?.dataAgendada}
           fullWidth
         />
 

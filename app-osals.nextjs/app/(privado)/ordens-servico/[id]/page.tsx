@@ -56,6 +56,11 @@ export default async function OrdemServicoDetalhePage({ params }: Props) {
                 Servico {os.servicoNumeroFormatado}
               </Link>
             </p>
+            {os.dataAgendada && (
+              <p className="text-xs font-medium text-slate-600 mt-1">
+                Agendada para {formatarData(os.dataAgendada)}
+              </p>
+            )}
             <p className="text-xs text-slate-400 mt-1">
               Aberta em {formatarDataHora(os.dataAbertura)}
               {os.dataImpressao ? ` · Impressa em ${formatarDataHora(os.dataImpressao)}` : ''}
@@ -67,6 +72,10 @@ export default async function OrdemServicoDetalhePage({ params }: Props) {
 
       <Card padding="md" title="Dados da OS">
         <div className="space-y-4">
+          <Campo titulo="Data agendada">
+            <p className="text-sm text-slate-700">{formatarData(os.dataAgendada)}</p>
+          </Campo>
+
           <Campo titulo="Atividade prevista">
             <p className="text-sm text-slate-700 whitespace-pre-wrap">{os.descricaoAtividade}</p>
           </Campo>
@@ -174,4 +183,11 @@ function formatarDataHora(iso: string | null): string {
   return Number.isNaN(d.getTime())
     ? iso
     : d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+}
+
+/** Converte uma data ISO (AAAA-MM-DD) para DD/MM/AAAA. */
+function formatarData(iso: string | null): string {
+  if (!iso) return '-'
+  const [ano, mes, dia] = iso.split('-')
+  return dia && mes && ano ? `${dia}/${mes}/${ano}` : iso
 }

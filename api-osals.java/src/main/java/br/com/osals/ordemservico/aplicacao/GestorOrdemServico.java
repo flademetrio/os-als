@@ -88,7 +88,8 @@ public class GestorOrdemServico {
         Set<Veiculo> veiculos = resolverVeiculos(req.veiculoIds());
 
         int numero = repositorio.proximoNumero().intValue();
-        var os = new OrdemServico(numero, servico, req.descricaoAtividade().trim(), autor);
+        var os = new OrdemServico(numero, servico, req.descricaoAtividade().trim(),
+                req.dataAgendada(), autor);
         os.definirEquipe(tecnicos, veiculos, equipamentos);
         var salva = repositorio.save(os);
         log.info("OS aberta: id={} numero={} servico={}", salva.getId(), salva.getNumero(), servicoId);

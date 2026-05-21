@@ -1,6 +1,7 @@
 package br.com.osals.ordemservico.aplicacao.dto;
 
 import br.com.osals.ordemservico.dominio.StatusOrdemServico;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public record OrdemServicoResposta(
         String descricaoAtividade,
         StatusOrdemServico status,
         String statusRotulo,
+        LocalDate dataAgendada,
         OffsetDateTime dataAbertura,
         OffsetDateTime dataImpressao,
         OffsetDateTime horaInicioExecucao,

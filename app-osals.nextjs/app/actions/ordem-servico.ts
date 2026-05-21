@@ -46,6 +46,7 @@ export async function abrirOrdemServico(
 ): Promise<EstadoOrdemServico> {
   const parse = aberturaOsSchema.safeParse({
     descricaoAtividade: formData.get('descricaoAtividade') ?? '',
+    dataAgendada: formData.get('dataAgendada') ?? '',
     tecnicoIds: idsDe(formData, 'tecnicoIds'),
     equipamentoIds: idsDe(formData, 'equipamentoIds'),
     veiculoIds: idsDe(formData, 'veiculoIds'),

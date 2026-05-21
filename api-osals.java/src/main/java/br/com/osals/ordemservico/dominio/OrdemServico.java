@@ -18,6 +18,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -52,6 +53,9 @@ public class OrdemServico {
 
     @Column(name = "data_abertura", nullable = false, updatable = false)
     private OffsetDateTime dataAbertura;
+
+    @Column(name = "data_agendada")
+    private LocalDate dataAgendada;
 
     @Column(name = "data_impressao")
     private OffsetDateTime dataImpressao;
@@ -110,10 +114,12 @@ public class OrdemServico {
         // JPA
     }
 
-    public OrdemServico(Integer numero, Servico servico, String descricaoAtividade, Usuario criadoPor) {
+    public OrdemServico(Integer numero, Servico servico, String descricaoAtividade,
+                        LocalDate dataAgendada, Usuario criadoPor) {
         this.numero = numero;
         this.servico = servico;
         this.descricaoAtividade = descricaoAtividade;
+        this.dataAgendada = dataAgendada;
         this.status = StatusOrdemServico.ABERTA;
         this.dataAbertura = OffsetDateTime.now();
         this.createdAt = this.dataAbertura;
@@ -190,6 +196,7 @@ public class OrdemServico {
     public String getDescricaoAtividade() { return descricaoAtividade; }
     public StatusOrdemServico getStatus() { return status; }
     public OffsetDateTime getDataAbertura() { return dataAbertura; }
+    public LocalDate getDataAgendada() { return dataAgendada; }
     public OffsetDateTime getDataImpressao() { return dataImpressao; }
     public OffsetDateTime getHoraInicioExecucao() { return horaInicioExecucao; }
     public OffsetDateTime getHoraFimExecucao() { return horaFimExecucao; }

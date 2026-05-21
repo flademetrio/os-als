@@ -326,6 +326,7 @@ export type OrdemServicoResposta = {
   descricaoAtividade: string
   status: StatusOrdemServico
   statusRotulo: string
+  dataAgendada: string | null
   dataAbertura: string
   dataImpressao: string | null
   horaInicioExecucao: string | null
@@ -390,6 +391,7 @@ export type OrdemServicoResumoDto = {
   descricaoAtividade: string
   status: StatusOrdemServico
   statusRotulo: string
+  dataAgendada: string | null
   dataAbertura: string
 }
 

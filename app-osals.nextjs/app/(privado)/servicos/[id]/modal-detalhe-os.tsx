@@ -76,6 +76,11 @@ export function ModalDetalheOs({ osId, ehGestor, onClose }: Props) {
               <p className="text-xs text-slate-500">
                 {os.tipoServicoNome} · Servico {os.servicoNumeroFormatado}
               </p>
+              {os.dataAgendada && (
+                <p className="text-xs font-medium text-slate-600 mt-1">
+                  Agendada para {dataSimples(os.dataAgendada)}
+                </p>
+              )}
               <p className="text-xs text-slate-400 mt-1">
                 Aberta em {dataHora(os.dataAbertura)}
                 {os.dataImpressao ? ` · Impressa em ${dataHora(os.dataImpressao)}` : ''}
@@ -210,4 +215,10 @@ function dataHora(iso: string | null): string {
   return Number.isNaN(d.getTime())
     ? iso
     : d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+}
+
+/** Converte uma data ISO (AAAA-MM-DD) para DD/MM/AAAA. */
+function dataSimples(iso: string): string {
+  const [ano, mes, dia] = iso.split('-')
+  return dia && mes && ano ? `${dia}/${mes}/${ano}` : iso
 }

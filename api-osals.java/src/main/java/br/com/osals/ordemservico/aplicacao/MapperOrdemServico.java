@@ -33,6 +33,7 @@ public class MapperOrdemServico {
                 os.getDescricaoAtividade(),
                 os.getStatus(),
                 os.getStatus().getRotulo(),
+                os.getDataAgendada(),
                 os.getDataAbertura(),
                 os.getDataImpressao(),
                 os.getHoraInicioExecucao(),
@@ -62,6 +63,7 @@ public class MapperOrdemServico {
                 os.getDescricaoAtividade(),
                 os.getStatus(),
                 os.getStatus().getRotulo(),
+                os.getDataAgendada(),
                 os.getDataAbertura()
         );
     }
