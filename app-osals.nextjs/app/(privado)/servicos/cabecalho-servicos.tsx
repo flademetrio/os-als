@@ -21,10 +21,10 @@ type Props = {
 
 /**
  * Cabecalho da listagem de servicos: titulo, contador, seletor de visao,
- * botao "+ Novo" e o painel de filtros — recolhivel pelo botao "Filtro".
+ * botao "+ Novo" e o painel de filtros recolhivel.
  *
- * Fechado: filtros escondidos. Abrir: as caixas surgem abaixo. Clicar de
- * novo: limpa todos os filtros e esconde as caixas.
+ * O toggle "Filtro" (Nao/Sim) controla o painel: "Sim" mostra as caixas;
+ * voltar para "Nao" limpa todos os filtros e esconde as caixas.
  */
 export function CabecalhoServicos({
   total,
@@ -39,18 +39,15 @@ export function CabecalhoServicos({
   const params = useSearchParams()
   const [aberto, setAberto] = useState(temFiltroAtivo)
 
-  function alternarFiltro() {
-    if (aberto) {
-      // Fecha e limpa tudo (mantem apenas a visao escolhida).
-      const next = new URLSearchParams()
-      const v = params.get('vista')
-      if (v) next.set('vista', v)
-      const qs = next.toString()
-      router.push(qs ? `/servicos?${qs}` : '/servicos')
-      setAberto(false)
-    } else {
-      setAberto(true)
-    }
+  function fecharLimpar() {
+    if (!aberto) return
+    // Mantem apenas a visao escolhida; descarta os filtros.
+    const next = new URLSearchParams()
+    const v = params.get('vista')
+    if (v) next.set('vista', v)
+    const qs = next.toString()
+    router.push(qs ? `/servicos?${qs}` : '/servicos')
+    setAberto(false)
   }
 
   return (
@@ -63,14 +60,13 @@ export function CabecalhoServicos({
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button
-            variant={aberto ? 'primary' : 'secondary'}
-            size="sm"
-            onClick={alternarFiltro}
-            aria-expanded={aberto}
-          >
-            Filtro
-          </Button>
+          <div className="inline-flex items-center gap-2">
+            <span className="text-xs font-medium text-slate-500">Filtro</span>
+            <div className="inline-flex rounded-lg border border-slate-200 p-0.5">
+              <Segmento ativo={!aberto} onClick={fecharLimpar} rotulo="Nao" />
+              <Segmento ativo={aberto} onClick={() => setAberto(true)} rotulo="Sim" />
+            </div>
+          </div>
           <SeletorVista vista={vista} />
           <Link href="/servicos/novo">
             <Button variant="primary">+ Novo servico</Button>
@@ -84,5 +80,29 @@ export function CabecalhoServicos({
         </div>
       )}
     </Card>
+  )
+}
+
+function Segmento({
+  ativo,
+  onClick,
+  rotulo,
+}: {
+  ativo: boolean
+  onClick: () => void
+  rotulo: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={ativo}
+      className={[
+        'px-3 py-1 text-xs font-medium rounded-md transition-colors',
+        ativo ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100',
+      ].join(' ')}
+    >
+      {rotulo}
+    </button>
   )
 }
