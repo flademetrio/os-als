@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import type { SessaoUsuario } from '@/app/lib/definicoes'
 import { sair } from '@/app/actions/auth/sair'
@@ -14,8 +15,18 @@ type Props = {
 }
 
 export function Topbar({ usuario, botaoMenuMobile }: Props) {
+  const router = useRouter()
   const [aberto, setAberto] = useState(false)
+  const [busca, setBusca] = useState('')
   const ref = useRef<HTMLDivElement>(null)
+
+  /** Enter na busca global: abre /servicos filtrado pelo termo, em todos os status. */
+  function buscar() {
+    const termo = busca.trim()
+    if (!termo) return
+    router.push(`/servicos?busca=${encodeURIComponent(termo)}&situacao=todos`)
+    setBusca('')
+  }
 
   // Fechar ao clicar fora
   useEffect(() => {
@@ -32,7 +43,15 @@ export function Topbar({ usuario, botaoMenuMobile }: Props) {
       {botaoMenuMobile && <div className="md:hidden">{botaoMenuMobile}</div>}
 
       <div className="flex-1 max-w-md hidden sm:block">
-        <SearchBar placeholder="Buscar servico, OS, cliente..." fullWidth />
+        <SearchBar
+          placeholder="Buscar servico, OS, cliente..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') buscar()
+          }}
+          fullWidth
+        />
       </div>
 
       <div className="flex-1 sm:hidden" />
