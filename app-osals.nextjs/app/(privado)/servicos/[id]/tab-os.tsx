@@ -1,63 +1,24 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
-import type {
-  EquipamentoResumoDto,
-  OrdemServicoResumoDto,
-  TecnicoResumoDto,
-  VeiculoResumoDto,
-} from '@/app/lib/definicoes'
+import type { OrdemServicoResumoDto } from '@/app/lib/definicoes'
 import { badgeStatusOs } from '@/app/lib/esquemas/ordem-servico'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
-import { ModalAbrirOs } from './modal-abrir-os'
 
 type Props = {
-  servicoId: number
-  servicoEncerrado: boolean
   ordens: OrdemServicoResumoDto[]
-  tecnicos: TecnicoResumoDto[]
-  veiculos: VeiculoResumoDto[]
-  equipamentos: EquipamentoResumoDto[]
 }
 
-export function TabOs({
-  servicoId,
-  servicoEncerrado,
-  ordens,
-  tecnicos,
-  veiculos,
-  equipamentos,
-}: Props) {
-  const [modalAberto, setModalAberto] = useState(false)
-
+/**
+ * Lista as OS do servico. A abertura de nova OS fica no botao "+ Nova OS"
+ * do cabecalho do servico.
+ */
+export function TabOs({ ordens }: Props) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-sm text-slate-500">
-          {ordens.length} {ordens.length === 1 ? 'ordem de servico' : 'ordens de servico'}
-        </p>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => setModalAberto(true)}
-          disabled={servicoEncerrado}
-          title={
-            servicoEncerrado
-              ? 'Servico encerrado — nao e possivel abrir novas OS'
-              : undefined
-          }
-        >
-          + Adicionar OS
-        </Button>
-      </div>
-
-      {servicoEncerrado && (
-        <p className="text-xs text-slate-500">
-          Servico encerrado — nao e possivel abrir novas ordens de servico.
-        </p>
-      )}
+      <p className="text-sm text-slate-500">
+        {ordens.length} {ordens.length === 1 ? 'ordem de servico' : 'ordens de servico'}
+      </p>
 
       {ordens.length === 0 ? (
         <div className="py-8 text-center">
@@ -97,16 +58,6 @@ export function TabOs({
             </tbody>
           </table>
         </div>
-      )}
-
-      {modalAberto && (
-        <ModalAbrirOs
-          servicoId={servicoId}
-          tecnicos={tecnicos}
-          veiculos={veiculos}
-          equipamentos={equipamentos}
-          onClose={() => setModalAberto(false)}
-        />
       )}
     </div>
   )

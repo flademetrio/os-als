@@ -111,8 +111,6 @@ export default async function ServicoDetalhePage({ params }: Props) {
         tipos={tipos}
         ordens={ordens}
         tecnicos={tecnicos.conteudo}
-        veiculos={veiculos.conteudo}
-        equipamentos={equipamentos.conteudo}
         custos={custos}
         resumo={resumo}
         categorias={categorias}

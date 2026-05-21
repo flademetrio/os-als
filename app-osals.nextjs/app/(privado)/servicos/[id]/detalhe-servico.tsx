@@ -4,14 +4,12 @@ import { useState } from 'react'
 import type {
   AnexoServicoResposta,
   CategoriaCustoResposta,
-  EquipamentoResumoDto,
   LancamentoCustoResposta,
   OrdemServicoResumoDto,
   ResumoFinanceiroServico,
   ServicoResposta,
   TecnicoResumoDto,
   TipoServicoResposta,
-  VeiculoResumoDto,
 } from '@/app/lib/definicoes'
 import { Card } from '@/components/ui/Card'
 import { Tabs } from '@/components/ui/Tabs'
@@ -27,8 +25,6 @@ type Props = {
   tipos: TipoServicoResposta[]
   ordens: OrdemServicoResumoDto[]
   tecnicos: TecnicoResumoDto[]
-  veiculos: VeiculoResumoDto[]
-  equipamentos: EquipamentoResumoDto[]
   custos: LancamentoCustoResposta[]
   resumo: ResumoFinanceiroServico
   categorias: CategoriaCustoResposta[]
@@ -41,8 +37,6 @@ export function DetalheServico({
   tipos,
   ordens,
   tecnicos,
-  veiculos,
-  equipamentos,
   custos,
   resumo,
   categorias,
@@ -50,7 +44,6 @@ export function DetalheServico({
   anexos,
 }: Props) {
   const [aba, setAba] = useState<AbaId>('dados')
-  const encerrado = servico.status === 'CONCLUIDO' || servico.status === 'CANCELADO'
 
   return (
     <Card padding="none">
@@ -69,16 +62,7 @@ export function DetalheServico({
 
       <div className="p-5">
         {aba === 'dados' && <TabDados servico={servico} tipos={tipos} />}
-        {aba === 'os' && (
-          <TabOs
-            servicoId={servico.id}
-            servicoEncerrado={encerrado}
-            ordens={ordens}
-            tecnicos={tecnicos}
-            veiculos={veiculos}
-            equipamentos={equipamentos}
-          />
-        )}
+        {aba === 'os' && <TabOs ordens={ordens} />}
         {aba === 'custos' && (
           <TabCustos
             servicoId={servico.id}
