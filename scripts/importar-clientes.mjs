@@ -1,7 +1,7 @@
 /**
  * Importa clientes a partir de um CSV exportado de ERP (separador ";").
  *
- * Para cada linha cria, via API: Cliente + Unidade ("Matriz") + Contato.
+ * Para cada linha cria, via API: Cliente + Unidade ("Matriz").
  * Respeita as validacoes do backend e a checagem de duplicidade (clientes
  * ja existentes sao pulados — o script pode ser re-executado com seguranca).
  *
@@ -13,10 +13,12 @@
  *   EMAIL   (default flavio@alsindustria.com.br)
  *   SENHA   (default 123)
  *
- * Mapeamento das colunas (0-based) do CSV:
- *   0 documento  1 razaoSocial  2 nomeFantasia  3 nomeContato
- *   4 logradouro 5 numero  6 bairro  7 complemento  8 UF  9 cidade
- *   10 pais  11 cep  12 telefone  15 email
+ * Cabecalho esperado do CSV (separador ";"):
+ *   Cnpj;razao;Fantasia;Logradouro;numero;Bairro;Complemento;estado;Cidade;Brasil;cep
+ *
+ * Mapeamento das colunas (0-based):
+ *   0 documento  1 razaoSocial  2 nomeFantasia  3 logradouro  4 numero
+ *   5 bairro  6 complemento  7 UF  8 cidade  9 pais  10 cep
  */
 
 import { readFileSync } from 'node:fs'
@@ -37,13 +39,12 @@ const texto = (s, max) => {
   if (!t) return undefined
   return max ? t.slice(0, max) : t
 }
-const emailValido = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)
 
 function lerCsv(caminho) {
   const buf = readFileSync(caminho)
   let conteudo = buf.toString('utf8')
   // CSV de ERP costuma vir em Latin-1; se o utf-8 produzir caractere
-  // de substituicao, relê como latin1.
+  // de substituicao, rele como latin1.
   if (conteudo.includes('�')) conteudo = buf.toString('latin1')
   return conteudo
     .split(/\r?\n/)
@@ -92,7 +93,7 @@ async function main() {
     const doc = digitos(c[0])
     const nome = texto(c[1], 160)
 
-    // Ignora o registro generico "Cliente Consumidor" e linhas sem nome.
+    // Ignora linhas sem nome ou com documento invalido.
     if (!nome || /^0+$/.test(doc) || (doc.length !== 11 && doc.length !== 14)) {
       continue
     }
@@ -121,41 +122,22 @@ async function main() {
     criados++
 
     // --- Unidade (endereco) ---
-    const cep = digitos(c[11])
-    const uf = (c[8] ?? '').trim().toUpperCase()
+    const cep = digitos(c[10])
+    const uf = (c[7] ?? '').trim().toUpperCase()
     const unidade = {
       identificacaoInterna: 'Matriz',
       cep: cep.length === 8 ? cep : '',
-      logradouro: texto(c[4], 160),
-      numero: texto(c[5], 20),
-      complemento: texto(c[7], 80),
-      bairro: texto(c[6], 80),
-      cidade: texto(c[9], 80),
+      logradouro: texto(c[3], 160),
+      numero: texto(c[4], 20),
+      complemento: texto(c[6], 80),
+      bairro: texto(c[5], 80),
+      cidade: texto(c[8], 80),
       estado: /^[A-Z]{2}$/.test(uf) ? uf : '',
     }
     const resUni = await post(`/clientes/${id}/unidades`, unidade)
     if (!resUni.ok) {
       const e = await jsonOuTexto(resUni)
       console.log(`  ! ${nome}: unidade nao criada — ${e?.mensagem ?? resUni.status}`)
-    }
-
-    // --- Contato ---
-    const nomeContato = texto(c[3], 120)
-    const telefone = texto(c[12], 20)
-    const primeiroEmail = (c[15] ?? '').split(',')[0].trim()
-    const email = emailValido(primeiroEmail) ? primeiroEmail.slice(0, 160) : undefined
-
-    if (nomeContato || telefone || email) {
-      const contato = {
-        nome: nomeContato ?? 'Contato principal',
-        telefone,
-        email,
-      }
-      const resCon = await post(`/clientes/${id}/contatos`, contato)
-      if (!resCon.ok) {
-        const e = await jsonOuTexto(resCon)
-        console.log(`  ! ${nome}: contato nao criado — ${e?.mensagem ?? resCon.status}`)
-      }
     }
 
     console.log(`+ ${nome}`)
