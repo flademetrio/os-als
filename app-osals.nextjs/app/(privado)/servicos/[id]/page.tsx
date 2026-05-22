@@ -15,11 +15,10 @@ import type {
   TipoServicoResposta,
   VeiculoResumoDto,
 } from '@/app/lib/definicoes'
-import { badgeStatusServico } from '@/app/lib/esquemas/servico'
+import { badgeTipoServico } from '@/app/lib/esquemas/servico'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { AcoesCabecalhoServico } from './acoes-cabecalho-servico'
-import { BotaoAbrirOs } from './botao-abrir-os'
 import { DetalheServico } from './detalhe-servico'
 
 type Props = { params: Promise<{ id: string }> }
@@ -67,52 +66,46 @@ export default async function ServicoDetalhePage({ params }: Props) {
       </Link>
 
       <Card padding="md">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1 flex-wrap">
-              <h1 className="text-2xl font-semibold text-slate-900 font-mono">
-                Servico {servico.numeroFormatado}
-              </h1>
-              <Badge variant={badgeStatusServico(servico.status)} dot>
-                {servico.statusRotulo}
-              </Badge>
-              <Badge variant="info" size="sm">
+        {/* Cliente como titulo (esquerda) + numero do servico (canto direito) */}
+        <div className="flex items-baseline justify-between gap-3">
+          <h1 className="min-w-0">
+            <Link
+              href={`/clientes/${servico.clienteId}`}
+              className="text-xl font-semibold text-primary hover:underline"
+            >
+              {servico.clienteNome}
+            </Link>
+          </h1>
+          <span className="text-xl font-mono text-slate-400 shrink-0">
+            Serviço {servico.numeroFormatado}
+          </span>
+        </div>
+
+        {/* Descricao e painel de acoes lado a lado, mesma altura */}
+        <div className="mt-3 flex items-stretch gap-4 flex-wrap">
+          <div className="flex-1 min-w-[15rem] rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                Descricao do servico
+              </p>
+              <Badge variant={badgeTipoServico(servico.tipoServicoNome)} size="sm">
                 {servico.tipoServicoNome}
               </Badge>
             </div>
-            <p className="text-sm text-slate-500">
-              <Link
-                href={`/clientes/${servico.clienteId}`}
-                className="text-primary hover:underline"
-              >
-                {servico.clienteNome}
-              </Link>
+            <p className="text-xs text-slate-600 whitespace-pre-wrap">
+              {servico.descricao || '—'}
             </p>
-            {servico.descricao && (
-              <p className="text-xs text-slate-500 mt-1 whitespace-pre-wrap">
-                {servico.descricao}
-              </p>
-            )}
-            {servico.finalizadoEm && (
-              <p className="text-xs text-slate-400 mt-1">
-                Encerrado em {formatarDataHora(servico.finalizadoEm)}
-                {servico.finalizadoPorNome ? ` por ${servico.finalizadoPorNome}` : ''}
-              </p>
-            )}
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {!encerrado && (
-              <BotaoAbrirOs
-                servicoId={servico.id}
-                tecnicos={tecnicos.conteudo}
-                veiculos={veiculos.conteudo}
-                equipamentos={equipamentos.conteudo}
-                contatos={contatos}
-              />
-            )}
-            <AcoesCabecalhoServico servico={servico} />
-          </div>
+
+          <AcoesCabecalhoServico servico={servico} />
         </div>
+
+        {servico.finalizadoEm && (
+          <p className="text-xs text-slate-400 mt-2">
+            Encerrado em {formatarDataHora(servico.finalizadoEm)}
+            {servico.finalizadoPorNome ? ` por ${servico.finalizadoPorNome}` : ''}
+          </p>
+        )}
       </Card>
 
       <DetalheServico
@@ -120,6 +113,9 @@ export default async function ServicoDetalhePage({ params }: Props) {
         tipos={tipos}
         ordens={ordens}
         tecnicos={tecnicos.conteudo}
+        veiculos={veiculos.conteudo}
+        equipamentos={equipamentos.conteudo}
+        contatos={contatos}
         custos={custos}
         resumo={resumo}
         categorias={categorias}

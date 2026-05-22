@@ -57,6 +57,30 @@ export function badgeStatusServico(
   }
 }
 
+type VarianteTipo = 'primary' | 'success' | 'warning' | 'info' | 'purple'
+
+/** Paleta de cores discretas para os badges de tipo de servico. */
+const PALETA_TIPO_SERVICO: VarianteTipo[] = [
+  'primary',
+  'success',
+  'warning',
+  'info',
+  'purple',
+]
+
+/**
+ * Variante de Badge para um tipo de servico. A cor e derivada do nome
+ * (hash deterministico), entao o mesmo tipo recebe sempre a mesma cor,
+ * sem precisar cadastrar cor por tipo.
+ */
+export function badgeTipoServico(nome: string): VarianteTipo {
+  let hash = 0
+  for (let i = 0; i < nome.length; i++) {
+    hash = (hash * 31 + nome.charCodeAt(i)) | 0
+  }
+  return PALETA_TIPO_SERVICO[Math.abs(hash) % PALETA_TIPO_SERVICO.length]
+}
+
 /** Estados intermediarios para os quais o Servico pode ser movido manualmente. */
 export const STATUS_INTERMEDIARIOS: { valor: string; rotulo: string }[] = [
   { valor: 'EM_ABERTO', rotulo: 'Em aberto' },

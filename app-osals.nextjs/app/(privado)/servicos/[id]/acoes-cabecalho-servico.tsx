@@ -30,27 +30,49 @@ export function AcoesCabecalhoServico({ servico }: { servico: ServicoResposta })
   }
 
   return (
-    <div className="flex items-center gap-2 shrink-0">
-      <Select
-        value={servico.status}
-        onChange={(e) =>
-          iniciar(() => mudarStatusServico(servico.id, e.target.value))
-        }
-        disabled={pendente}
-        aria-label="Mudar status"
-      >
-        {STATUS_INTERMEDIARIOS.map((s) => (
-          <option key={s.valor} value={s.valor}>
-            {s.rotulo}
-          </option>
-        ))}
-      </Select>
+    <div className="w-full sm:w-48 shrink-0 rounded-lg border border-slate-200 bg-slate-50 p-2.5 flex flex-col justify-center gap-1.5">
+      <div>
+        <label
+          htmlFor="status-servico"
+          className="block text-[10px] uppercase tracking-wider text-slate-400 mb-0.5"
+        >
+          Status
+        </label>
+        <Select
+          id="status-servico"
+          fullWidth
+          value={servico.status}
+          onChange={(e) =>
+            iniciar(() => mudarStatusServico(servico.id, e.target.value))
+          }
+          disabled={pendente}
+          aria-label="Mudar status do servico"
+          className="!py-1 !text-xs"
+        >
+          {STATUS_INTERMEDIARIOS.map((s) => (
+            <option key={s.valor} value={s.valor}>
+              {s.rotulo}
+            </option>
+          ))}
+        </Select>
+      </div>
 
-      <Button variant="ghost" size="sm" onClick={() => setConfirmar('cancelar')}>
-        Cancelar servico
-      </Button>
-      <Button variant="primary" size="sm" onClick={() => setConfirmar('finalizar')}>
+      {/* Botoes na vertical — discretos, mesmo tamanho, so muda a cor */}
+      <Button
+        variant="primary"
+        size="xs"
+        fullWidth
+        onClick={() => setConfirmar('finalizar')}
+      >
         Finalizar
+      </Button>
+      <Button
+        variant="danger"
+        size="xs"
+        fullWidth
+        onClick={() => setConfirmar('cancelar')}
+      >
+        Cancelar servico
       </Button>
 
       <Modal
