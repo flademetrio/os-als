@@ -48,7 +48,7 @@ export function ModalDetalheOs({ osId, ehGestor, onClose }: Props) {
       open
       onClose={onClose}
       title={os ? `OS ${os.codigoExibicao}` : 'Ordem de servico'}
-      size="meio"
+      size="grande"
     >
       {erro && <Alert variant="danger">{erro}</Alert>}
 
@@ -98,11 +98,7 @@ export function ModalDetalheOs({ osId, ehGestor, onClose }: Props) {
             </Bloco>
 
             <Bloco titulo={`Tecnicos (${os.tecnicos.length})`}>
-              <Lista
-                itens={os.tecnicos.map((t) =>
-                  t.especialidade ? `${t.nome} — ${t.especialidade}` : t.nome,
-                )}
-              />
+              <Lista itens={os.tecnicos.map((t) => primeiroNome(t.nome))} />
             </Bloco>
 
             <Bloco titulo={`Veiculos (${os.veiculos.length})`}>
@@ -234,4 +230,9 @@ function dataHora(iso: string | null): string {
 function dataSimples(iso: string): string {
   const [ano, mes, dia] = iso.split('-')
   return dia && mes && ano ? `${dia}/${mes}/${ano}` : iso
+}
+
+/** Primeiro nome do tecnico (descarta sobrenomes). */
+function primeiroNome(nome: string): string {
+  return nome.trim().split(/\s+/)[0]
 }
