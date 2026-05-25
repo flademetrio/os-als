@@ -148,12 +148,21 @@ public class GeradorPdfOS {
         return lista;
     }
 
+    /** Tecnicos da OS — apenas o primeiro nome de cada um, para deixar a linha enxuta. */
     private static List<String> tecnicos(OrdemServico os) {
         var lista = new ArrayList<String>();
         for (Tecnico t : os.getTecnicos()) {
-            lista.add(t.getUsuario().getNome());
+            lista.add(primeiroNome(t.getUsuario().getNome()));
         }
         return lista;
+    }
+
+    /** "Ademir Ferreira da Silva" -> "Ademir". */
+    private static String primeiroNome(String nome) {
+        if (nome == null) return "";
+        String t = nome.trim();
+        int sp = t.indexOf(' ');
+        return sp < 0 ? t : t.substring(0, sp);
     }
 
     private static List<String> veiculos(OrdemServico os) {
