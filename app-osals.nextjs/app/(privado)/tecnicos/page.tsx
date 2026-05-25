@@ -3,8 +3,8 @@ import { lerSessao } from '@/app/lib/sessao'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type { PaginaResposta, TecnicoResumoDto } from '@/app/lib/definicoes'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { BotaoNovoTecnico } from './botao-novo-tecnico'
 
 type Props = { searchParams: Promise<{ busca?: string; pagina?: string; apenasAtivos?: string }> }
 
@@ -36,22 +36,14 @@ export default async function TecnicosPage({ searchParams }: Props) {
             {apenasAtivos ? ' ativos' : ' no total'}
           </p>
         </div>
-        {podeCriar && (
-          <Link href="/tecnicos/novo">
-            <Button variant="primary">+ Novo tecnico</Button>
-          </Link>
-        )}
+        {podeCriar && <BotaoNovoTecnico />}
       </div>
 
       <Card padding="none">
         {dados.conteudo.length === 0 ? (
           <div className="p-10 text-center">
-            <p className="text-slate-500">Nenhum tecnico cadastrado.</p>
-            {podeCriar && (
-              <Link href="/tecnicos/novo" className="inline-block mt-4">
-                <Button size="sm">Cadastrar primeiro tecnico</Button>
-              </Link>
-            )}
+            <p className="text-slate-500 mb-4">Nenhum tecnico cadastrado.</p>
+            {podeCriar && <BotaoNovoTecnico rotulo="Cadastrar primeiro tecnico" size="sm" />}
           </div>
         ) : (
           <div className="overflow-x-auto">

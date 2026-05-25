@@ -1,6 +1,5 @@
 'use server'
 
-import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { clienteApi, ErroApi, ErroConexao } from '@/app/lib/cliente-api'
 import { equipamentoSchema, novoEquipamentoSchema } from '@/app/lib/esquemas/equipamento'
@@ -10,6 +9,7 @@ export type EstadoEquipamento = {
   erro?: string
   errosCampos?: Record<string, string>
   sucesso?: boolean
+  criado?: EquipamentoResposta
 }
 
 function aplicarErros(parseError: { issues: ReadonlyArray<{ path: ReadonlyArray<PropertyKey>; message: string }> }) {
@@ -43,7 +43,7 @@ export async function criarEquipamento(
   }
 
   revalidatePath('/equipamentos')
-  redirect(`/equipamentos/${criado.id}`)
+  return { criado }
 }
 
 export async function atualizarEquipamento(

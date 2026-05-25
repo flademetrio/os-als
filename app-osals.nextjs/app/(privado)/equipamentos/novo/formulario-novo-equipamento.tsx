@@ -1,9 +1,14 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useActionState, useEffect, useState } from 'react'
 import { criarEquipamento, type EstadoEquipamento } from '@/app/actions/equipamento'
-import type { ClienteResumoDto, UnidadeResposta } from '@/app/lib/definicoes'
+import type {
+  ClienteResumoDto,
+  EquipamentoResposta,
+  UnidadeResposta,
+} from '@/app/lib/definicoes'
 import { TIPOS_EQUIPAMENTO_LABEL } from '@/app/lib/esquemas/equipamento'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
@@ -12,13 +17,29 @@ import { Select } from '@/components/ui/Select'
 
 const ESTADO_INICIAL: EstadoEquipamento = {}
 
-type Props = { clientes: ClienteResumoDto[] }
+type Props = {
+  clientes: ClienteResumoDto[]
+  /** Quando informado, "Cancelar" fecha o modal em vez de navegar. */
+  onCancelar?: () => void
+  /**
+   * Chamado apos criar o equipamento. Sem callback, navega para o detalhe;
+   * com callback (drawer), o pai decide (ex.: fechar e atualizar a lista).
+   */
+  onCriado?: (equipamento: EquipamentoResposta) => void
+}
 
-export function FormularioNovoEquipamento({ clientes }: Props) {
+export function FormularioNovoEquipamento({ clientes, onCancelar, onCriado }: Props) {
+  const router = useRouter()
   const [estado, dispatch, pendente] = useActionState(criarEquipamento, ESTADO_INICIAL)
   const [clienteId, setClienteId] = useState<string>('')
   const [unidades, setUnidades] = useState<UnidadeResposta[]>([])
   const [carregandoUnidades, setCarregandoUnidades] = useState(false)
+
+  useEffect(() => {
+    if (!estado.criado) return
+    if (onCriado) onCriado(estado.criado)
+    else router.push(`/equipamentos/${estado.criado.id}`)
+  }, [estado.criado, onCriado, router])
 
   // Carrega unidades quando cliente muda (chamada client-side via fetch ao back)
   useEffect(() => {
@@ -152,9 +173,15 @@ export function FormularioNovoEquipamento({ clientes }: Props) {
       </Select>
 
       <div className="flex items-center justify-end gap-3 pt-2">
-        <Link href="/equipamentos">
-          <Button type="button" variant="ghost">Cancelar</Button>
-        </Link>
+        {onCancelar ? (
+          <Button type="button" variant="ghost" onClick={onCancelar} disabled={pendente}>
+            Cancelar
+          </Button>
+        ) : (
+          <Link href="/equipamentos">
+            <Button type="button" variant="ghost">Cancelar</Button>
+          </Link>
+        )}
         <Button type="submit" variant="primary" loading={pendente}>
           {pendente ? 'Salvando...' : 'Criar equipamento'}
         </Button>

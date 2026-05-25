@@ -1,8 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useActionState, useEffect } from 'react'
 import { criarVeiculo, type EstadoVeiculo } from '@/app/actions/veiculo'
+import type { VeiculoResposta } from '@/app/lib/definicoes'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -10,8 +12,22 @@ import { Select } from '@/components/ui/Select'
 
 const ESTADO_INICIAL: EstadoVeiculo = {}
 
-export function FormularioNovoVeiculo() {
+type Props = {
+  /** Quando informado, "Cancelar" fecha o modal em vez de navegar. */
+  onCancelar?: () => void
+  /** Sem callback, navega para o detalhe; com callback, o pai decide. */
+  onCriado?: (veiculo: VeiculoResposta) => void
+}
+
+export function FormularioNovoVeiculo({ onCancelar, onCriado }: Props = {}) {
+  const router = useRouter()
   const [estado, dispatch, pendente] = useActionState(criarVeiculo, ESTADO_INICIAL)
+
+  useEffect(() => {
+    if (!estado.criado) return
+    if (onCriado) onCriado(estado.criado)
+    else router.push(`/veiculos/${estado.criado.id}`)
+  }, [estado.criado, onCriado, router])
 
   return (
     <form action={dispatch} className="space-y-4">
@@ -49,9 +65,15 @@ export function FormularioNovoVeiculo() {
       </div>
 
       <div className="flex items-center justify-end gap-3 pt-2">
-        <Link href="/veiculos">
-          <Button type="button" variant="ghost">Cancelar</Button>
-        </Link>
+        {onCancelar ? (
+          <Button type="button" variant="ghost" onClick={onCancelar} disabled={pendente}>
+            Cancelar
+          </Button>
+        ) : (
+          <Link href="/veiculos">
+            <Button type="button" variant="ghost">Cancelar</Button>
+          </Link>
+        )}
         <Button type="submit" variant="primary" loading={pendente}>
           {pendente ? 'Salvando...' : 'Criar veiculo'}
         </Button>

@@ -1,13 +1,17 @@
 import Link from 'next/link'
 import { clienteApi } from '@/app/lib/cliente-api'
-import type { EquipamentoResumoDto, PaginaResposta } from '@/app/lib/definicoes'
+import type {
+  ClienteResumoDto,
+  EquipamentoResumoDto,
+  PaginaResposta,
+} from '@/app/lib/definicoes'
 import {
   STATUS_EQUIPAMENTO_LABEL,
   TIPOS_EQUIPAMENTO_LABEL,
 } from '@/app/lib/esquemas/equipamento'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { BotaoNovoEquipamento } from './botao-novo-equipamento'
 
 type Props = {
   searchParams: Promise<{
@@ -33,9 +37,10 @@ export default async function EquipamentosPage({ searchParams }: Props) {
   q.set('tamanho', '20')
   q.set('apenasAtivos', String(apenasAtivos))
 
-  const dados = await clienteApi<PaginaResposta<EquipamentoResumoDto>>(
-    `/equipamentos?${q.toString()}`,
-  )
+  const [dados, clientes] = await Promise.all([
+    clienteApi<PaginaResposta<EquipamentoResumoDto>>(`/equipamentos?${q.toString()}`),
+    clienteApi<PaginaResposta<ClienteResumoDto>>('/clientes?tamanho=200&apenasAtivos=true'),
+  ])
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -47,18 +52,18 @@ export default async function EquipamentosPage({ searchParams }: Props) {
             {apenasAtivos ? ' ativos' : ' no total'}
           </p>
         </div>
-        <Link href="/equipamentos/novo">
-          <Button variant="primary">+ Novo equipamento</Button>
-        </Link>
+        <BotaoNovoEquipamento clientes={clientes.conteudo} />
       </div>
 
       <Card padding="none">
         {dados.conteudo.length === 0 ? (
           <div className="p-10 text-center">
-            <p className="text-slate-500">Nenhum equipamento cadastrado.</p>
-            <Link href="/equipamentos/novo" className="inline-block mt-4">
-              <Button size="sm">Cadastrar primeiro equipamento</Button>
-            </Link>
+            <p className="text-slate-500 mb-4">Nenhum equipamento cadastrado.</p>
+            <BotaoNovoEquipamento
+              clientes={clientes.conteudo}
+              rotulo="Cadastrar primeiro equipamento"
+              size="sm"
+            />
             <p className="text-xs text-slate-400 mt-4">
               Equipamentos sao vinculados a uma unidade de um cliente.
               <br />

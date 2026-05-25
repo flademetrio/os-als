@@ -1,16 +1,32 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useActionState, useEffect } from 'react'
 import { criarTecnico, type EstadoTecnico } from '@/app/actions/tecnico'
+import type { TecnicoResposta } from '@/app/lib/definicoes'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 
 const ESTADO_INICIAL: EstadoTecnico = {}
 
-export function FormularioNovoTecnico() {
+type Props = {
+  /** Quando informado, "Cancelar" fecha o modal em vez de navegar. */
+  onCancelar?: () => void
+  /** Sem callback, navega para o detalhe; com callback, o pai decide. */
+  onCriado?: (tecnico: TecnicoResposta) => void
+}
+
+export function FormularioNovoTecnico({ onCancelar, onCriado }: Props = {}) {
+  const router = useRouter()
   const [estado, dispatch, pendente] = useActionState(criarTecnico, ESTADO_INICIAL)
+
+  useEffect(() => {
+    if (!estado.criado) return
+    if (onCriado) onCriado(estado.criado)
+    else router.push(`/tecnicos/${estado.criado.id}`)
+  }, [estado.criado, onCriado, router])
 
   return (
     <form action={dispatch} className="space-y-4">
@@ -74,9 +90,15 @@ export function FormularioNovoTecnico() {
       />
 
       <div className="flex items-center justify-end gap-3 pt-2">
-        <Link href="/tecnicos">
-          <Button type="button" variant="ghost">Cancelar</Button>
-        </Link>
+        {onCancelar ? (
+          <Button type="button" variant="ghost" onClick={onCancelar} disabled={pendente}>
+            Cancelar
+          </Button>
+        ) : (
+          <Link href="/tecnicos">
+            <Button type="button" variant="ghost">Cancelar</Button>
+          </Link>
+        )}
         <Button type="submit" variant="primary" loading={pendente}>
           {pendente ? 'Salvando...' : 'Criar tecnico'}
         </Button>

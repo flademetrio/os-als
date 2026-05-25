@@ -1,6 +1,5 @@
 'use server'
 
-import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { clienteApi, ErroApi, ErroConexao } from '@/app/lib/cliente-api'
 import {
@@ -14,6 +13,7 @@ export type EstadoTecnico = {
   erro?: string
   errosCampos?: Record<string, string>
   sucesso?: boolean
+  criado?: TecnicoResposta
 }
 
 function aplicarErros(parseError: { issues: ReadonlyArray<{ path: ReadonlyArray<PropertyKey>; message: string }> }) {
@@ -49,7 +49,7 @@ export async function criarTecnico(
   }
 
   revalidatePath('/tecnicos')
-  redirect(`/tecnicos/${criado.id}`)
+  return { criado }
 }
 
 export async function atualizarTecnico(
