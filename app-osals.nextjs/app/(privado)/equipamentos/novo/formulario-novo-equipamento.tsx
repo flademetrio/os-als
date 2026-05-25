@@ -10,6 +10,7 @@ import type {
   UnidadeResposta,
 } from '@/app/lib/definicoes'
 import { TIPOS_EQUIPAMENTO_LABEL } from '@/app/lib/esquemas/equipamento'
+import { ComboboxCliente } from '@/components/app/combobox-cliente'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -31,7 +32,7 @@ type Props = {
 export function FormularioNovoEquipamento({ clientes, onCancelar, onCriado }: Props) {
   const router = useRouter()
   const [estado, dispatch, pendente] = useActionState(criarEquipamento, ESTADO_INICIAL)
-  const [clienteId, setClienteId] = useState<string>('')
+  const [clienteId, setClienteId] = useState<number | null>(null)
   const [unidades, setUnidades] = useState<UnidadeResposta[]>([])
   const [carregandoUnidades, setCarregandoUnidades] = useState(false)
 
@@ -43,7 +44,7 @@ export function FormularioNovoEquipamento({ clientes, onCancelar, onCriado }: Pr
 
   // Carrega unidades quando cliente muda (chamada client-side via fetch ao back)
   useEffect(() => {
-    if (!clienteId) {
+    if (clienteId == null) {
       setUnidades([])
       return
     }
@@ -62,32 +63,22 @@ export function FormularioNovoEquipamento({ clientes, onCancelar, onCriado }: Pr
       {estado.erro && <Alert variant="danger" dismissible>{estado.erro}</Alert>}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Select
-          label="Cliente"
-          name="clienteId"
-          required
+        <ComboboxCliente
+          clientesIniciais={clientes}
           value={clienteId}
-          onChange={(e) => setClienteId(e.target.value)}
+          onChange={setClienteId}
           error={estado.errosCampos?.clienteId}
-          fullWidth
-        >
-          <option value="">— Selecione</option>
-          {clientes.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nome}
-            </option>
-          ))}
-        </Select>
+        />
         <Select
           label="Unidade"
           name="unidadeId"
           required
-          disabled={!clienteId || carregandoUnidades}
+          disabled={clienteId == null || carregandoUnidades}
           error={estado.errosCampos?.unidadeId}
           fullWidth
         >
           <option value="">
-            {!clienteId
+            {clienteId == null
               ? '— Escolha o cliente primeiro'
               : carregandoUnidades
               ? '— Carregando...'

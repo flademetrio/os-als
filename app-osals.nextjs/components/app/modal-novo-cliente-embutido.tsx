@@ -20,8 +20,11 @@ type Props = {
   onClose: () => void
 }
 
-/** Drawer lateral para cadastrar um cliente sem sair do formulario de servico. */
-export function ModalNovoCliente({ onCriado, onClose }: Props) {
+/**
+ * Drawer lateral para cadastrar um cliente sem sair do formulario pai.
+ * Usado pelo ComboboxCliente quando o usuario clica em "+ Novo cliente".
+ */
+export function ModalNovoClienteEmbutido({ onCriado, onClose }: Props) {
   const [estado, dispatch, pendente] = useActionState(criarClienteRetornando, ESTADO_INICIAL)
   const [tipoPessoa, setTipoPessoa] = useState<'PF' | 'PJ'>('PJ')
 
