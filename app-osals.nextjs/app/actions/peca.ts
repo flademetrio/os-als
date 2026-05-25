@@ -1,6 +1,5 @@
 'use server'
 
-import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { clienteApi, ErroApi, ErroConexao } from '@/app/lib/cliente-api'
 import { pecaSchema } from '@/app/lib/esquemas/peca'
@@ -10,6 +9,7 @@ export type EstadoPeca = {
   erro?: string
   errosCampos?: Record<string, string>
   sucesso?: boolean
+  criado?: PecaResposta
 }
 
 function aplicarErros(parseError: { issues: ReadonlyArray<{ path: ReadonlyArray<PropertyKey>; message: string }> }) {
@@ -38,7 +38,7 @@ export async function criarPeca(
   }
 
   revalidatePath('/pecas')
-  redirect(`/pecas/${criada.id}`)
+  return { criado: criada }
 }
 
 export async function atualizarPeca(

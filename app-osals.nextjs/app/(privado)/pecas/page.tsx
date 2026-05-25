@@ -1,9 +1,13 @@
 import Link from 'next/link'
 import { clienteApi } from '@/app/lib/cliente-api'
-import type { PaginaResposta, PecaResposta } from '@/app/lib/definicoes'
+import type {
+  PaginaResposta,
+  PecaResposta,
+  UnidadeMedidaResposta,
+} from '@/app/lib/definicoes'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { BotaoNovaPeca } from './botao-nova-peca'
 
 type Props = { searchParams: Promise<{ busca?: string; pagina?: string; apenasAtivos?: string }> }
 
@@ -19,7 +23,10 @@ export default async function PecasPage({ searchParams }: Props) {
   q.set('tamanho', '20')
   q.set('apenasAtivos', String(apenasAtivos))
 
-  const dados = await clienteApi<PaginaResposta<PecaResposta>>(`/pecas?${q.toString()}`)
+  const [dados, unidadesMedida] = await Promise.all([
+    clienteApi<PaginaResposta<PecaResposta>>(`/pecas?${q.toString()}`),
+    clienteApi<UnidadeMedidaResposta[]>('/unidades-medida'),
+  ])
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -31,18 +38,18 @@ export default async function PecasPage({ searchParams }: Props) {
             {apenasAtivos ? ' (apenas ativos)' : ''}
           </p>
         </div>
-        <Link href="/pecas/novo">
-          <Button variant="primary">+ Nova peca</Button>
-        </Link>
+        <BotaoNovaPeca unidadesMedida={unidadesMedida} />
       </div>
 
       <Card padding="none">
         {dados.conteudo.length === 0 ? (
           <div className="p-10 text-center">
-            <p className="text-slate-500">Nenhuma peca cadastrada.</p>
-            <Link href="/pecas/novo" className="inline-block mt-4">
-              <Button size="sm">Cadastrar primeira peca</Button>
-            </Link>
+            <p className="text-slate-500 mb-4">Nenhuma peca cadastrada.</p>
+            <BotaoNovaPeca
+              unidadesMedida={unidadesMedida}
+              rotulo="Cadastrar primeira peca"
+              size="sm"
+            />
           </div>
         ) : (
           <div className="overflow-x-auto">

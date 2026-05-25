@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useActionState, useEffect } from 'react'
 import { atualizarPeca, criarPeca, type EstadoPeca } from '@/app/actions/peca'
 import type { PecaResposta, UnidadeMedidaResposta } from '@/app/lib/definicoes'
 import { Alert } from '@/components/ui/Alert'
@@ -15,11 +16,25 @@ const ESTADO_INICIAL: EstadoPeca = {}
 type Props = {
   peca: PecaResposta | null
   unidadesMedida: UnidadeMedidaResposta[]
+  /** Apenas no modo criar: quando informado, "Cancelar" fecha o modal. */
+  onCancelar?: () => void
+  /**
+   * Apenas no modo criar: chamado apos criar a peca. Sem callback, navega
+   * para o detalhe; com callback (drawer), o pai decide o destino.
+   */
+  onCriado?: (peca: PecaResposta) => void
 }
 
-export function FormularioPeca({ peca, unidadesMedida }: Props) {
+export function FormularioPeca({ peca, unidadesMedida, onCancelar, onCriado }: Props) {
+  const router = useRouter()
   const acao = peca ? atualizarPeca.bind(null, peca.id) : criarPeca
   const [estado, dispatch, pendente] = useActionState(acao, ESTADO_INICIAL)
+
+  useEffect(() => {
+    if (!estado.criado) return
+    if (onCriado) onCriado(estado.criado)
+    else router.push(`/pecas/${estado.criado.id}`)
+  }, [estado.criado, onCriado, router])
 
   return (
     <form action={dispatch} className="space-y-4">
@@ -61,9 +76,15 @@ export function FormularioPeca({ peca, unidadesMedida }: Props) {
       </Select>
 
       <div className="flex items-center justify-end gap-3 pt-2">
-        <Link href="/pecas">
-          <Button type="button" variant="ghost">Cancelar</Button>
-        </Link>
+        {onCancelar ? (
+          <Button type="button" variant="ghost" onClick={onCancelar} disabled={pendente}>
+            Cancelar
+          </Button>
+        ) : (
+          <Link href="/pecas">
+            <Button type="button" variant="ghost">Cancelar</Button>
+          </Link>
+        )}
         <Button type="submit" variant="primary" loading={pendente}>
           {pendente ? 'Salvando...' : peca ? 'Salvar alteracoes' : 'Criar peca'}
         </Button>
