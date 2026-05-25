@@ -54,9 +54,7 @@ export function Topbar({ usuario, botaoMenuMobile }: Props) {
         />
       </div>
 
-      <div className="flex-1 sm:hidden" />
-
-      <div className="relative" ref={ref}>
+      <div className="relative ml-auto" ref={ref}>
         <button
           onClick={() => setAberto((a) => !a)}
           className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-slate-50 transition-colors"
