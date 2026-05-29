@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type { CategoriaCustoResposta } from '@/app/lib/definicoes'
 import { Card } from '@/components/ui/Card'
+import { CabecalhoCategoriasCusto } from './cabecalho-categorias-custo'
 import { ListaCategoriasCusto } from './lista-categorias-custo'
 
 export default async function CategoriasCustoPage() {
@@ -16,12 +17,7 @@ export default async function CategoriasCustoPage() {
         ← Voltar para configuracoes
       </Link>
 
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Categorias de custo</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Lista fixa do sistema — codigo e tipo de lancamento sao imutaveis. Permite renomear e ativar/desativar.
-        </p>
-      </div>
+      <CabecalhoCategoriasCusto />
 
       <Card padding="md">
         <ListaCategoriasCusto categorias={categorias} />

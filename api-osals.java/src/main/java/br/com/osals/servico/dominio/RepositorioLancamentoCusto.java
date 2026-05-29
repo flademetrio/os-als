@@ -16,4 +16,7 @@ public interface RepositorioLancamentoCusto extends JpaRepository<LancamentoCust
             ORDER BY l.id
             """)
     List<LancamentoCusto> listarDoServico(@Param("servicoId") Long servicoId);
+
+    /** Quantos lancamentos historicos usam uma categoria — usado na exclusao. */
+    long countByCategoriaCustoId(Integer categoriaCustoId);
 }

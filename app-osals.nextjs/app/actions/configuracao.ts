@@ -106,6 +106,31 @@ export async function atualizarTipoServico(
 
 // ===== Categoria de Custo =====
 
+export async function criarCategoriaCusto(
+  _estado: EstadoConfiguracao,
+  formData: FormData,
+): Promise<EstadoConfiguracao> {
+  const nome = String(formData.get('nome') ?? '').trim()
+
+  if (!nome) {
+    return { errosCampos: { nome: 'Nome e obrigatorio' } }
+  }
+
+  try {
+    await clienteApi('/categorias-custo', {
+      method: 'POST',
+      body: { nome },
+    })
+  } catch (err) {
+    if (err instanceof ErroApi) return { erro: err.body.mensagem }
+    if (err instanceof ErroConexao) return { erro: 'Falha de conexao com a API.' }
+    return { erro: 'Erro ao criar categoria.' }
+  }
+
+  revalidatePath('/configuracoes/categorias-custo')
+  return { sucesso: true }
+}
+
 export async function atualizarCategoriaCusto(
   id: number,
   _estado: EstadoConfiguracao,
@@ -131,6 +156,19 @@ export async function atualizarCategoriaCusto(
 
   revalidatePath('/configuracoes/categorias-custo')
   return { sucesso: true }
+}
+
+/** Exclui uma categoria LIVRE sem lancamentos. Retorna mensagem se o backend recusar. */
+export async function excluirCategoriaCusto(id: number): Promise<{ erro?: string }> {
+  try {
+    await clienteApi(`/categorias-custo/${id}`, { method: 'DELETE' })
+  } catch (err) {
+    if (err instanceof ErroApi) return { erro: err.body.mensagem }
+    if (err instanceof ErroConexao) return { erro: 'Falha de conexao com a API.' }
+    return { erro: 'Erro ao excluir categoria.' }
+  }
+  revalidatePath('/configuracoes/categorias-custo')
+  return {}
 }
 
 // ===== Unidade de Medida =====
