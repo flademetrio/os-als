@@ -29,6 +29,7 @@ Documentos vivos — atualizados conforme decisões do PO.
 | 16 | [Plano de Implementação — Backend](16-plano-backend.md) | Fases de construção do back, com Definition of Done |
 | 17 | [Plano de Implementação — Frontend](17-plano-frontend.md) | Fases de construção do front, sincronizadas com o back |
 | 18 | [Usuários iniciais](18-usuarios-iniciais.md) | Lista de seed (admin + 3 operadores), senhas provisórias, plano de troca |
+| 19 | [Runbook de produção](19-runbook.md) | Setup do servidor, release, deploy, rollback, restore, troubleshooting |
 
 ## Convenções
 
