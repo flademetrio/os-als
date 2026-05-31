@@ -1,0 +1,91 @@
+# =====================================================================
+# Docker Compose do OS-ALS — PRODUCAO.
+#
+# Usa as imagens prontas do GHCR (ghcr.io/flademetrio/...). Nao builda
+# nada no servidor. Versao da release controlada pela variavel OSALS_VERSAO
+# do .env.prod (default "latest", recomendado fixar em "v1.0.0", "v1.0.1"...
+# para ter rollback determinístico).
+#
+# Pre-requisitos no host Ubuntu (ver runbook em documentacao/19-runbook.md):
+#   1. Criar o usuario "osals" com UID 10001 (mesmo da imagem da API):
+#        sudo useradd -u 10001 -r -s /usr/sbin/nologin osals
+#   2. Criar a arvore de dados em /srv/os-als:
+#        sudo mkdir -p /srv/os-als/{anexos,keys,logs,postgres}
+#        sudo chown -R osals:osals /srv/os-als
+#        sudo chmod 750 /srv/os-als/anexos /srv/os-als/keys /srv/os-als/logs
+#   3. Gerar as chaves JWT (novas, NAO reusar as de dev):
+#        sudo -u osals openssl genrsa -out /srv/os-als/keys/chave-privada.pem 2048
+#        sudo -u osals openssl rsa  -in  /srv/os-als/keys/chave-privada.pem \
+#                                   -pubout -out /srv/os-als/keys/chave-publica.pem
+#        sudo chmod 600 /srv/os-als/keys/chave-privada.pem
+#        sudo chmod 644 /srv/os-als/keys/chave-publica.pem
+#   4. Copiar .env.prod.example para .env.prod e ajustar todos os segredos.
+#   5. Login no GHCR (com PAT read:packages):
+#        docker login ghcr.io -u CONTA-DO-SERVIDOR
+#   6. docker compose -f docker-compose.prod.yml --env-file .env.prod pull
+#   7. docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+#
+# Update de versao: editar .env.prod (OSALS_VERSAO=v1.0.1), depois
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod pull
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+# =====================================================================
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: osals-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${BD_USUARIO}
+      POSTGRES_PASSWORD: ${BD_SENHA}
+      POSTGRES_DB: ${BD_NOME}
+    # SEM ports: na producao o banco e acessivel apenas pela rede interna
+    # do compose. Backup local com pg_dump dentro do container.
+    volumes:
+      - /srv/os-als/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${BD_USUARIO} -d ${BD_NOME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: ghcr.io/flademetrio/osals-api:${OSALS_VERSAO:-latest}
+    container_name: osals-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./.env.prod
+    environment:
+      # BD_URL aponta ao service "postgres" da rede do compose
+      BD_URL: jdbc:postgresql://postgres:5432/${BD_NOME}
+      ANEXOS_DIR: /var/os-als/anexos
+      LOGS_DIR: /var/log/os-als
+    ports:
+      - "8080:8080"
+    volumes:
+      - /srv/os-als/anexos:/var/os-als/anexos
+      - /srv/os-als/logs:/var/log/os-als
+      - /srv/os-als/keys:/app/keys:ro
+
+  frontend:
+    image: ghcr.io/flademetrio/osals-app:${OSALS_VERSAO:-latest}
+    container_name: osals-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file:
+      - ./.env.prod
+    environment:
+      # API_BASE_URL aponta ao service "backend" da rede do compose
+      API_BASE_URL: http://backend:8080
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    volumes:
+      # O frontend precisa da chave publica para validar JWT em server actions
+      - /srv/os-als/keys:/app/keys:ro

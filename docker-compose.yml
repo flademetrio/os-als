@@ -54,7 +54,10 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - anexos:/var/os-als/anexos
+      # Anexos como bind mount na mesma pasta usada pelo modo hibrido
+      # (mvnw spring-boot:run grava em api-osals.java/anexos-local/). Assim
+      # alternar entre modo Docker e nativo nao perde os PDFs gerados.
+      - ./api-osals.java/anexos-local:/var/os-als/anexos
       - logs:/var/log/os-als
       # Chaves RSA do JWT — gitignored, montadas do host (somente leitura)
       - ./api-osals.java/keys:/app/keys:ro
@@ -78,8 +81,6 @@ services:
 
 volumes:
   postgres-data:
-    driver: local
-  anexos:
     driver: local
   logs:
     driver: local

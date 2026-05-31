@@ -11,8 +11,10 @@
 .env
 .env.local
 .env.*.local
+.env.prod
 !.env.example
 !.env.local.example
+!.env.prod.example
 
 # Chaves (JWT RS256, certificados)
 keys/
