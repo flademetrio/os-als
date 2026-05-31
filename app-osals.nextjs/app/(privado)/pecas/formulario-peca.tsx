@@ -33,13 +33,17 @@ export function FormularioPeca({ peca, unidadesMedida, onCancelar, onCriado }: P
   useEffect(() => {
     if (!estado.criado) return
     if (onCriado) onCriado(estado.criado)
-    else router.push(`/pecas/${estado.criado.id}`)
+    else router.push('/pecas')
   }, [estado.criado, onCriado, router])
+
+  // Edicao concluida — volta para a listagem.
+  useEffect(() => {
+    if (estado.sucesso) router.push('/pecas')
+  }, [estado.sucesso, router])
 
   return (
     <form action={dispatch} className="space-y-4">
       {estado.erro && <Alert variant="danger" dismissible>{estado.erro}</Alert>}
-      {estado.sucesso && <Alert variant="success" dismissible>Dados atualizados.</Alert>}
 
       <Input
         label="Nome"

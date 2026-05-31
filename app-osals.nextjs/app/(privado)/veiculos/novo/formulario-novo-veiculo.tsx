@@ -26,7 +26,7 @@ export function FormularioNovoVeiculo({ onCancelar, onCriado }: Props = {}) {
   useEffect(() => {
     if (!estado.criado) return
     if (onCriado) onCriado(estado.criado)
-    else router.push(`/veiculos/${estado.criado.id}`)
+    else router.push('/veiculos')
   }, [estado.criado, onCriado, router])
 
   return (

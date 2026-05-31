@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useActionState, useEffect } from 'react'
 import { atualizarTecnico, type EstadoTecnico } from '@/app/actions/tecnico'
 import type { TecnicoResposta } from '@/app/lib/definicoes'
 import { centavosParaReais } from '@/app/lib/moeda'
@@ -16,8 +17,13 @@ type Props = {
 }
 
 export function FormularioEdicaoTecnico({ tecnico, podeEditar }: Props) {
+  const router = useRouter()
   const acao = atualizarTecnico.bind(null, tecnico.id)
   const [estado, dispatch, pendente] = useActionState(acao, ESTADO_INICIAL)
+
+  useEffect(() => {
+    if (estado.sucesso) router.push('/tecnicos')
+  }, [estado.sucesso, router])
 
   // Converte centavos -> "45,00" pro defaultValue do input
   const valorHoraDefault = (tecnico.valorHoraCentavos / 100)
@@ -27,7 +33,6 @@ export function FormularioEdicaoTecnico({ tecnico, podeEditar }: Props) {
   return (
     <form action={dispatch} className="space-y-4">
       {estado.erro && <Alert variant="danger" dismissible>{estado.erro}</Alert>}
-      {estado.sucesso && <Alert variant="success" dismissible>Dados atualizados.</Alert>}
 
       <Input
         label="Nome"

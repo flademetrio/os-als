@@ -25,7 +25,7 @@ export function FormularioNovoTecnico({ onCancelar, onCriado }: Props = {}) {
   useEffect(() => {
     if (!estado.criado) return
     if (onCriado) onCriado(estado.criado)
-    else router.push(`/tecnicos/${estado.criado.id}`)
+    else router.push('/tecnicos')
   }, [estado.criado, onCriado, router])
 
   return (

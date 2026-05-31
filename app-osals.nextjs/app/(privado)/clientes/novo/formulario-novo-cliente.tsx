@@ -36,7 +36,7 @@ export function FormularioNovoCliente({ onCancelar, onCriado }: Props = {}) {
     if (onCriado) {
       onCriado(estado.cliente)
     } else {
-      router.push(`/clientes/${estado.cliente.id}`)
+      router.push('/clientes')
     }
   }, [estado.cliente, onCriado, router])
 

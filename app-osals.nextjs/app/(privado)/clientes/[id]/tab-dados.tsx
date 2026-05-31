@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useActionState, useEffect } from 'react'
 import { atualizarCliente, type EstadoAtualizacaoCliente } from '@/app/actions/cliente'
 import type { ClienteResposta } from '@/app/lib/definicoes'
 import { Alert } from '@/components/ui/Alert'
@@ -10,19 +11,19 @@ import { Input } from '@/components/ui/Input'
 const ESTADO_INICIAL: EstadoAtualizacaoCliente = {}
 
 export function TabDados({ cliente }: { cliente: ClienteResposta }) {
+  const router = useRouter()
   const acaoVinculada = atualizarCliente.bind(null, cliente.id)
   const [estado, dispatch, pendente] = useActionState(acaoVinculada, ESTADO_INICIAL)
+
+  useEffect(() => {
+    if (estado.sucesso) router.push('/clientes')
+  }, [estado.sucesso, router])
 
   return (
     <form action={dispatch} className="space-y-4 max-w-xl">
       {estado.erro && (
         <Alert variant="danger" dismissible>
           {estado.erro}
-        </Alert>
-      )}
-      {estado.sucesso && (
-        <Alert variant="success" dismissible>
-          Dados atualizados com sucesso.
         </Alert>
       )}
 

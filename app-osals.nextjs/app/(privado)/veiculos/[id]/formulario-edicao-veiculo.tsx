@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useActionState, useEffect } from 'react'
 import { atualizarVeiculo, type EstadoVeiculo } from '@/app/actions/veiculo'
 import type { VeiculoResposta } from '@/app/lib/definicoes'
 import { Alert } from '@/components/ui/Alert'
@@ -11,13 +12,17 @@ import { Select } from '@/components/ui/Select'
 const ESTADO_INICIAL: EstadoVeiculo = {}
 
 export function FormularioEdicaoVeiculo({ veiculo }: { veiculo: VeiculoResposta }) {
+  const router = useRouter()
   const acao = atualizarVeiculo.bind(null, veiculo.id)
   const [estado, dispatch, pendente] = useActionState(acao, ESTADO_INICIAL)
+
+  useEffect(() => {
+    if (estado.sucesso) router.push('/veiculos')
+  }, [estado.sucesso, router])
 
   return (
     <form action={dispatch} className="space-y-4">
       {estado.erro && <Alert variant="danger" dismissible>{estado.erro}</Alert>}
-      {estado.sucesso && <Alert variant="success" dismissible>Dados atualizados.</Alert>}
 
       <Input
         label="Placa"

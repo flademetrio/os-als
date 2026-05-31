@@ -39,7 +39,7 @@ export function FormularioNovoEquipamento({ clientes, onCancelar, onCriado }: Pr
   useEffect(() => {
     if (!estado.criado) return
     if (onCriado) onCriado(estado.criado)
-    else router.push(`/equipamentos/${estado.criado.id}`)
+    else router.push('/equipamentos')
   }, [estado.criado, onCriado, router])
 
   // Carrega unidades quando cliente muda (chamada client-side via fetch ao back)

@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useActionState, useEffect } from 'react'
 import { atualizarEquipamento, type EstadoEquipamento } from '@/app/actions/equipamento'
 import type { EquipamentoResposta } from '@/app/lib/definicoes'
 import { TIPOS_EQUIPAMENTO_LABEL } from '@/app/lib/esquemas/equipamento'
@@ -16,13 +17,17 @@ export function FormularioEdicaoEquipamento({
 }: {
   equipamento: EquipamentoResposta
 }) {
+  const router = useRouter()
   const acao = atualizarEquipamento.bind(null, equipamento.id)
   const [estado, dispatch, pendente] = useActionState(acao, ESTADO_INICIAL)
+
+  useEffect(() => {
+    if (estado.sucesso) router.push('/equipamentos')
+  }, [estado.sucesso, router])
 
   return (
     <form action={dispatch} className="space-y-4">
       {estado.erro && <Alert variant="danger" dismissible>{estado.erro}</Alert>}
-      {estado.sucesso && <Alert variant="success" dismissible>Dados atualizados.</Alert>}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Input label="Marca" name="marca" defaultValue={equipamento.marca ?? ''} fullWidth />
