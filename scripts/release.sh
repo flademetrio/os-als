@@ -84,12 +84,31 @@ docker build \
   --tag "${IMG_APP}:latest" \
   ./app-osals.nextjs
 
-# ---------- Push ----------
+# ---------- Push (com retry — o GHCR costuma falhar no primeiro push
+# de um pacote novo com "error from registry: unknown") ----------
+push_retry() {
+  local img="$1"
+  local tentativas=3
+  local pausa=2
+  local n
+  for n in $(seq 1 $tentativas); do
+    if docker push "$img"; then
+      return 0
+    fi
+    if [[ $n -lt $tentativas ]]; then
+      echo "    push de ${img} falhou (tentativa ${n}/${tentativas}), aguardando ${pausa}s e tentando de novo..."
+      sleep "$pausa"
+    fi
+  done
+  echo "Erro: push de ${img} falhou apos ${tentativas} tentativas." >&2
+  return 1
+}
+
 echo "==> Push das 4 tags para o GHCR..."
-docker push "${IMG_API}:${TAG}"
-docker push "${IMG_API}:latest"
-docker push "${IMG_APP}:${TAG}"
-docker push "${IMG_APP}:latest"
+push_retry "${IMG_API}:${TAG}"
+push_retry "${IMG_API}:latest"
+push_retry "${IMG_APP}:${TAG}"
+push_retry "${IMG_APP}:latest"
 
 # ---------- Git tag ----------
 if git rev-parse "$TAG" >/dev/null 2>&1; then
