@@ -1,0 +1,75 @@
+# =====================================================================
+# Smoke test local das imagens do GHCR.
+# Usa as mesmas imagens que rodam em producao, mas sem os bind mounts
+# de /srv/os-als/ (que so existem no servidor Ubuntu). Aponta para as
+# mesmas pastas locais que o docker-compose.yml de dev usa, pra ficar
+# rodando lado-a-lado sem conflitar.
+#
+# Uso:
+#   docker compose -f docker-compose.smoke.yml up -d
+#   docker compose -f docker-compose.smoke.yml down
+#
+# Versao a testar: a tag deve existir no GHCR. Para mudar, edite
+# IMG_API_TAG e IMG_APP_TAG abaixo, ou rode com:
+#   IMG_API_TAG=v1.0.1 IMG_APP_TAG=v1.0.1 docker compose -f docker-compose.smoke.yml up -d
+# =====================================================================
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: osals-smoke-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: osals
+      POSTGRES_PASSWORD: osals-dev
+      POSTGRES_DB: osals
+    ports:
+      - "5433:5432"
+    volumes:
+      - smoke-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U osals -d osals"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: ghcr.io/flademetrio/osals-api:${IMG_API_TAG:-v1.0.0}
+    container_name: osals-smoke-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./api-osals.java/.env
+    environment:
+      BD_URL: jdbc:postgresql://postgres:5432/osals
+      ANEXOS_DIR: /var/os-als/anexos
+      LOGS_DIR: /var/log/os-als
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./api-osals.java/anexos-local:/var/os-als/anexos
+      - ./api-osals.java/keys:/app/keys:ro
+
+  frontend:
+    image: ghcr.io/flademetrio/osals-app:${IMG_APP_TAG:-v1.0.0}
+    container_name: osals-smoke-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file:
+      - ./app-osals.nextjs/.env.local
+    environment:
+      API_BASE_URL: http://backend:8080
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./app-osals.nextjs/keys:/app/keys:ro
+
+volumes:
+  smoke-postgres:
+    driver: local
