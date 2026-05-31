@@ -85,6 +85,12 @@ logs/
 anexos-local/
 
 # ---------------------------------------------------------------------
+# Bundles portateis gerados por scripts/empacotar-bundle.ps1 — contem
+# .env, chaves JWT e imagens em .tar (segredos).
+# ---------------------------------------------------------------------
+bundle-*/
+
+# ---------------------------------------------------------------------
 # IDEs e editores — o projeto e desenvolvido em VS Code e IntelliJ IDEA
 # ---------------------------------------------------------------------
 # IntelliJ IDEA — ignora a config local da IDE por inteiro
