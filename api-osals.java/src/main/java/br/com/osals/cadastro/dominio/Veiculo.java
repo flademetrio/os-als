@@ -61,6 +61,12 @@ public class Veiculo {
         this.updatedAt = OffsetDateTime.now();
     }
 
+    /** Troca a placa. A unicidade e validada pelo Servico antes de chamar. */
+    public void mudarPlaca(String novaPlaca) {
+        this.placa = novaPlaca;
+        this.updatedAt = OffsetDateTime.now();
+    }
+
     public void inativar() {
         this.ativo = false;
         this.updatedAt = OffsetDateTime.now();

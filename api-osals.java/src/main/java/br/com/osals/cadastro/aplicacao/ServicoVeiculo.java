@@ -58,7 +58,18 @@ public class ServicoVeiculo {
     @Transactional
     public VeiculoResposta atualizar(Long id, VeiculoRequisicao req) {
         var v = obrigatorio(id);
-        // Placa nao alteravel via update (criar novo veiculo se placa muda — alinhamento legal)
+
+        // Permite alterar a placa, mas valida unicidade. So executa o lookup
+        // se a placa de fato mudou — evita falso positivo (a propria do veiculo).
+        String novaPlaca = normalizarPlaca(req.placa());
+        if (novaPlaca != null && !novaPlaca.equals(v.getPlaca())) {
+            if (repositorio.existsByPlaca(novaPlaca)) {
+                throw new DuplicidadeException("Ja existe veiculo com esta placa.");
+            }
+            v.mudarPlaca(novaPlaca);
+            log.info("Veiculo {}: placa alterada para {}", id, novaPlaca);
+        }
+
         v.atualizarDados(normalizar(req.marca()), normalizar(req.modelo()), req.ano(), req.status());
         return mapper.paraVeiculoResposta(v);
     }
