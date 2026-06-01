@@ -46,11 +46,22 @@ public final class EspecificacoesOrdemServico {
             if (busca != null && !busca.isBlank()) {
                 String termo = busca.trim();
                 String like = "%" + termo.toLowerCase() + "%";
-                Predicate porDescricao = cb.like(
-                        cb.lower(root.get("descricaoAtividade")), like);
-                Predicate porNumero = cb.like(
-                        root.get("numero").as(String.class), "%" + termo + "%");
-                predicates.add(cb.or(porDescricao, porNumero));
+
+                List<Predicate> ors = new ArrayList<>();
+                ors.add(cb.like(cb.lower(root.get("descricaoAtividade")), like));
+
+                // Busca por numero exato apenas se termo for puramente numerico.
+                // Evita CAST SQL (que quebra como "operator does not exist:
+                // integer ~~ text") e e mais util na pratica.
+                if (termo.matches("\\d+")) {
+                    try {
+                        ors.add(cb.equal(root.get("numero"), Integer.parseInt(termo)));
+                    } catch (NumberFormatException ignore) {
+                        // termo > Integer.MAX_VALUE — ignora a parte de numero
+                    }
+                }
+
+                predicates.add(cb.or(ors.toArray(new Predicate[0])));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
