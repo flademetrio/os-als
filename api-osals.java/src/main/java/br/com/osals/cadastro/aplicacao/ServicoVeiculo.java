@@ -3,6 +3,7 @@ package br.com.osals.cadastro.aplicacao;
 import br.com.osals.cadastro.aplicacao.dto.VeiculoRequisicao;
 import br.com.osals.cadastro.aplicacao.dto.VeiculoResposta;
 import br.com.osals.cadastro.aplicacao.dto.VeiculoResumoDto;
+import br.com.osals.cadastro.dominio.EspecificacoesVeiculo;
 import br.com.osals.cadastro.dominio.RepositorioVeiculo;
 import br.com.osals.cadastro.dominio.StatusVeiculo;
 import br.com.osals.cadastro.dominio.Veiculo;
@@ -31,8 +32,8 @@ public class ServicoVeiculo {
 
     public PaginaResposta<VeiculoResumoDto> listar(StatusVeiculo status, String busca,
                                                    boolean apenasAtivos, Pageable pageable) {
-        String b = (busca == null || busca.isBlank()) ? "" : busca.trim().toUpperCase();
-        var page = repositorio.buscarFiltrado(status, b, apenasAtivos, pageable);
+        var spec = EspecificacoesVeiculo.comFiltros(status, busca, apenasAtivos);
+        var page = repositorio.findAll(spec, pageable);
         return PaginaResposta.de(page.map(mapper::paraVeiculoResumo));
     }
 

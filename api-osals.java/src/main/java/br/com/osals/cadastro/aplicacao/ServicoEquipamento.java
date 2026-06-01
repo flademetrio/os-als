@@ -4,6 +4,7 @@ import br.com.osals.cadastro.aplicacao.dto.EquipamentoRequisicao;
 import br.com.osals.cadastro.aplicacao.dto.EquipamentoResposta;
 import br.com.osals.cadastro.aplicacao.dto.EquipamentoResumoDto;
 import br.com.osals.cadastro.dominio.Equipamento;
+import br.com.osals.cadastro.dominio.EspecificacoesEquipamento;
 import br.com.osals.cadastro.dominio.RepositorioEquipamento;
 import br.com.osals.cadastro.dominio.RepositorioUnidade;
 import br.com.osals.cadastro.dominio.StatusEquipamento;
@@ -47,8 +48,9 @@ public class ServicoEquipamento {
             Long clienteId, Long unidadeId, TipoEquipamento tipo, StatusEquipamento status,
             String busca, boolean apenasAtivos, Pageable pageable
     ) {
-        String b = (busca == null || busca.isBlank()) ? "" : busca.trim();
-        var page = repositorio.buscarFiltrado(clienteId, unidadeId, tipo, status, b, apenasAtivos, pageable);
+        var spec = EspecificacoesEquipamento.comFiltros(
+                clienteId, unidadeId, tipo, status, busca, apenasAtivos);
+        var page = repositorio.findAll(spec, pageable);
         return PaginaResposta.de(page.map(mapper::paraEquipamentoResumo));
     }
 

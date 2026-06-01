@@ -13,6 +13,7 @@ import br.com.osals.ordemservico.aplicacao.dto.AberturaOsRequisicao;
 import br.com.osals.ordemservico.aplicacao.dto.DigitacaoExecucaoRequisicao;
 import br.com.osals.ordemservico.aplicacao.dto.OrdemServicoResposta;
 import br.com.osals.ordemservico.aplicacao.dto.OrdemServicoResumoDto;
+import br.com.osals.ordemservico.dominio.EspecificacoesOrdemServico;
 import br.com.osals.ordemservico.dominio.OrdemServico;
 import br.com.osals.ordemservico.dominio.RepositorioOrdemServico;
 import br.com.osals.ordemservico.dominio.StatusOrdemServico;
@@ -65,8 +66,8 @@ public class GestorOrdemServico {
 
     public PaginaResposta<OrdemServicoResumoDto> listar(StatusOrdemServico status, Long servicoId,
                                                         Long clienteId, String busca, Pageable pageable) {
-        String b = (busca == null || busca.isBlank()) ? "" : busca.trim();
-        var page = repositorio.buscarFiltrado(status, servicoId, clienteId, b, pageable);
+        var spec = EspecificacoesOrdemServico.comFiltros(status, servicoId, clienteId, busca);
+        var page = repositorio.findAll(spec, pageable);
         return PaginaResposta.de(page.map(mapper::paraResumo));
     }
 

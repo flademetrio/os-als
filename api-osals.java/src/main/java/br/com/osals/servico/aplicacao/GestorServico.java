@@ -12,6 +12,7 @@ import br.com.osals.servico.aplicacao.dto.AtualizacaoServicoRequisicao;
 import br.com.osals.servico.aplicacao.dto.CriacaoServicoRequisicao;
 import br.com.osals.servico.aplicacao.dto.ServicoResposta;
 import br.com.osals.servico.aplicacao.dto.ServicoResumoDto;
+import br.com.osals.servico.dominio.EspecificacoesServico;
 import br.com.osals.servico.dominio.RepositorioServico;
 import br.com.osals.servico.dominio.Servico;
 import br.com.osals.servico.dominio.StatusServico;
@@ -51,12 +52,12 @@ public class GestorServico {
     public PaginaResposta<ServicoResumoDto> listar(List<StatusServico> status, Long clienteId,
                                                    Integer tipoServicoId, LocalDate inicio,
                                                    LocalDate fim, String busca, Pageable pageable) {
-        String b = (busca == null || busca.isBlank()) ? "" : busca.trim();
         // Sem filtro de status -> considera todos (evita IN com lista vazia).
         List<StatusServico> statusFiltro =
                 (status == null || status.isEmpty()) ? List.of(StatusServico.values()) : status;
-        var page = repositorio.buscarFiltrado(
-                statusFiltro, clienteId, tipoServicoId, inicio, fim, b, pageable);
+        var spec = EspecificacoesServico.comFiltros(
+                statusFiltro, clienteId, tipoServicoId, inicio, fim, busca);
+        var page = repositorio.findAll(spec, pageable);
         return PaginaResposta.de(page.map(mapper::paraResumo));
     }
 
