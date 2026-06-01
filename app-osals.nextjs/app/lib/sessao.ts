@@ -104,7 +104,10 @@ export async function repassarCookiesDeApi(resposta: Response): Promise<void> {
       path: cookie.path ?? '/',
       maxAge: cookie.maxAge,
       sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      // Cookies Secure so funcionam em HTTPS (localhost e excecao). Como
+      // o sistema roda on-premise em HTTP, default e false. Quando subir
+      // HTTPS (reverse proxy, dominio), setar COOKIES_SECURE=true no env.
+      secure: process.env.COOKIES_SECURE === 'true',
     })
   }
 }
