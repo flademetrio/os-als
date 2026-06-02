@@ -11,6 +11,9 @@ public interface RepositorioServico
     @Query(value = "SELECT nextval('servico_numero_seq')", nativeQuery = true)
     Long proximoNumero();
 
+    /** Quantos Servicos usam um determinado tipo - usado ao validar exclusao. */
+    long countByTipoServicoId(Integer tipoServicoId);
+
     // A busca filtrada vive em EspecificacoesServico + GestorServico.listar(),
     // usando JpaSpecificationExecutor para evitar o problema do Postgres com
     // "(:param IS NULL OR ...)" quando :param e LocalDate sem typecast.

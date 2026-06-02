@@ -77,6 +77,27 @@ export async function atualizarValorKm(
 
 // ===== Tipo de Serviço =====
 
+export async function criarTipoServico(
+  _estado: EstadoConfiguracao,
+  formData: FormData,
+): Promise<EstadoConfiguracao> {
+  const nome = String(formData.get('nome') ?? '').trim()
+  if (!nome) {
+    return { errosCampos: { nome: 'Nome e obrigatorio' } }
+  }
+
+  try {
+    await clienteApi('/tipos-servico', { method: 'POST', body: { nome } })
+  } catch (err) {
+    if (err instanceof ErroApi) return { erro: err.body.mensagem }
+    if (err instanceof ErroConexao) return { erro: 'Falha de conexao com a API.' }
+    return { erro: 'Erro ao criar tipo de servico.' }
+  }
+
+  revalidatePath('/configuracoes/tipos-servico')
+  return { sucesso: true }
+}
+
 export async function atualizarTipoServico(
   id: number,
   _estado: EstadoConfiguracao,
@@ -102,6 +123,19 @@ export async function atualizarTipoServico(
 
   revalidatePath('/configuracoes/tipos-servico')
   return { sucesso: true }
+}
+
+/** Exclui um tipo de servico. Retorna mensagem se houver servico vinculado. */
+export async function excluirTipoServico(id: number): Promise<{ erro?: string }> {
+  try {
+    await clienteApi(`/tipos-servico/${id}`, { method: 'DELETE' })
+  } catch (err) {
+    if (err instanceof ErroApi) return { erro: err.body.mensagem }
+    if (err instanceof ErroConexao) return { erro: 'Falha de conexao com a API.' }
+    return { erro: 'Erro ao excluir tipo de servico.' }
+  }
+  revalidatePath('/configuracoes/tipos-servico')
+  return {}
 }
 
 // ===== Categoria de Custo =====

@@ -29,6 +29,11 @@ public class TipoServico {
         // JPA
     }
 
+    public TipoServico(String nome) {
+        this.nome = nome;
+        this.ativo = true;
+    }
+
     public void atualizar(String nome, boolean ativo) {
         this.nome = nome;
         this.ativo = ativo;
