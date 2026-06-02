@@ -1,5 +1,6 @@
 package br.com.osals.servico.aplicacao;
 
+import br.com.osals.anexo.aplicacao.GestorAnexo;
 import br.com.osals.cadastro.dominio.Cliente;
 import br.com.osals.cadastro.dominio.RepositorioCliente;
 import br.com.osals.cadastro.dominio.RepositorioTipoServico;
@@ -7,12 +8,15 @@ import br.com.osals.cadastro.dominio.TipoServico;
 import br.com.osals.compartilhado.api.PaginaResposta;
 import br.com.osals.compartilhado.excecoes.NegocioException;
 import br.com.osals.compartilhado.excecoes.RecursoNaoEncontradoException;
+import br.com.osals.ordemservico.aplicacao.GestorOrdemServico;
+import br.com.osals.ordemservico.dominio.RepositorioOrdemServico;
 import br.com.osals.seguranca.dominio.Usuario;
 import br.com.osals.servico.aplicacao.dto.AtualizacaoServicoRequisicao;
 import br.com.osals.servico.aplicacao.dto.CriacaoServicoRequisicao;
 import br.com.osals.servico.aplicacao.dto.ServicoResposta;
 import br.com.osals.servico.aplicacao.dto.ServicoResumoDto;
 import br.com.osals.servico.dominio.EspecificacoesServico;
+import br.com.osals.servico.dominio.RepositorioLancamentoCusto;
 import br.com.osals.servico.dominio.RepositorioServico;
 import br.com.osals.servico.dominio.Servico;
 import br.com.osals.servico.dominio.StatusServico;
@@ -37,15 +41,27 @@ public class GestorServico {
     private final RepositorioServico repositorio;
     private final RepositorioCliente repositorioCliente;
     private final RepositorioTipoServico repositorioTipoServico;
+    private final RepositorioOrdemServico repositorioOrdemServico;
+    private final RepositorioLancamentoCusto repositorioLancamentoCusto;
+    private final GestorOrdemServico gestorOrdemServico;
+    private final GestorAnexo gestorAnexo;
     private final MapperServico mapper;
 
     public GestorServico(RepositorioServico repositorio,
                          RepositorioCliente repositorioCliente,
                          RepositorioTipoServico repositorioTipoServico,
+                         RepositorioOrdemServico repositorioOrdemServico,
+                         RepositorioLancamentoCusto repositorioLancamentoCusto,
+                         GestorOrdemServico gestorOrdemServico,
+                         GestorAnexo gestorAnexo,
                          MapperServico mapper) {
         this.repositorio = repositorio;
         this.repositorioCliente = repositorioCliente;
         this.repositorioTipoServico = repositorioTipoServico;
+        this.repositorioOrdemServico = repositorioOrdemServico;
+        this.repositorioLancamentoCusto = repositorioLancamentoCusto;
+        this.gestorOrdemServico = gestorOrdemServico;
+        this.gestorAnexo = gestorAnexo;
         this.mapper = mapper;
     }
 
@@ -116,6 +132,38 @@ public class GestorServico {
         s.cancelar(autor);
         log.info("Servico {} cancelado por usuario {}", id, autor.getId());
         return mapper.paraResposta(s);
+    }
+
+    /**
+     * Operacao administrativa: apaga o Servico e tudo o que depende dele
+     * (OS + anexos das OS + lancamentos de custo + anexos do servico).
+     * Endpoint restrito a ADMIN.
+     */
+    @Transactional
+    public void excluir(Long id, Usuario autor) {
+        var s = obrigatorio(id);
+
+        // 1. Apaga cada OS do servico via gestor (cuida do anexo + cascade)
+        var oss = repositorioOrdemServico.findByServicoIdOrderByNumero(id);
+        for (var os : oss) {
+            gestorOrdemServico.excluir(os.getId(), autor);
+        }
+
+        // 2. Apaga lancamentos de custo do servico
+        var lancamentos = repositorioLancamentoCusto.listarDoServico(id);
+        if (!lancamentos.isEmpty()) {
+            repositorioLancamentoCusto.deleteAll(lancamentos);
+        }
+
+        // 3. Apaga anexos do proprio servico (storage + registros)
+        gestorAnexo.apagarTodosAnexosDoServico(id);
+
+        // 4. Apaga o Servico
+        repositorio.delete(s);
+
+        log.info("Servico {} (numero {}) excluido por usuario {} (admin) — "
+                + "{} OS, {} lancamentos",
+                id, s.getNumero(), autor.getId(), oss.size(), lancamentos.size());
     }
 
     Servico obrigatorio(Long id) {

@@ -195,6 +195,21 @@ public class OrdemServico {
         transicionar(StatusOrdemServico.CANCELADA);
     }
 
+    /**
+     * Operacao administrativa: reabre uma OS previamente CANCELADA, voltando ao
+     * status ABERTA e limpando a data de impressao (se houver). Bypassa a
+     * maquina de estado normal — so deve ser chamada via endpoint restrito a ADMIN.
+     */
+    public void reabrirCancelada() {
+        if (status != StatusOrdemServico.CANCELADA) {
+            throw new NegocioException(
+                    "Apenas OS cancelada pode ser reaberta. Status atual: "
+                            + status.getRotulo() + ".");
+        }
+        this.status = StatusOrdemServico.ABERTA;
+        this.dataImpressao = null;
+    }
+
     private void transicionar(StatusOrdemServico destino) {
         if (!status.permiteTransicaoPara(destino)) {
             throw new NegocioException("Nao e possivel mudar a OS de "

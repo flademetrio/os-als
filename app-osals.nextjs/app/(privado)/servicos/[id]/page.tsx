@@ -57,6 +57,7 @@ export default async function ServicoDetalhePage({ params }: Props) {
 
   const encerrado = servico.status === 'CONCLUIDO' || servico.status === 'CANCELADO'
   const ehGestor = sessao?.papel === 'GERENTE' || sessao?.papel === 'ADMIN'
+  const ehAdmin = sessao?.papel === 'ADMIN'
   const podeAlterarCustos = !encerrado || ehGestor
 
   return (
@@ -97,7 +98,7 @@ export default async function ServicoDetalhePage({ params }: Props) {
             </p>
           </div>
 
-          <AcoesCabecalhoServico servico={servico} />
+          <AcoesCabecalhoServico servico={servico} ehAdmin={ehAdmin} />
         </div>
 
         {servico.finalizadoEm && (
@@ -122,6 +123,7 @@ export default async function ServicoDetalhePage({ params }: Props) {
         podeAlterarCustos={podeAlterarCustos}
         anexos={anexos}
         ehGestor={ehGestor}
+        ehAdmin={ehAdmin}
       />
     </div>
   )

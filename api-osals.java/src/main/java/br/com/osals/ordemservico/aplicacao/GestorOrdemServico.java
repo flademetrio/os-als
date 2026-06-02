@@ -1,5 +1,6 @@
 package br.com.osals.ordemservico.aplicacao;
 
+import br.com.osals.anexo.aplicacao.GestorAnexo;
 import br.com.osals.cadastro.dominio.ContatoCliente;
 import br.com.osals.cadastro.dominio.Equipamento;
 import br.com.osals.cadastro.dominio.RepositorioContatoCliente;
@@ -46,6 +47,7 @@ public class GestorOrdemServico {
     private final RepositorioVeiculo repositorioVeiculo;
     private final RepositorioEquipamento repositorioEquipamento;
     private final RepositorioContatoCliente repositorioContato;
+    private final GestorAnexo gestorAnexo;
     private final MapperOrdemServico mapper;
 
     public GestorOrdemServico(RepositorioOrdemServico repositorio,
@@ -54,6 +56,7 @@ public class GestorOrdemServico {
                               RepositorioVeiculo repositorioVeiculo,
                               RepositorioEquipamento repositorioEquipamento,
                               RepositorioContatoCliente repositorioContato,
+                              GestorAnexo gestorAnexo,
                               MapperOrdemServico mapper) {
         this.repositorio = repositorio;
         this.repositorioServico = repositorioServico;
@@ -61,6 +64,7 @@ public class GestorOrdemServico {
         this.repositorioVeiculo = repositorioVeiculo;
         this.repositorioEquipamento = repositorioEquipamento;
         this.repositorioContato = repositorioContato;
+        this.gestorAnexo = gestorAnexo;
         this.mapper = mapper;
     }
 
@@ -140,6 +144,31 @@ public class GestorOrdemServico {
         os.cancelar();
         log.info("OS {} cancelada", id);
         return mapper.paraResposta(os);
+    }
+
+    /**
+     * Operacao administrativa: reabre uma OS CANCELADA voltando ao status
+     * ABERTA. Endpoint restrito a ADMIN.
+     */
+    @Transactional
+    public OrdemServicoResposta reabrirCancelada(Long id, Usuario autor) {
+        var os = obrigatorio(id);
+        os.reabrirCancelada();
+        log.info("OS {} reaberta por usuario {} (admin)", id, autor.getId());
+        return mapper.paraResposta(os);
+    }
+
+    /**
+     * Operacao administrativa: apaga uma OS por completo (anexo + tabelas de
+     * juncao via cascade SQL + a propria OS). Endpoint restrito a ADMIN.
+     */
+    @Transactional
+    public void excluir(Long id, Usuario autor) {
+        var os = obrigatorio(id);
+        gestorAnexo.apagarAnexoDaOsSeExistir(id);
+        repositorio.delete(os);
+        log.info("OS {} (numero {}) excluida por usuario {} (admin)",
+                id, os.getNumero(), autor.getId());
     }
 
     OrdemServico obrigatorio(Long id) {

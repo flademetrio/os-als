@@ -97,3 +97,16 @@ export async function cancelarServico(id: number): Promise<void> {
   revalidatePath(`/servicos/${id}`)
   revalidatePath('/servicos')
 }
+
+/** Admin: exclui permanentemente o Servico (cascateia OS, anexos, lancamentos). */
+export async function excluirServico(id: number): Promise<{ erro?: string }> {
+  try {
+    await clienteApi(`/servicos/${id}`, { method: 'DELETE' })
+  } catch (err) {
+    if (err instanceof ErroApi) return { erro: err.body.mensagem }
+    if (err instanceof ErroConexao) return { erro: 'Falha de conexao com a API.' }
+    return { erro: 'Erro ao excluir o servico.' }
+  }
+  revalidatePath('/servicos')
+  redirect('/servicos')
+}

@@ -173,6 +173,36 @@ public class GestorAnexo {
         log.info("Anexo da OS {} removido", osId);
     }
 
+    // ===== Operacoes administrativas (chamadas em cascata pelo delete) =====
+
+    /**
+     * Apaga o anexo da OS (storage + registro) se existir. Sem verificacao de
+     * autor/papel — destinado a operacoes administrativas em cascata
+     * (exclusao de OS/Servico via endpoint protegido por ROLE_ADMIN).
+     */
+    @Transactional
+    public void apagarAnexoDaOsSeExistir(Long osId) {
+        repositorioAnexoOs.findById(osId).ifPresent(a -> {
+            String chave = a.getStorageKey();
+            repositorioAnexoOs.delete(a);
+            storage.remover(chave);
+        });
+    }
+
+    /**
+     * Apaga TODOS os anexos do Servico (storage + registros). Sem verificacao
+     * de autor/papel — destinado a operacoes administrativas em cascata.
+     */
+    @Transactional
+    public void apagarTodosAnexosDoServico(Long servicoId) {
+        var lista = repositorioAnexoServico.listarDoServico(servicoId);
+        for (var a : lista) {
+            String chave = a.getStorageKey();
+            repositorioAnexoServico.delete(a);
+            storage.remover(chave);
+        }
+    }
+
     // ===== Validacao =====
 
     /** Valida que o arquivo e um PDF dentro do limite e devolve seus bytes. */

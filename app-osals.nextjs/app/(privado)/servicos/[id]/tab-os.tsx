@@ -19,6 +19,7 @@ type Props = {
   servico: ServicoResposta
   ordens: OrdemServicoResumoDto[]
   ehGestor: boolean
+  ehAdmin?: boolean
   tecnicos: TecnicoResumoDto[]
   veiculos: VeiculoResumoDto[]
   equipamentos: EquipamentoResumoDto[]
@@ -33,6 +34,7 @@ export function TabOs({
   servico,
   ordens,
   ehGestor,
+  ehAdmin = false,
   tecnicos,
   veiculos,
   equipamentos,
@@ -106,7 +108,12 @@ export function TabOs({
       )}
 
       {osAberta != null && (
-        <ModalDetalheOs osId={osAberta} ehGestor={ehGestor} onClose={fechar} />
+        <ModalDetalheOs
+          osId={osAberta}
+          ehGestor={ehGestor}
+          ehAdmin={ehAdmin}
+          onClose={fechar}
+        />
       )}
     </div>
   )

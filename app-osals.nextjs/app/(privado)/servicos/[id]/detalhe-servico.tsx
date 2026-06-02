@@ -37,6 +37,7 @@ type Props = {
   podeAlterarCustos: boolean
   anexos: AnexoServicoResposta[]
   ehGestor: boolean
+  ehAdmin?: boolean
 }
 
 export function DetalheServico({
@@ -53,6 +54,7 @@ export function DetalheServico({
   podeAlterarCustos,
   anexos,
   ehGestor,
+  ehAdmin = false,
 }: Props) {
   const [aba, setAba] = useState<AbaId>('dados')
 
@@ -78,6 +80,7 @@ export function DetalheServico({
             servico={servico}
             ordens={ordens}
             ehGestor={ehGestor}
+            ehAdmin={ehAdmin}
             tecnicos={tecnicos}
             veiculos={veiculos}
             equipamentos={equipamentos}

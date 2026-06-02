@@ -121,3 +121,35 @@ export async function cancelarOrdemServico(osId: number): Promise<void> {
   revalidatePath(`/ordens-servico/${osId}`)
   revalidatePath('/ordens-servico')
 }
+
+/** Admin: reabre uma OS cancelada (status volta a ABERTA). */
+export async function reabrirOrdemServicoCancelada(osId: number): Promise<{ erro?: string }> {
+  try {
+    await clienteApi(`/ordens-servico/${osId}/reabrir`, { method: 'POST' })
+  } catch (err) {
+    if (err instanceof ErroApi) return { erro: err.body.mensagem }
+    if (err instanceof ErroConexao) return { erro: 'Falha de conexao com a API.' }
+    return { erro: 'Erro ao reabrir a OS.' }
+  }
+  revalidatePath(`/ordens-servico/${osId}`)
+  revalidatePath('/ordens-servico')
+  return {}
+}
+
+/** Admin: exclui permanentemente uma OS (anexo + relacoes). Retorna servicoId para
+ *  o caller redirecionar para a tela do Servico se desejar. */
+export async function excluirOrdemServico(
+  osId: number,
+  servicoId: number,
+): Promise<{ erro?: string }> {
+  try {
+    await clienteApi(`/ordens-servico/${osId}`, { method: 'DELETE' })
+  } catch (err) {
+    if (err instanceof ErroApi) return { erro: err.body.mensagem }
+    if (err instanceof ErroConexao) return { erro: 'Falha de conexao com a API.' }
+    return { erro: 'Erro ao excluir a OS.' }
+  }
+  revalidatePath(`/servicos/${servicoId}`)
+  revalidatePath('/ordens-servico')
+  return {}
+}

@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -116,8 +117,29 @@ public class ControladorOrdemServico {
 
     @PostMapping("/ordens-servico/{id}/cancelar")
     @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Cancela a OS. Encerramento alternativo, irreversivel.")
+    @Operation(summary = "Cancela a OS. Encerramento alternativo.")
     public ResponseEntity<OrdemServicoResposta> cancelar(@PathVariable Long id) {
         return ResponseEntity.ok(gestor.cancelar(id));
+    }
+
+    @PostMapping("/ordens-servico/{id}/reabrir")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Reabre uma OS cancelada (status volta a ABERTA). Apenas admin.")
+    public ResponseEntity<OrdemServicoResposta> reabrir(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Usuario autor
+    ) {
+        return ResponseEntity.ok(gestor.reabrirCancelada(id, autor));
+    }
+
+    @DeleteMapping("/ordens-servico/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Exclui permanentemente uma OS (com anexo). Apenas admin.")
+    public ResponseEntity<Void> excluir(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Usuario autor
+    ) {
+        gestor.excluir(id, autor);
+        return ResponseEntity.noContent().build();
     }
 }

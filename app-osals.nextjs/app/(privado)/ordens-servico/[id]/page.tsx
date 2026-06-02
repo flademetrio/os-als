@@ -25,6 +25,7 @@ export default async function OrdemServicoDetalhePage({ params }: Props) {
   const sessao = await lerSessao()
   const encerrada = os.status === 'CONCLUIDA' || os.status === 'CANCELADA'
   const ehGestor = sessao?.papel === 'GERENTE' || sessao?.papel === 'ADMIN'
+  const ehAdmin = sessao?.papel === 'ADMIN'
   const podeAlterarAnexo = !encerrada || ehGestor
 
   return (
@@ -66,7 +67,7 @@ export default async function OrdemServicoDetalhePage({ params }: Props) {
               {os.dataImpressao ? ` · Impressa em ${formatarDataHora(os.dataImpressao)}` : ''}
             </p>
           </div>
-          <AcoesOs os={os} />
+          <AcoesOs os={os} ehAdmin={ehAdmin} />
         </div>
       </Card>
 

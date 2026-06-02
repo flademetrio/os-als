@@ -15,11 +15,12 @@ type RespostaProxy = { os: OrdemServicoResposta; anexo: AnexoOsResposta | null }
 type Props = {
   osId: number
   ehGestor: boolean
+  ehAdmin?: boolean
   onClose: () => void
 }
 
 /** Modal (drawer) com o detalhe completo de uma OS, aberto a partir do Servico. */
-export function ModalDetalheOs({ osId, ehGestor, onClose }: Props) {
+export function ModalDetalheOs({ osId, ehGestor, ehAdmin = false, onClose }: Props) {
   const [dados, setDados] = useState<RespostaProxy | null>(null)
   const [erro, setErro] = useState<string | null>(null)
 
@@ -86,7 +87,7 @@ export function ModalDetalheOs({ osId, ehGestor, onClose }: Props) {
                 {os.dataImpressao ? ` · Impressa em ${dataHora(os.dataImpressao)}` : ''}
               </p>
             </div>
-            <AcoesOs os={os} onConcluido={onClose} />
+            <AcoesOs os={os} ehAdmin={ehAdmin} onConcluido={onClose} />
           </div>
 
           {/* Dados — grade de 2 colunas */}

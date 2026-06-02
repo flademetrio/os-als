@@ -2,7 +2,11 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
-import { cancelarOrdemServico } from '@/app/actions/ordem-servico'
+import {
+  cancelarOrdemServico,
+  excluirOrdemServico,
+  reabrirOrdemServicoCancelada,
+} from '@/app/actions/ordem-servico'
 import type { OrdemServicoResposta } from '@/app/lib/definicoes'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
@@ -11,6 +15,8 @@ import { ModalDigitarExecucao } from './modal-digitar-execucao'
 
 type Props = {
   os: OrdemServicoResposta
+  /** Habilita acoes administrativas (reabrir cancelada, excluir). */
+  ehAdmin?: boolean
   /**
    * Chamado quando a OS e concluida pela digitacao de execucao. Em modal
    * (detalhe da OS dentro do servico), fecha o drawer; sem callback, navega
@@ -19,9 +25,11 @@ type Props = {
   onConcluido?: () => void
 }
 
-export function AcoesOs({ os, onConcluido }: Props) {
+export function AcoesOs({ os, ehAdmin = false, onConcluido }: Props) {
   const router = useRouter()
   const [confirmarCancelar, setConfirmarCancelar] = useState(false)
+  const [confirmarExcluir, setConfirmarExcluir] = useState(false)
+  const [confirmarReabrir, setConfirmarReabrir] = useState(false)
   const [digitando, setDigitando] = useState(false)
   const [imprimindo, setImprimindo] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -29,6 +37,7 @@ export function AcoesOs({ os, onConcluido }: Props) {
 
   const encerrada = os.status === 'CONCLUIDA' || os.status === 'CANCELADA'
   const podeDigitar = os.status === 'IMPRESSA' || os.status === 'PENDENTE_DIGITACAO'
+  const podeReabrir = ehAdmin && os.status === 'CANCELADA'
 
   /** Apos concluir a OS: fecha o modal de digitacao e leva o usuario ao servico. */
   function execucaoConcluida() {
@@ -82,6 +91,16 @@ export function AcoesOs({ os, onConcluido }: Props) {
             Cancelar OS
           </Button>
         )}
+        {podeReabrir && (
+          <Button variant="secondary" size="sm" onClick={() => setConfirmarReabrir(true)}>
+            Reabrir OS
+          </Button>
+        )}
+        {ehAdmin && (
+          <Button variant="danger" size="sm" onClick={() => setConfirmarExcluir(true)}>
+            Excluir
+          </Button>
+        )}
       </div>
       {erro && (
         <Alert variant="danger" dismissible>
@@ -127,7 +146,87 @@ export function AcoesOs({ os, onConcluido }: Props) {
         }
       >
         <p className="text-sm text-slate-700">
-          Cancelar a OS <strong>{os.codigoExibicao}</strong>? Esta acao e irreversivel.
+          Cancelar a OS <strong>{os.codigoExibicao}</strong>?
+        </p>
+      </Modal>
+
+      <Modal
+        open={confirmarReabrir}
+        onClose={() => setConfirmarReabrir(false)}
+        title="Reabrir OS"
+        size="sm"
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => setConfirmarReabrir(false)}
+              disabled={pendente}
+            >
+              Voltar
+            </Button>
+            <Button
+              variant="primary"
+              loading={pendente}
+              onClick={() =>
+                iniciar(async () => {
+                  const r = await reabrirOrdemServicoCancelada(os.id)
+                  if (r.erro) {
+                    setErro(r.erro)
+                  } else {
+                    setConfirmarReabrir(false)
+                    router.refresh()
+                  }
+                })
+              }
+            >
+              Reabrir
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-slate-700">
+          Reabrir a OS <strong>{os.codigoExibicao}</strong>? O status volta para
+          <strong> Aberta</strong>.
+        </p>
+      </Modal>
+
+      <Modal
+        open={confirmarExcluir}
+        onClose={() => setConfirmarExcluir(false)}
+        title="Excluir OS"
+        size="sm"
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => setConfirmarExcluir(false)}
+              disabled={pendente}
+            >
+              Voltar
+            </Button>
+            <Button
+              variant="danger"
+              loading={pendente}
+              onClick={() =>
+                iniciar(async () => {
+                  const r = await excluirOrdemServico(os.id, os.servicoId)
+                  if (r.erro) {
+                    setErro(r.erro)
+                  } else {
+                    setConfirmarExcluir(false)
+                    router.push(`/servicos/${os.servicoId}`)
+                  }
+                })
+              }
+            >
+              Excluir
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-slate-700">
+          Excluir permanentemente a OS <strong>{os.codigoExibicao}</strong> e seu
+          anexo? <strong>Esta acao nao pode ser desfeita.</strong>
         </p>
       </Modal>
     </div>
