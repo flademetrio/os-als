@@ -37,8 +37,12 @@ COPY --from=build --chown=nextjs:nodejs /app/public ./public
 USER nextjs
 EXPOSE 3000
 
-# Confirma que o Next responde — usa o wget do busybox (ja vem na alpine).
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:3000/ || exit 1
+# Confirma que o Next responde. Usa /login (rota publica) em vez de /
+# porque "/" redireciona para /login (307) e o wget --spider do busybox
+# trata redirect como erro — marcaria o container unhealthy mesmo
+# funcionando. Tambem aumenta start-period para 45s — Next 16 com
+# standalone leva ~40s para responder no primeiro hit.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:3000/login || exit 1
 
 CMD ["node", "server.js"]
