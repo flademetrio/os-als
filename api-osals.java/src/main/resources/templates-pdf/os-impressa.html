@@ -24,6 +24,9 @@
                      font-size: 11pt; font-weight: bold; }
         .titulo-os .codigo { float: right; }
         .meta { font-size: 8.5pt; color: #334155; margin: 4px 0 6px 0; }
+        .meta .linha-meta { margin-bottom: 2px; }
+        /* Servico ocupa sempre 3 linhas fixas (descricao pode ser longa). */
+        .meta .servico-bloco { height: 3.6em; line-height: 1.2em; overflow: hidden; }
         .secao { border: 1px solid #cbd5e1; margin-bottom: 5px; }
         .secao h2 { background: #f1f5f9; margin: 0; padding: 2px 6px;
                     font-size: 8.5pt; text-transform: uppercase; color: #0c4a6e;
@@ -44,7 +47,7 @@
         /* Bloco de assinaturas: renderiza no rodape da pagina via @page acima. */
         .rodape-ass { position: running(rodape); }
         .assinaturas { margin-top: 0; }
-        .assinaturas td { border: none; text-align: center; padding-top: 16px; font-size: 8pt; }
+        .assinaturas td { border: none; text-align: center; padding-top: 16px; padding-bottom: 0.6cm; font-size: 8pt; }
         .assinaturas .linha-ass { border-top: 1px solid #334155; padding-top: 2px; font-size: 7.5pt; }
         .vazio { color: #94a3b8; }
     /*]]>*/</style>
@@ -63,9 +66,13 @@
         <span class="codigo" th:text="'No: ' + ${codigo}">No: 0001-00001</span>
     </div>
     <div class="meta">
-        Servico: <span th:text="${descricaoServico}">Descricao do servico</span>
-        &#183; Tipo: <span th:text="${tipoServico}">Tipo</span>
-        &#183; Data de agendamento: <span th:text="${dataAgendamento}">00/00/0000</span>
+        <div class="linha-meta">
+            Data de agendamento: <span th:text="${dataAgendamento}">00/00/0000</span>
+            &#183; Tipo: <span th:text="${tipoServico}">Tipo</span>
+        </div>
+        <div class="linha-meta servico-bloco">
+            <span class="rotulo">Servico: </span><span th:text="${descricaoServico}">Descricao do servico</span>
+        </div>
     </div>
 
     <div class="secao">
