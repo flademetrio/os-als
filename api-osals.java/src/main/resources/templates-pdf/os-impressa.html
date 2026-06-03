@@ -4,31 +4,48 @@
     <meta charset="UTF-8" />
     <title th:text="'OS ' + ${codigo}">Ordem de Servico</title>
     <style>/*<![CDATA[*/
-        @page { size: A4; margin: 1.5cm; }
+        /* Tudo apertado para caber em 1 unica pagina A4.
+           Margem inferior reservada (2.4cm) para o bloco de assinaturas
+           via @page @bottom-center + position: running(rodape). */
+        @page {
+            size: A4;
+            margin: 1cm 1.2cm 2.4cm 1.2cm;
+            @bottom-center {
+                content: element(rodape);
+                vertical-align: bottom;
+            }
+        }
         * { box-sizing: border-box; }
-        body { font-family: sans-serif; font-size: 10pt; color: #1e293b; margin: 0; }
-        .empresa { border-bottom: 2px solid #0ea5e9; padding-bottom: 6px; margin-bottom: 10px; }
-        .empresa .razao { font-size: 13pt; font-weight: bold; color: #0c4a6e; }
-        .empresa .linha { font-size: 8pt; color: #475569; }
-        .titulo-os { background: #0c4a6e; color: #ffffff; padding: 6px 10px;
-                     font-size: 12pt; font-weight: bold; }
+        body { font-family: sans-serif; font-size: 9pt; color: #1e293b; margin: 0; line-height: 1.25; }
+        .empresa { border-bottom: 2px solid #0ea5e9; padding-bottom: 4px; margin-bottom: 6px; }
+        .empresa .razao { font-size: 12pt; font-weight: bold; color: #0c4a6e; }
+        .empresa .linha { font-size: 7.5pt; color: #475569; }
+        .titulo-os { background: #0c4a6e; color: #ffffff; padding: 4px 8px;
+                     font-size: 11pt; font-weight: bold; }
         .titulo-os .codigo { float: right; }
-        .meta { font-size: 9pt; color: #334155; margin: 6px 0 12px 0; }
-        .secao { border: 1px solid #cbd5e1; margin-bottom: 10px; }
-        .secao h2 { background: #f1f5f9; margin: 0; padding: 4px 8px;
-                    font-size: 9pt; text-transform: uppercase; color: #0c4a6e;
+        .meta { font-size: 8.5pt; color: #334155; margin: 4px 0 6px 0; }
+        .secao { border: 1px solid #cbd5e1; margin-bottom: 5px; }
+        .secao h2 { background: #f1f5f9; margin: 0; padding: 2px 6px;
+                    font-size: 8.5pt; text-transform: uppercase; color: #0c4a6e;
                     border-bottom: 1px solid #cbd5e1; }
-        .secao .conteudo { padding: 8px; }
-        .campo { margin-bottom: 4px; }
+        .secao .conteudo { padding: 5px 7px; }
+        .campo { margin-bottom: 2px; }
         .rotulo { font-weight: bold; color: #475569; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #cbd5e1; padding: 4px 6px; font-size: 9pt; text-align: left; }
+        th, td { border: 1px solid #cbd5e1; padding: 2px 5px; font-size: 8.5pt; text-align: left; }
         th { background: #f8fafc; }
-        .linha-preench { border-bottom: 1px solid #94a3b8; height: 16px; }
-        .caixa-preench { border: 1px solid #cbd5e1; height: 70px; }
-        .assinaturas { margin-top: 24px; }
-        .assinaturas td { border: none; text-align: center; padding-top: 24px; }
-        .assinaturas .linha-ass { border-top: 1px solid #334155; padding-top: 3px; font-size: 8pt; }
+        .linha-preench { border-bottom: 1px solid #94a3b8; height: 14px; }
+        /* Caixas de Observacoes e Impedimentos — ocupam o espaco restante */
+        .caixa-preench { border: 1px solid #cbd5e1; height: 1.8cm; }
+        /* Atividade prevista — espaco razoavel para descricao */
+        .atividade-conteudo { min-height: 2.5cm; }
+        /* "O que foi feito" — caixa principal, espaco generoso */
+        .caixa-feito { height: 6.5cm; }
+        /* Bloco de assinaturas: renderiza no rodape da pagina via @page acima. */
+        .rodape-ass { position: running(rodape); }
+        .assinaturas { margin-top: 0; }
+        .assinaturas td { border: none; text-align: center; padding-top: 16px; font-size: 8pt; }
+        .assinaturas .linha-ass { border-top: 1px solid #334155; padding-top: 2px; font-size: 7.5pt; }
         .vazio { color: #94a3b8; }
     /*]]>*/</style>
 </head>
@@ -71,10 +88,8 @@
                 <span class="rotulo">Contato: </span>
                 <span th:text="${c}">Contato</span>
             </div>
-            <div class="campo" th:if="${#lists.isEmpty(contatos)}">
-                <span class="rotulo">Contato local: </span>
-                <span class="linha-preench" style="display: inline-block; width: 60%;">&#160;</span>
-            </div>
+            <!-- Sem contato cadastrado e sem contato selecionado na OS:
+                 nao mostra nada (regra do PO). -->
         </div>
     </div>
 
@@ -102,7 +117,7 @@
 
     <div class="secao">
         <h2>Atividade prevista</h2>
-        <div class="conteudo">
+        <div class="conteudo atividade-conteudo">
             <span th:text="${descricaoAtividade}">Descricao da atividade</span>
         </div>
     </div>
@@ -133,24 +148,27 @@
                 <span class="linha-preench" style="display: inline-block; width: 20%;">&#160;</span>
             </div>
             <div class="campo"><span class="rotulo">O que foi feito:</span></div>
+            <div class="caixa-preench caixa-feito">&#160;</div>
+            <div class="campo" style="margin-top: 4px;"><span class="rotulo">Observacoes:</span></div>
             <div class="caixa-preench">&#160;</div>
-            <div class="campo" style="margin-top: 6px;"><span class="rotulo">Observacoes:</span></div>
-            <div class="caixa-preench" style="height: 40px;">&#160;</div>
-            <div class="campo" style="margin-top: 6px;"><span class="rotulo">Impedimentos:</span></div>
-            <div class="caixa-preench" style="height: 40px;">&#160;</div>
+            <div class="campo" style="margin-top: 4px;"><span class="rotulo">Impedimentos:</span></div>
+            <div class="caixa-preench">&#160;</div>
         </div>
     </div>
 
-    <table class="assinaturas">
-        <tr>
-            <td style="width: 50%;">
-                <div class="linha-ass">Tecnico responsavel</div>
-            </td>
-            <td style="width: 50%;">
-                <div class="linha-ass">Cliente / Responsavel local</div>
-            </td>
-        </tr>
-    </table>
+    <!-- Bloco de assinaturas: renderizado no rodape da pagina via @page. -->
+    <div class="rodape-ass">
+        <table class="assinaturas">
+            <tr>
+                <td style="width: 50%;">
+                    <div class="linha-ass">Tecnico responsavel</div>
+                </td>
+                <td style="width: 50%;">
+                    <div class="linha-ass">Cliente / Responsavel local</div>
+                </td>
+            </tr>
+        </table>
+    </div>
 
 </body>
 </html>

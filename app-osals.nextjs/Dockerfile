@@ -25,6 +25,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+# Next 16 standalone, sem HOSTNAME, escolhe uma unica interface (geralmente
+# a do bridge Docker) e nao responde em localhost dentro do container - o
+# wget do healthcheck cai em "connection refused" mesmo o app rodando.
+# Forcar 0.0.0.0 garante que ouve em todas as interfaces.
+ENV HOSTNAME=0.0.0.0
 
 # Usuario nao-root (boas praticas)
 RUN addgroup --system --gid 1001 nodejs \
