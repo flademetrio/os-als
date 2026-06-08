@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { abrirOrdemServico, type EstadoOrdemServico } from '@/app/actions/ordem-servico'
 import type {
   ContatoClienteResposta,
@@ -19,6 +19,7 @@ const ESTADO_INICIAL: EstadoOrdemServico = {}
 
 type Props = {
   servicoId: number
+  descricaoServico: string
   tecnicos: TecnicoResumoDto[]
   veiculos: VeiculoResumoDto[]
   equipamentos: EquipamentoResumoDto[]
@@ -28,6 +29,7 @@ type Props = {
 
 export function ModalAbrirOs({
   servicoId,
+  descricaoServico,
   tecnicos,
   veiculos,
   equipamentos,
@@ -36,6 +38,11 @@ export function ModalAbrirOs({
 }: Props) {
   const acao = abrirOrdemServico.bind(null, servicoId)
   const [estado, dispatch, pendente] = useActionState(acao, ESTADO_INICIAL)
+  const [descricaoAtividade, setDescricaoAtividade] = useState('')
+
+  // Data de hoje no fuso local (YYYY-MM-DD) — default do campo "Data agendada".
+  const hoje = new Date()
+  const dataHoje = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`
 
   useEffect(() => {
     if (estado.sucesso) onClose()
@@ -50,21 +57,56 @@ export function ModalAbrirOs({
           </Alert>
         )}
 
-        <Textarea
-          label="Descricao da atividade"
-          name="descricaoAtividade"
-          required
-          rows={3}
-          hint="O que sera executado nesta OS"
-          error={estado.errosCampos?.descricaoAtividade}
-          fullWidth
-        />
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label
+              htmlFor="descricaoAtividade"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Descricao da atividade<span className="text-red-500 ml-1">*</span>
+            </label>
+            {descricaoServico.trim() && (
+              <button
+                type="button"
+                onClick={() => setDescricaoAtividade(descricaoServico)}
+                title="Reaproveitar a descricao do servico"
+                aria-label="Reaproveitar a descricao do servico"
+                className="text-slate-400 hover:text-primary transition-colors rounded p-0.5 focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.8}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-4 h-4"
+                >
+                  <rect x="9" y="9" width="11" height="11" rx="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+              </button>
+            )}
+          </div>
+          <Textarea
+            id="descricaoAtividade"
+            name="descricaoAtividade"
+            required
+            rows={3}
+            hint="O que sera executado nesta OS"
+            error={estado.errosCampos?.descricaoAtividade}
+            fullWidth
+            value={descricaoAtividade}
+            onChange={(e) => setDescricaoAtividade(e.target.value)}
+          />
+        </div>
 
         <Input
           label="Data agendada"
           name="dataAgendada"
           type="date"
           required
+          defaultValue={dataHoje}
           hint="Dia previsto da visita da equipe ao cliente"
           error={estado.errosCampos?.dataAgendada}
           fullWidth

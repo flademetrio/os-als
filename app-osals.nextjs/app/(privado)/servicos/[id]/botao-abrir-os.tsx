@@ -12,6 +12,7 @@ import { ModalAbrirOs } from './modal-abrir-os'
 
 type Props = {
   servicoId: number
+  descricaoServico: string
   tecnicos: TecnicoResumoDto[]
   veiculos: VeiculoResumoDto[]
   equipamentos: EquipamentoResumoDto[]
@@ -21,6 +22,7 @@ type Props = {
 /** Botao do cabecalho do servico para abrir uma nova OS — sempre visivel. */
 export function BotaoAbrirOs({
   servicoId,
+  descricaoServico,
   tecnicos,
   veiculos,
   equipamentos,
@@ -36,6 +38,7 @@ export function BotaoAbrirOs({
       {aberto && (
         <ModalAbrirOs
           servicoId={servicoId}
+          descricaoServico={descricaoServico}
           tecnicos={tecnicos}
           veiculos={veiculos}
           equipamentos={equipamentos}

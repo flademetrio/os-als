@@ -60,6 +60,7 @@ export function TabOs({
         {!encerrado && (
           <BotaoAbrirOs
             servicoId={servico.id}
+            descricaoServico={servico.descricao}
             tecnicos={tecnicos}
             veiculos={veiculos}
             equipamentos={equipamentos}
