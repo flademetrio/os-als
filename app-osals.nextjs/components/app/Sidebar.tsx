@@ -7,7 +7,7 @@ import type { SessaoUsuario } from '@/app/lib/definicoes'
 import {
   NAV_PRINCIPAL,
   NAV_INFERIOR,
-  filtrarPorPapel,
+  filtrarPorPermissao,
   itemEstaAtivo,
   type ItemNavegacao,
 } from '@/app/lib/navegacao'
@@ -35,6 +35,7 @@ const ICONE_POR_HREF: Record<string, ReactNode> = {
   '/veiculos': <IconeVeiculo />,
   '/pecas': <IconePecas />,
   '/relatorios': <IconeRelatorios />,
+  '/usuarios': <IconeTecnico />,
   '/configuracoes': <IconeConfiguracoes />,
 }
 
@@ -42,8 +43,8 @@ export function Sidebar({ usuario }: { usuario: SessaoUsuario }) {
   const pathname = usePathname()
   const [expandida, setExpandida] = useState(true)
 
-  const principal = filtrarPorPapel(NAV_PRINCIPAL, usuario.papel)
-  const inferior = filtrarPorPapel(NAV_INFERIOR, usuario.papel)
+  const principal = filtrarPorPermissao(NAV_PRINCIPAL, usuario.permissoes)
+  const inferior = filtrarPorPermissao(NAV_INFERIOR, usuario.permissoes)
 
   function LinkNav({ item }: { item: ItemNavegacao }) {
     const ativa = itemEstaAtivo(item, pathname)

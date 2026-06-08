@@ -34,6 +34,7 @@ type Props = {
   custos: LancamentoCustoResposta[]
   resumo: ResumoFinanceiroServico
   categorias: CategoriaCustoResposta[]
+  podeVerCustos: boolean
   podeAlterarCustos: boolean
   anexos: AnexoServicoResposta[]
   ehGestor: boolean
@@ -51,6 +52,7 @@ export function DetalheServico({
   custos,
   resumo,
   categorias,
+  podeVerCustos,
   podeAlterarCustos,
   anexos,
   ehGestor,
@@ -65,7 +67,9 @@ export function DetalheServico({
           tabs={[
             { id: 'dados', label: 'Informacoes' },
             { id: 'os', label: 'Ordem De Servico', count: ordens.length },
-            { id: 'custos', label: 'Custos', count: custos.length },
+            ...(podeVerCustos
+              ? [{ id: 'custos', label: 'Custos', count: custos.length }]
+              : []),
             { id: 'anexos', label: 'Anexos', count: anexos.length },
           ]}
           ativa={aba}
@@ -87,7 +91,7 @@ export function DetalheServico({
             contatos={contatos}
           />
         )}
-        {aba === 'custos' && (
+        {aba === 'custos' && podeVerCustos && (
           <TabCustos
             servicoId={servico.id}
             podeAlterar={podeAlterarCustos}

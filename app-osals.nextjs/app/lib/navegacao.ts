@@ -1,17 +1,18 @@
 /**
  * Definicao dos itens de navegacao da Sidebar e do menu mobile.
  *
- * Filtragem por papel acontece nos componentes que renderizam — esta lista
- * declara apenas o requisito minimo de papel para ver cada item.
+ * Cada item pode exigir uma permissao; itens sem permissao aparecem para
+ * qualquer usuario autenticado. A filtragem por permissao acontece nos
+ * componentes que renderizam.
  */
 
-import type { Papel } from './definicoes'
+import type { Permissao } from './definicoes'
 
 export type ItemNavegacao = {
   rotulo: string
   href: string
-  /** Papeis que veem este item. Vazio = todos autenticados. */
-  papeis?: Papel[]
+  /** Permissao necessaria para ver o item. Ausente = todos autenticados. */
+  permissao?: Permissao
   /** Rotas correlatas que tambem ativam este item (ex.: /clientes ativa "Clientes" em /clientes/123). */
   rotasCorrelatas?: string[]
 }
@@ -24,15 +25,19 @@ export const NAV_PRINCIPAL: ItemNavegacao[] = [
   { rotulo: 'Tecnicos', href: '/tecnicos' },
   { rotulo: 'Veiculos', href: '/veiculos' },
   { rotulo: 'Pecas', href: '/pecas' },
-  { rotulo: 'Relatorios', href: '/relatorios', papeis: ['GERENTE', 'ADMIN'] },
+  { rotulo: 'Relatorios', href: '/relatorios', permissao: 'RELATORIO_VER' },
 ]
 
 export const NAV_INFERIOR: ItemNavegacao[] = [
-  { rotulo: 'Configuracoes', href: '/configuracoes', papeis: ['ADMIN'] },
+  { rotulo: 'Usuarios', href: '/usuarios', permissao: 'USUARIO_GERENCIAR' },
+  { rotulo: 'Configuracoes', href: '/configuracoes', permissao: 'CONFIG_GERENCIAR' },
 ]
 
-export function filtrarPorPapel(itens: ItemNavegacao[], papel: Papel): ItemNavegacao[] {
-  return itens.filter((i) => !i.papeis || i.papeis.includes(papel))
+export function filtrarPorPermissao(
+  itens: ItemNavegacao[],
+  permissoes: Permissao[],
+): ItemNavegacao[] {
+  return itens.filter((i) => !i.permissao || permissoes.includes(i.permissao))
 }
 
 export function itemEstaAtivo(item: ItemNavegacao, pathname: string): boolean {

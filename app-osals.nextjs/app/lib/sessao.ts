@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { cookies } from 'next/headers'
 import { decodeJwt, jwtVerify, importSPKI } from 'jose'
-import type { Papel, SessaoUsuario } from './definicoes'
+import type { Papel, Permissao, SessaoUsuario } from './definicoes'
 
 const COOKIE_ACCESS = 'osals_at'
 
@@ -32,6 +32,7 @@ export async function lerSessao(): Promise<SessaoUsuario | null> {
       nome: (claims.nome as string) ?? '',
       email: (claims.email as string) ?? '',
       papel: (claims.papel as Papel) ?? 'OPERADOR',
+      permissoes: (claims.permissoes as Permissao[]) ?? [],
       versaoToken: (claims.versaoToken as number) ?? 0,
       expiraEm: claims.exp * 1000,
     }
@@ -76,6 +77,7 @@ export async function verificarSessao(): Promise<SessaoUsuario> {
     nome: (payload.nome as string) ?? '',
     email: (payload.email as string) ?? '',
     papel: (payload.papel as Papel) ?? 'OPERADOR',
+    permissoes: (payload.permissoes as Permissao[]) ?? [],
     versaoToken: (payload.versaoToken as number) ?? 0,
     expiraEm: (payload.exp ?? 0) * 1000,
   }

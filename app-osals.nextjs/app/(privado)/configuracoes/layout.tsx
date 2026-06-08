@@ -2,9 +2,9 @@ import { redirect } from 'next/navigation'
 import { lerSessao } from '@/app/lib/sessao'
 
 /**
- * Layout das telas de configuracoes — apenas ADMIN pode acessar.
+ * Layout das telas de configuracoes — exige a permissao CONFIG_GERENCIAR.
  *
- * Caso o usuario nao tenha papel ADMIN, redireciona para /dashboard.
+ * Sem a permissao, redireciona para /dashboard.
  * A camada de autenticacao ja foi feita no layout (privado) pai.
  */
 export default async function LayoutConfiguracoes({
@@ -13,7 +13,7 @@ export default async function LayoutConfiguracoes({
   children: React.ReactNode
 }) {
   const sessao = await lerSessao()
-  if (sessao?.papel !== 'ADMIN') {
+  if (!sessao?.permissoes.includes('CONFIG_GERENCIAR')) {
     redirect('/dashboard')
   }
   return <>{children}</>

@@ -7,7 +7,7 @@ import type { SessaoUsuario } from '@/app/lib/definicoes'
 import {
   NAV_PRINCIPAL,
   NAV_INFERIOR,
-  filtrarPorPapel,
+  filtrarPorPermissao,
   itemEstaAtivo,
 } from '@/app/lib/navegacao'
 import {
@@ -35,6 +35,7 @@ const ICONE_POR_HREF: Record<string, ReactNode> = {
   '/veiculos': <IconeVeiculo />,
   '/pecas': <IconePecas />,
   '/relatorios': <IconeRelatorios />,
+  '/usuarios': <IconeTecnico />,
   '/configuracoes': <IconeConfiguracoes />,
 }
 
@@ -60,8 +61,8 @@ export function NavegacaoMobile({
   onFechar: () => void
 }) {
   const pathname = usePathname()
-  const principal = filtrarPorPapel(NAV_PRINCIPAL, usuario.papel)
-  const inferior = filtrarPorPapel(NAV_INFERIOR, usuario.papel)
+  const principal = filtrarPorPermissao(NAV_PRINCIPAL, usuario.permissoes)
+  const inferior = filtrarPorPermissao(NAV_INFERIOR, usuario.permissoes)
 
   // Fecha ao mudar de rota
   useEffect(() => {

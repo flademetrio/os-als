@@ -25,21 +25,14 @@ type Props = { params: Promise<{ id: string }> }
 
 export default async function ServicoDetalhePage({ params }: Props) {
   const { id } = await params
+  const sessao = await lerSessao()
+  const permissoes = sessao?.permissoes ?? []
+  const podeVerCustos = permissoes.includes('CUSTO_VER')
+  const podeEditarCustos = permissoes.includes('CUSTO_EDITAR')
+
   const servico = await clienteApi<ServicoResposta>(`/servicos/${id}`)
 
-  const [
-    tipos,
-    ordens,
-    tecnicos,
-    veiculos,
-    equipamentos,
-    contatos,
-    custos,
-    resumo,
-    categorias,
-    anexos,
-    sessao,
-  ] = await Promise.all([
+  const [tipos, ordens, tecnicos, veiculos, equipamentos, contatos, anexos] = await Promise.all([
     clienteApi<TipoServicoResposta[]>('/tipos-servico?apenasAtivos=true'),
     clienteApi<OrdemServicoResumoDto[]>(`/servicos/${id}/ordens-servico`),
     clienteApi<PaginaResposta<TecnicoResumoDto>>('/tecnicos?apenasAtivos=true&tamanho=200'),
@@ -48,17 +41,27 @@ export default async function ServicoDetalhePage({ params }: Props) {
       `/equipamentos?clienteId=${servico.clienteId}&apenasAtivos=true&tamanho=200`,
     ),
     clienteApi<ContatoClienteResposta[]>(`/clientes/${servico.clienteId}/contatos`),
-    clienteApi<LancamentoCustoResposta[]>(`/servicos/${id}/custos`),
-    clienteApi<ResumoFinanceiroServico>(`/servicos/${id}/resumo-financeiro`),
-    clienteApi<CategoriaCustoResposta[]>('/categorias-custo?apenasAtivos=true'),
     clienteApi<AnexoServicoResposta[]>(`/servicos/${id}/anexos`),
-    lerSessao(),
   ])
+
+  // Custos (e o catalogo de categorias usado no modal) so sao buscados quando o
+  // usuario tem CUSTO_VER — caso contrario o backend retornaria 403 e a tela quebraria.
+  const [custos, resumo, categorias]: [
+    LancamentoCustoResposta[],
+    ResumoFinanceiroServico,
+    CategoriaCustoResposta[],
+  ] = podeVerCustos
+    ? await Promise.all([
+        clienteApi<LancamentoCustoResposta[]>(`/servicos/${id}/custos`),
+        clienteApi<ResumoFinanceiroServico>(`/servicos/${id}/resumo-financeiro`),
+        clienteApi<CategoriaCustoResposta[]>('/categorias-custo?apenasAtivos=true'),
+      ])
+    : [[], resumoVazio(servico.id), []]
 
   const encerrado = servico.status === 'CONCLUIDO' || servico.status === 'CANCELADO'
   const ehGestor = sessao?.papel === 'GERENTE' || sessao?.papel === 'ADMIN'
   const ehAdmin = sessao?.papel === 'ADMIN'
-  const podeAlterarCustos = !encerrado || ehGestor
+  const podeAlterarCustos = podeEditarCustos && (!encerrado || ehGestor)
 
   return (
     <div className="space-y-6">
@@ -120,6 +123,7 @@ export default async function ServicoDetalhePage({ params }: Props) {
         custos={custos}
         resumo={resumo}
         categorias={categorias}
+        podeVerCustos={podeVerCustos}
         podeAlterarCustos={podeAlterarCustos}
         anexos={anexos}
         ehGestor={ehGestor}
@@ -127,6 +131,16 @@ export default async function ServicoDetalhePage({ params }: Props) {
       />
     </div>
   )
+}
+
+function resumoVazio(servicoId: number): ResumoFinanceiroServico {
+  return {
+    servicoId,
+    custosPorCategoria: [],
+    custoTotalCentavos: 0,
+    markupPercentual: 0,
+    precoVendaCentavos: 0,
+  }
 }
 
 function formatarDataHora(iso: string): string {

@@ -40,6 +40,8 @@ public class GeradorJwt {
                 .claim("papel", usuario.getPapel().name())
                 .claim("versaoToken", usuario.getVersaoToken())
                 .claim("nome", usuario.getNome())
+                .claim("permissoes", usuario.permissoesEfetivas().stream()
+                        .map(Enum::name).sorted().toList())
                 .id(UUID.randomUUID().toString())
                 .signWith(chavePrivada, Jwts.SIG.RS256)
                 .compact();

@@ -3,13 +3,57 @@
  * Manter em sincronia com br.com.osals.seguranca.aplicacao.dto.*
  */
 
-export type Papel = 'OPERADOR' | 'GERENTE' | 'ADMIN' | 'TECNICO'
+export type Papel = 'OPERADOR' | 'COMPRAS' | 'GERENTE' | 'ADMIN' | 'TECNICO'
+
+export type Permissao =
+  | 'SERVICO_VER'
+  | 'SERVICO_GERENCIAR'
+  | 'SERVICO_EXCLUIR'
+  | 'CUSTO_VER'
+  | 'CUSTO_EDITAR'
+  | 'RELATORIO_VER'
+  | 'CADASTRO_VER'
+  | 'CADASTRO_GERENCIAR'
+  | 'CONFIG_GERENCIAR'
+  | 'USUARIO_GERENCIAR'
 
 export type UsuarioResumoDto = {
   id: number
   nome: string
   email: string
   papel: Papel
+  permissoes: Permissao[]
+}
+
+// ===== Administracao de usuarios e permissoes =====
+
+export type UsuarioAdminResumoDto = {
+  id: number
+  nome: string
+  email: string
+  papel: Papel
+  ativo: boolean
+}
+
+export type UsuarioAdminResposta = {
+  id: number
+  nome: string
+  email: string
+  papel: Papel
+  ativo: boolean
+  permissoes: Permissao[]
+}
+
+export type PermissaoDto = {
+  nome: Permissao
+  grupo: string
+  descricao: string
+}
+
+export type CatalogoPermissoesResposta = {
+  permissoes: PermissaoDto[]
+  /** chave = nome do papel (ex.: "COMPRAS"), valor = lista de permissoes do preset */
+  presets: Record<string, Permissao[]>
 }
 
 export type TokenResposta = {
@@ -45,6 +89,7 @@ export type SessaoUsuario = {
   nome: string
   email: string
   papel: Papel
+  permissoes: Permissao[]
   versaoToken: number
   expiraEm: number
 }
