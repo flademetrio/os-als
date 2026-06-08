@@ -1,6 +1,7 @@
 package br.com.osals.seguranca.infraestrutura;
 
 import br.com.osals.seguranca.dominio.Papel;
+import br.com.osals.seguranca.dominio.PresetsPermissao;
 import br.com.osals.seguranca.dominio.RepositorioUsuario;
 import br.com.osals.seguranca.dominio.Usuario;
 import org.slf4j.Logger;
@@ -48,14 +49,16 @@ public class BootstrapUsuariosIniciais implements ApplicationRunner {
 
         criar("Flavio", "flavio@alsindustria.com.br", Papel.ADMIN);
         criar("Vendas 2", "vendas2@alsindustria.com.br", Papel.OPERADOR);
-        criar("Compras", "compra@alsindustria.com.br", Papel.OPERADOR);
+        criar("Compras", "compra@alsindustria.com.br", Papel.COMPRAS);
         criar("Atendimento", "atendimento@alsindustria.com.br", Papel.OPERADOR);
     }
 
     private void criar(String nome, String email, Papel papel) {
         var hash = passwordEncoder.encode(SENHA_PROVISORIA);
         var usuario = new Usuario(nome, email, hash, papel);
+        usuario.definirPermissoes(PresetsPermissao.doPapel(papel));
         repositorioUsuario.save(usuario);
-        log.info("Usuario criado: {} ({}) — {}", nome, email, papel);
+        log.info("Usuario criado: {} ({}) — {} com {} permissoes",
+                nome, email, papel, usuario.getPermissoes().size());
     }
 }

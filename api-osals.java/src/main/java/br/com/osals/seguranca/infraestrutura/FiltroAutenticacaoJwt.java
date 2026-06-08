@@ -11,11 +11,12 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -73,8 +74,14 @@ public class FiltroAutenticacaoJwt extends OncePerRequestFilter {
                 return;
             }
 
-            var autoridade = new SimpleGrantedAuthority("ROLE_" + usuario.getPapel().name());
-            var auth = new UsernamePasswordAuthenticationToken(usuario, null, List.of(autoridade));
+            var autoridades = new ArrayList<GrantedAuthority>();
+            // ROLE_<papel> mantido por compatibilidade; a partir da Fase 2 a
+            // autorizacao passa a usar as permissoes (hasAuthority).
+            autoridades.add(new SimpleGrantedAuthority("ROLE_" + usuario.getPapel().name()));
+            for (var permissao : usuario.permissoesEfetivas()) {
+                autoridades.add(new SimpleGrantedAuthority(permissao.name()));
+            }
+            var auth = new UsernamePasswordAuthenticationToken(usuario, null, autoridades);
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
             SecurityContextHolder.getContext().setAuthentication(auth);
 

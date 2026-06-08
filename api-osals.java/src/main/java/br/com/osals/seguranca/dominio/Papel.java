@@ -5,6 +5,7 @@ package br.com.osals.seguranca.dominio;
  */
 public enum Papel {
     OPERADOR,
+    COMPRAS,
     GERENTE,
     ADMIN,
     TECNICO
