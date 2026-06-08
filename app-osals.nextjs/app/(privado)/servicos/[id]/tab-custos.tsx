@@ -25,7 +25,6 @@ type Props = {
 export function TabCustos({
   servicoId,
   podeAlterar,
-  resumo,
   lancamentos,
   categorias,
   tecnicos,
@@ -36,16 +35,6 @@ export function TabCustos({
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <CardResumo titulo="Custo total" valor={centavosParaReais(resumo.custoTotalCentavos)} />
-        <CardResumo titulo="Markup" valor={`${resumo.markupPercentual}%`} />
-        <CardResumo
-          titulo="Preco de venda"
-          valor={centavosParaReais(resumo.precoVendaCentavos)}
-          destaque
-        />
-      </div>
-
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm text-slate-500">
           {lancamentos.length} {lancamentos.length === 1 ? 'lancamento' : 'lancamentos'}
@@ -167,33 +156,4 @@ function detalhe(l: LancamentoCustoResposta): string {
     return [km, l.descricao].filter(Boolean).join(' · ') || '-'
   }
   return l.descricao || '-'
-}
-
-function CardResumo({
-  titulo,
-  valor,
-  destaque,
-}: {
-  titulo: string
-  valor: string
-  destaque?: boolean
-}) {
-  return (
-    <div
-      className={[
-        'rounded-xl border p-4',
-        destaque ? 'border-primary bg-primary-light' : 'border-slate-200 bg-slate-50',
-      ].join(' ')}
-    >
-      <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{titulo}</p>
-      <p
-        className={[
-          'text-xl font-semibold mt-1',
-          destaque ? 'text-primary-dark' : 'text-slate-900',
-        ].join(' ')}
-      >
-        {valor}
-      </p>
-    </div>
-  )
 }
