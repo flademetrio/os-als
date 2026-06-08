@@ -92,18 +92,18 @@ export default async function ServicosPage({ searchParams }: Props) {
       ) : vista === 'cards' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {dados.conteudo.map((s) => (
-            <Link key={s.id} href={`/servicos/${s.id}`} className="block">
-              <Card padding="md" hover>
+            <Link key={s.id} href={`/servicos/${s.id}`} className="block h-full">
+              <Card padding="md" hover className="h-52 overflow-hidden">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono font-semibold text-primary">
+                  <span className="font-mono font-semibold text-primary truncate">
                     {s.numeroFormatado}
                   </span>
                   <Badge variant={badgeStatusServico(s.status)} dot size="sm">
                     {s.statusRotulo}
                   </Badge>
                 </div>
-                <p className="text-sm font-medium text-slate-800 mt-2">{s.clienteNome}</p>
-                <p className="text-xs text-slate-500">{s.tipoServicoNome}</p>
+                <p className="text-sm font-medium text-slate-800 mt-2 truncate">{s.clienteNome}</p>
+                <p className="text-xs text-slate-500 truncate">{s.tipoServicoNome}</p>
                 <p className="text-sm text-slate-600 mt-2 line-clamp-2">{s.descricao}</p>
                 <p className="text-xs text-slate-400 mt-3">
                   Inicio previsto: {formatarData(s.dataInicioPrevista)}
