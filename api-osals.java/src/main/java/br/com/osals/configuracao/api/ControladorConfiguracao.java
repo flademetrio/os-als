@@ -30,20 +30,20 @@ public class ControladorConfiguracao {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CONFIG_GERENCIAR')")
     @Operation(summary = "Lista todas as configuracoes. Apenas admin.")
     public ResponseEntity<List<ConfiguracaoResposta>> listar() {
         return ResponseEntity.ok(servico.listar());
     }
 
     @GetMapping("/{chave}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CONFIG_GERENCIAR')")
     public ResponseEntity<ConfiguracaoResposta> buscar(@PathVariable String chave) {
         return ResponseEntity.ok(servico.buscar(chave));
     }
 
     @PutMapping("/{chave}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CONFIG_GERENCIAR')")
     @Operation(summary = "Atualiza valor da configuracao. Tipo e validado conforme cadastro.")
     public ResponseEntity<ConfiguracaoResposta> atualizar(
             @PathVariable String chave,

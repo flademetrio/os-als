@@ -25,9 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Endpoints de custos de um Servico e resumo financeiro.
  *
- * Lancar/editar/excluir e permitido a operador, gerente e admin enquanto o
- * Servico nao esta encerrado; apos encerrado, somente gerente e admin
- * (regra aplicada no GestorLancamentoCusto — operador recebe 403).
+ * Ver custos exige a permissao CUSTO_VER; lancar/editar/excluir exige
+ * CUSTO_EDITAR. Alem disso, apos o Servico encerrado somente GERENTE e ADMIN
+ * podem alterar custos (regra de negocio no GestorLancamentoCusto).
  */
 @RestController
 @RequestMapping("/servicos/{servicoId}")
@@ -41,14 +41,14 @@ public class ControladorLancamentoCusto {
     }
 
     @GetMapping("/custos")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CUSTO_VER')")
     @Operation(summary = "Lista os lancamentos de custo do Servico.")
     public ResponseEntity<List<LancamentoCustoResposta>> listar(@PathVariable Long servicoId) {
         return ResponseEntity.ok(gestor.listar(servicoId));
     }
 
     @PostMapping("/custos")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CUSTO_EDITAR')")
     @Operation(summary = "Lanca um custo. Mao de obra e deslocamento sao calculados pelo sistema.")
     public ResponseEntity<LancamentoCustoResposta> lancar(
             @PathVariable Long servicoId,
@@ -62,7 +62,7 @@ public class ControladorLancamentoCusto {
     }
 
     @PutMapping("/custos/{custoId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CUSTO_EDITAR')")
     @Operation(summary = "Edita um lancamento de custo.")
     public ResponseEntity<LancamentoCustoResposta> editar(
             @PathVariable Long servicoId,
@@ -74,7 +74,7 @@ public class ControladorLancamentoCusto {
     }
 
     @DeleteMapping("/custos/{custoId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CUSTO_EDITAR')")
     @Operation(summary = "Exclui um lancamento de custo.")
     public ResponseEntity<Void> excluir(
             @PathVariable Long servicoId,
@@ -86,7 +86,7 @@ public class ControladorLancamentoCusto {
     }
 
     @GetMapping("/resumo-financeiro")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CUSTO_VER')")
     @Operation(summary = "Custo agregado por categoria, custo total, markup e preco de venda.")
     public ResponseEntity<ResumoFinanceiroServico> resumoFinanceiro(@PathVariable Long servicoId) {
         return ResponseEntity.ok(gestor.calcularResumoFinanceiro(servicoId));

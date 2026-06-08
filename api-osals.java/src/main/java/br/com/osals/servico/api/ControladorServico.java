@@ -47,7 +47,7 @@ public class ControladorServico {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_VER')")
     @Operation(summary = "Lista Servicos com filtros (status, cliente, tipo, periodo) e paginacao. "
             + "O parametro status aceita multiplos valores.")
     public ResponseEntity<PaginaResposta<ServicoResumoDto>> listar(
@@ -64,13 +64,13 @@ public class ControladorServico {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_VER')")
     public ResponseEntity<ServicoResposta> buscar(@PathVariable Long id) {
         return ResponseEntity.ok(gestor.buscarPorId(id));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Abre um novo Servico. Numero sequencial atribuido pelo sistema.")
     public ResponseEntity<ServicoResposta> criar(
             @Valid @RequestBody CriacaoServicoRequisicao req,
@@ -81,7 +81,7 @@ public class ControladorServico {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Edita um Servico. Falha com 422 se ja estiver concluido ou cancelado.")
     public ResponseEntity<ServicoResposta> atualizar(
             @PathVariable Long id,
@@ -92,7 +92,7 @@ public class ControladorServico {
     }
 
     @PostMapping("/{id}/status")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Move o Servico entre estados intermediarios (EM_ABERTO, EM_EXECUCAO, AGUARDANDO).")
     public ResponseEntity<ServicoResposta> mudarStatus(
             @PathVariable Long id,
@@ -103,7 +103,7 @@ public class ControladorServico {
     }
 
     @PostMapping("/{id}/finalizar")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Conclui o Servico. Nao pode ser reaberto depois.")
     public ResponseEntity<ServicoResposta> finalizar(
             @PathVariable Long id,
@@ -113,7 +113,7 @@ public class ControladorServico {
     }
 
     @PostMapping("/{id}/cancelar")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Cancela o Servico. Encerramento alternativo.")
     public ResponseEntity<ServicoResposta> cancelar(
             @PathVariable Long id,
@@ -123,7 +123,7 @@ public class ControladorServico {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('SERVICO_EXCLUIR')")
     @Operation(summary = "Exclui permanentemente o Servico (e tudo o que depende dele: "
             + "OS, anexos, lancamentos de custo). Apenas admin.")
     public ResponseEntity<Void> excluir(

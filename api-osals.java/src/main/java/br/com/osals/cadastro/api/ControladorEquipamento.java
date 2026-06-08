@@ -35,7 +35,7 @@ public class ControladorEquipamento {
     }
 
     @GetMapping("/unidades/{unidadeId}/equipamentos")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_VER')")
     @Operation(summary = "Lista equipamentos de uma unidade.")
     public ResponseEntity<List<EquipamentoResposta>> listarDaUnidade(
             @PathVariable Long unidadeId,
@@ -45,7 +45,7 @@ public class ControladorEquipamento {
     }
 
     @PostMapping("/unidades/{unidadeId}/equipamentos")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     @Operation(summary = "Cria equipamento vinculado a uma unidade.")
     public ResponseEntity<EquipamentoResposta> criar(
             @PathVariable Long unidadeId,
@@ -56,7 +56,7 @@ public class ControladorEquipamento {
     }
 
     @GetMapping("/equipamentos")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_VER')")
     @Operation(summary = "Lista equipamentos filtrada por cliente, unidade, tipo, status ou busca textual.")
     public ResponseEntity<PaginaResposta<EquipamentoResumoDto>> listar(
             @RequestParam(required = false) Long clienteId,
@@ -71,13 +71,13 @@ public class ControladorEquipamento {
     }
 
     @GetMapping("/equipamentos/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_VER')")
     public ResponseEntity<EquipamentoResposta> buscar(@PathVariable Long id) {
         return ResponseEntity.ok(servico.buscarPorId(id));
     }
 
     @PutMapping("/equipamentos/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<EquipamentoResposta> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody EquipamentoRequisicao req
@@ -86,14 +86,14 @@ public class ControladorEquipamento {
     }
 
     @DeleteMapping("/equipamentos/{id}")
-    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<Void> inativar(@PathVariable Long id) {
         servico.inativar(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/equipamentos/{id}/reativar")
-    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<Void> reativar(@PathVariable Long id) {
         servico.reativar(id);
         return ResponseEntity.noContent().build();

@@ -28,13 +28,13 @@ public class ControladorContatoCliente {
     }
 
     @GetMapping("/clientes/{clienteId}/contatos")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_VER')")
     public ResponseEntity<List<ContatoClienteResposta>> listar(@PathVariable Long clienteId) {
         return ResponseEntity.ok(servico.listarDoCliente(clienteId));
     }
 
     @PostMapping("/clientes/{clienteId}/contatos")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<ContatoClienteResposta> criar(
             @PathVariable Long clienteId,
             @Valid @RequestBody ContatoClienteRequisicao req
@@ -44,7 +44,7 @@ public class ControladorContatoCliente {
     }
 
     @PutMapping("/contatos/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<ContatoClienteResposta> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody ContatoClienteRequisicao req
@@ -53,7 +53,7 @@ public class ControladorContatoCliente {
     }
 
     @DeleteMapping("/contatos/{id}")
-    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<Void> remover(@PathVariable Long id) {
         servico.remover(id);
         return ResponseEntity.noContent().build();

@@ -30,26 +30,26 @@ public class ControladorUnidadeMedida {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_VER')")
     public ResponseEntity<List<UnidadeMedidaResposta>> listar() {
         return ResponseEntity.ok(servico.listar());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_VER')")
     public ResponseEntity<UnidadeMedidaResposta> buscar(@PathVariable Integer id) {
         return ResponseEntity.ok(servico.buscarPorId(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CONFIG_GERENCIAR')")
     public ResponseEntity<UnidadeMedidaResposta> criar(@Valid @RequestBody UnidadeMedidaRequisicao req) {
         var u = servico.criar(req);
         return ResponseEntity.created(URI.create("/unidades-medida/" + u.id())).body(u);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CONFIG_GERENCIAR')")
     public ResponseEntity<UnidadeMedidaResposta> atualizar(
             @PathVariable Integer id,
             @Valid @RequestBody UnidadeMedidaRequisicao req
@@ -58,7 +58,7 @@ public class ControladorUnidadeMedida {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CONFIG_GERENCIAR')")
     public ResponseEntity<Void> remover(@PathVariable Integer id) {
         servico.remover(id);
         return ResponseEntity.noContent().build();

@@ -47,7 +47,7 @@ public class ControladorOrdemServico {
     }
 
     @PostMapping("/servicos/{servicoId}/ordens-servico")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Abre uma OS dentro de um Servico. Numero sequencial atribuido pelo sistema.")
     public ResponseEntity<OrdemServicoResposta> abrir(
             @PathVariable Long servicoId,
@@ -59,14 +59,14 @@ public class ControladorOrdemServico {
     }
 
     @GetMapping("/servicos/{servicoId}/ordens-servico")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_VER')")
     @Operation(summary = "Lista as OS de um Servico.")
     public ResponseEntity<List<OrdemServicoResumoDto>> listarDoServico(@PathVariable Long servicoId) {
         return ResponseEntity.ok(gestor.listarDoServico(servicoId));
     }
 
     @GetMapping("/ordens-servico")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_VER')")
     @Operation(summary = "Lista OS com filtros (status, servico, cliente) e paginacao.")
     public ResponseEntity<PaginaResposta<OrdemServicoResumoDto>> listar(
             @RequestParam(required = false) StatusOrdemServico status,
@@ -79,13 +79,13 @@ public class ControladorOrdemServico {
     }
 
     @GetMapping("/ordens-servico/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_VER')")
     public ResponseEntity<OrdemServicoResposta> buscar(@PathVariable Long id) {
         return ResponseEntity.ok(gestor.buscarPorId(id));
     }
 
     @PostMapping("/ordens-servico/{id}/imprimir")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Marca a OS como impressa e retorna o PDF para impressao.")
     public ResponseEntity<byte[]> imprimir(@PathVariable Long id) {
         gestor.imprimir(id);
@@ -98,7 +98,7 @@ public class ControladorOrdemServico {
     }
 
     @PostMapping("/ordens-servico/{id}/digitar-execucao")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Registra os dados de execucao preenchidos pela equipe e conclui a OS.")
     public ResponseEntity<OrdemServicoResposta> digitarExecucao(
             @PathVariable Long id,
@@ -109,21 +109,21 @@ public class ControladorOrdemServico {
     }
 
     @PostMapping("/ordens-servico/{id}/marcar-devolvida")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Marca que o papel preenchido voltou e aguarda digitacao.")
     public ResponseEntity<OrdemServicoResposta> marcarDevolvida(@PathVariable Long id) {
         return ResponseEntity.ok(gestor.marcarDevolvida(id));
     }
 
     @PostMapping("/ordens-servico/{id}/cancelar")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Cancela a OS. Encerramento alternativo.")
     public ResponseEntity<OrdemServicoResposta> cancelar(@PathVariable Long id) {
         return ResponseEntity.ok(gestor.cancelar(id));
     }
 
     @PostMapping("/ordens-servico/{id}/reabrir")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('SERVICO_EXCLUIR')")
     @Operation(summary = "Reabre uma OS cancelada (status volta a ABERTA). Apenas admin.")
     public ResponseEntity<OrdemServicoResposta> reabrir(
             @PathVariable Long id,
@@ -133,7 +133,7 @@ public class ControladorOrdemServico {
     }
 
     @DeleteMapping("/ordens-servico/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('SERVICO_EXCLUIR')")
     @Operation(summary = "Exclui permanentemente uma OS (com anexo). Apenas admin.")
     public ResponseEntity<Void> excluir(
             @PathVariable Long id,

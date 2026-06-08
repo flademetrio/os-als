@@ -40,14 +40,14 @@ public class ControladorAnexoServico {
     }
 
     @GetMapping("/servicos/{servicoId}/anexos")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_VER')")
     @Operation(summary = "Lista os anexos do Servico.")
     public ResponseEntity<List<AnexoServicoResposta>> listar(@PathVariable Long servicoId) {
         return ResponseEntity.ok(gestor.listarDoServico(servicoId));
     }
 
     @PostMapping(value = "/servicos/{servicoId}/anexos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Anexa um PDF ao Servico (multipart/form-data).")
     public ResponseEntity<AnexoServicoResposta> anexar(
             @PathVariable Long servicoId,
@@ -62,7 +62,7 @@ public class ControladorAnexoServico {
     }
 
     @GetMapping("/anexos-servico/{anexoId}/conteudo")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_VER')")
     @Operation(summary = "Baixa o conteudo do anexo (PDF, inline).")
     public ResponseEntity<Resource> baixar(@PathVariable Long anexoId) {
         ConteudoAnexo c = gestor.baixarAnexoServico(anexoId);
@@ -70,7 +70,7 @@ public class ControladorAnexoServico {
     }
 
     @DeleteMapping("/servicos/{servicoId}/anexos/{anexoId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Remove um anexo do Servico.")
     public ResponseEntity<Void> remover(
             @PathVariable Long servicoId,

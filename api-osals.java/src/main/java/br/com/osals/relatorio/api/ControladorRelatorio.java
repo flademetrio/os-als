@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/relatorios")
-@PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
+@PreAuthorize("hasAuthority('RELATORIO_VER')")
 @Tag(name = "Relatorios", description = "Relatorios agregados — somente gerente e admin")
 public class ControladorRelatorio {
 

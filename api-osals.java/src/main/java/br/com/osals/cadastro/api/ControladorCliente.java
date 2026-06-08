@@ -37,7 +37,7 @@ public class ControladorCliente {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_VER')")
     @Operation(summary = "Lista clientes com busca opcional e paginacao.")
     public ResponseEntity<PaginaResposta<ClienteResumoDto>> listar(
             @RequestParam(required = false) String busca,
@@ -48,13 +48,13 @@ public class ControladorCliente {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_VER')")
     public ResponseEntity<ClienteResposta> buscar(@PathVariable Long id) {
         return ResponseEntity.ok(servico.buscarPorId(id));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     @Operation(summary = "Cria novo cliente.")
     public ResponseEntity<ClienteResposta> criar(
             @Valid @RequestBody CriacaoClienteRequisicao req,
@@ -65,7 +65,7 @@ public class ControladorCliente {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<ClienteResposta> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody AtualizacaoClienteRequisicao req,
@@ -75,7 +75,7 @@ public class ControladorCliente {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     @Operation(summary = "Inativa cliente (soft delete). Apenas gerente ou admin.")
     public ResponseEntity<Void> inativar(@PathVariable Long id, @AuthenticationPrincipal Usuario autor) {
         servico.inativar(id, autor);
@@ -83,7 +83,7 @@ public class ControladorCliente {
     }
 
     @PostMapping("/{id}/reativar")
-    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<Void> reativar(@PathVariable Long id, @AuthenticationPrincipal Usuario autor) {
         servico.reativar(id, autor);
         return ResponseEntity.noContent().build();

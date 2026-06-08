@@ -36,7 +36,7 @@ public class ControladorTecnico {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_VER')")
     @Operation(summary = "Lista tecnicos paginado com busca opcional.")
     public ResponseEntity<PaginaResposta<TecnicoResumoDto>> listar(
             @RequestParam(required = false) String busca,
@@ -47,13 +47,13 @@ public class ControladorTecnico {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_VER')")
     public ResponseEntity<TecnicoResposta> buscar(@PathVariable Long id) {
         return ResponseEntity.ok(servico.buscarPorId(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     @Operation(summary = "Cria tecnico (usuario+tecnico em transacao). Apenas gerente ou admin.")
     public ResponseEntity<TecnicoResposta> criar(@Valid @RequestBody CriacaoTecnicoRequisicao req) {
         var t = servico.criar(req);
@@ -61,7 +61,7 @@ public class ControladorTecnico {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<TecnicoResposta> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody AtualizacaoTecnicoRequisicao req
@@ -70,7 +70,7 @@ public class ControladorTecnico {
     }
 
     @PutMapping("/{id}/senha")
-    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     @Operation(summary = "Redefine senha do tecnico. Invalida sessoes vigentes.")
     public ResponseEntity<Void> redefinirSenha(
             @PathVariable Long id,
@@ -81,14 +81,14 @@ public class ControladorTecnico {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<Void> inativar(@PathVariable Long id) {
         servico.inativar(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/reativar")
-    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<Void> reativar(@PathVariable Long id) {
         servico.reativar(id);
         return ResponseEntity.noContent().build();

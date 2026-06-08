@@ -38,14 +38,14 @@ public class ControladorAnexoOs {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_VER')")
     @Operation(summary = "Metadados do anexo da OS.")
     public ResponseEntity<AnexoOsResposta> metadados(@PathVariable Long osId) {
         return ResponseEntity.ok(gestor.metadadosAnexoOs(osId));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Anexa (ou substitui) o PDF da OS.")
     public ResponseEntity<AnexoOsResposta> anexar(
             @PathVariable Long osId,
@@ -56,7 +56,7 @@ public class ControladorAnexoOs {
     }
 
     @GetMapping("/conteudo")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_VER')")
     @Operation(summary = "Baixa o conteudo do anexo da OS (PDF, inline).")
     public ResponseEntity<Resource> baixar(@PathVariable Long osId) {
         ConteudoAnexo c = gestor.baixarAnexoOs(osId);
@@ -64,7 +64,7 @@ public class ControladorAnexoOs {
     }
 
     @DeleteMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Remove o anexo da OS.")
     public ResponseEntity<Void> remover(
             @PathVariable Long osId,

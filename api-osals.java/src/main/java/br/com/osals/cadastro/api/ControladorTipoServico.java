@@ -37,7 +37,7 @@ public class ControladorTipoServico {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('SERVICO_VER')")
     public ResponseEntity<List<TipoServicoResposta>> listar(
             @RequestParam(defaultValue = "true") boolean apenasAtivos
     ) {
@@ -45,7 +45,7 @@ public class ControladorTipoServico {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CONFIG_GERENCIAR')")
     @Operation(summary = "Cadastra um novo tipo de servico. Apenas admin.")
     public ResponseEntity<TipoServicoResposta> criar(
             @Valid @RequestBody CriacaoTipoServicoRequisicao req
@@ -55,7 +55,7 @@ public class ControladorTipoServico {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CONFIG_GERENCIAR')")
     @Operation(summary = "Renomeia e/ou ativa/desativa um tipo de servico. Apenas admin.")
     public ResponseEntity<TipoServicoResposta> atualizar(
             @PathVariable Integer id,
@@ -65,7 +65,7 @@ public class ControladorTipoServico {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CONFIG_GERENCIAR')")
     @Operation(summary = "Exclui um tipo de servico. Falha (422) se houver servico vinculado. Apenas admin.")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
         servico.excluir(id);

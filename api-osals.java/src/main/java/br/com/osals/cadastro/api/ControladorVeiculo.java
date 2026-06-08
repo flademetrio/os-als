@@ -35,7 +35,7 @@ public class ControladorVeiculo {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_VER')")
     @Operation(summary = "Lista veiculos com filtros opcionais.")
     public ResponseEntity<PaginaResposta<VeiculoResumoDto>> listar(
             @RequestParam(required = false) StatusVeiculo status,
@@ -47,13 +47,13 @@ public class ControladorVeiculo {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_VER')")
     public ResponseEntity<VeiculoResposta> buscar(@PathVariable Long id) {
         return ResponseEntity.ok(servico.buscarPorId(id));
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     @Operation(summary = "Cria novo veiculo. Placa unica, formato Mercosul ou antigo.")
     public ResponseEntity<VeiculoResposta> criar(@Valid @RequestBody VeiculoRequisicao req) {
         var v = servico.criar(req);
@@ -61,7 +61,7 @@ public class ControladorVeiculo {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<VeiculoResposta> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody VeiculoRequisicao req
@@ -70,14 +70,14 @@ public class ControladorVeiculo {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<Void> inativar(@PathVariable Long id) {
         servico.inativar(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/reativar")
-    @PreAuthorize("hasAnyRole('GERENTE','ADMIN')")
+    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
     public ResponseEntity<Void> reativar(@PathVariable Long id) {
         servico.reativar(id);
         return ResponseEntity.noContent().build();

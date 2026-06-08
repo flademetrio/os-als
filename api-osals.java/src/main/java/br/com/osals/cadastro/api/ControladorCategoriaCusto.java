@@ -38,7 +38,7 @@ public class ControladorCategoriaCusto {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('CUSTO_VER')")
     public ResponseEntity<List<CategoriaCustoResposta>> listar(
             @RequestParam(defaultValue = "true") boolean apenasAtivos
     ) {
@@ -46,7 +46,7 @@ public class ControladorCategoriaCusto {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CONFIG_GERENCIAR')")
     @Operation(summary = "Cria categoria nova. Apenas admin. Sempre entra como tipo LIVRE.")
     public ResponseEntity<CategoriaCustoResposta> criar(
             @Valid @RequestBody CriacaoCategoriaCustoRequisicao req
@@ -56,7 +56,7 @@ public class ControladorCategoriaCusto {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CONFIG_GERENCIAR')")
     @Operation(summary = "Renomeia e/ou ativa/desativa categoria. Codigo e tipo sao imutaveis.")
     public ResponseEntity<CategoriaCustoResposta> atualizar(
             @PathVariable Integer id,
@@ -66,7 +66,7 @@ public class ControladorCategoriaCusto {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CONFIG_GERENCIAR')")
     @Operation(summary = "Exclui categoria. Bloqueado para estruturadas (mao de obra/deslocamento) "
             + "e para categorias com lancamentos historicos.")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {

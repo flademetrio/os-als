@@ -196,8 +196,16 @@ public class GestorLancamentoCusto {
                 .longValueExact();
     }
 
+    /**
+     * O acesso base (CUSTO_EDITAR) ja foi validado pelo @PreAuthorize do
+     * controller. Aqui aplicamos a regra de negocio extra: apos o Servico
+     * encerrado, somente GERENTE e ADMIN podem alterar custos — qualquer outro
+     * papel (inclusive COMPRAS) recebe 403.
+     */
     private void validarPermissaoAlteracao(Servico servico, Usuario autor) {
-        if (servico.estaEncerrado() && autor.getPapel() == Papel.OPERADOR) {
+        if (servico.estaEncerrado()
+                && autor.getPapel() != Papel.GERENTE
+                && autor.getPapel() != Papel.ADMIN) {
             throw new AccessDeniedException(
                     "Servico encerrado: apenas gerente ou admin podem alterar custos.");
         }
