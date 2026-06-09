@@ -30,13 +30,13 @@ public class ControladorUnidadeMedida {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('CADASTRO_VER')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<UnidadeMedidaResposta>> listar() {
         return ResponseEntity.ok(servico.listar());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('CADASTRO_VER')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UnidadeMedidaResposta> buscar(@PathVariable Integer id) {
         return ResponseEntity.ok(servico.buscarPorId(id));
     }

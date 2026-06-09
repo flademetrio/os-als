@@ -27,8 +27,12 @@ public final class PresetsPermissao {
                     Permissao.CUSTO_VER,
                     Permissao.CUSTO_EDITAR,
                     Permissao.RELATORIO_VER,
-                    Permissao.CADASTRO_VER,
-                    Permissao.CADASTRO_GERENCIAR,
+                    Permissao.CLIENTE_VER, Permissao.CLIENTE_GERENCIAR,
+                    Permissao.EQUIPAMENTO_VER, Permissao.EQUIPAMENTO_GERENCIAR,
+                    Permissao.PECA_VER, Permissao.PECA_GERENCIAR,
+                    Permissao.FORNECEDOR_VER, Permissao.FORNECEDOR_GERENCIAR,
+                    Permissao.VEICULO_VER, Permissao.VEICULO_GERENCIAR,
+                    Permissao.TECNICO_VER, Permissao.TECNICO_GERENCIAR,
                     Permissao.CONFIG_GERENCIAR);
 
             case COMPRAS -> EnumSet.of(
@@ -36,18 +40,31 @@ public final class PresetsPermissao {
                     Permissao.CUSTO_VER,
                     Permissao.CUSTO_EDITAR,
                     Permissao.RELATORIO_VER,
-                    Permissao.CADASTRO_VER,
-                    Permissao.CADASTRO_GERENCIAR);
+                    Permissao.CLIENTE_VER, Permissao.CLIENTE_GERENCIAR,
+                    Permissao.EQUIPAMENTO_VER, Permissao.EQUIPAMENTO_GERENCIAR,
+                    Permissao.PECA_VER, Permissao.PECA_GERENCIAR,
+                    Permissao.FORNECEDOR_VER, Permissao.FORNECEDOR_GERENCIAR,
+                    Permissao.VEICULO_VER, Permissao.VEICULO_GERENCIAR,
+                    Permissao.TECNICO_VER, Permissao.TECNICO_GERENCIAR);
 
             case OPERADOR -> EnumSet.of(
                     Permissao.SERVICO_VER,
                     Permissao.SERVICO_GERENCIAR,
-                    Permissao.CADASTRO_VER,
-                    Permissao.CADASTRO_GERENCIAR);
+                    Permissao.CLIENTE_VER, Permissao.CLIENTE_GERENCIAR,
+                    Permissao.EQUIPAMENTO_VER, Permissao.EQUIPAMENTO_GERENCIAR,
+                    Permissao.PECA_VER, Permissao.PECA_GERENCIAR,
+                    Permissao.FORNECEDOR_VER, Permissao.FORNECEDOR_GERENCIAR,
+                    Permissao.VEICULO_VER, Permissao.VEICULO_GERENCIAR,
+                    Permissao.TECNICO_VER, Permissao.TECNICO_GERENCIAR);
 
             case TECNICO -> EnumSet.of(
                     Permissao.SERVICO_VER,
-                    Permissao.CADASTRO_VER);
+                    Permissao.CLIENTE_VER,
+                    Permissao.EQUIPAMENTO_VER,
+                    Permissao.PECA_VER,
+                    Permissao.FORNECEDOR_VER,
+                    Permissao.VEICULO_VER,
+                    Permissao.TECNICO_VER);
         };
     }
 }

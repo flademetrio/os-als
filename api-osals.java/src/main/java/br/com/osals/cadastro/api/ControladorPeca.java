@@ -32,7 +32,7 @@ public class ControladorPeca {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('CADASTRO_VER')")
+    @PreAuthorize("hasAuthority('PECA_VER')")
     public ResponseEntity<PaginaResposta<PecaResposta>> listar(
             @RequestParam(required = false) String busca,
             @RequestParam(defaultValue = "true") boolean apenasAtivos,
@@ -42,33 +42,33 @@ public class ControladorPeca {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('CADASTRO_VER')")
+    @PreAuthorize("hasAuthority('PECA_VER')")
     public ResponseEntity<PecaResposta> buscar(@PathVariable Long id) {
         return ResponseEntity.ok(servico.buscarPorId(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('PECA_GERENCIAR')")
     public ResponseEntity<PecaResposta> criar(@Valid @RequestBody PecaRequisicao req) {
         var p = servico.criar(req);
         return ResponseEntity.created(URI.create("/pecas/" + p.id())).body(p);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('PECA_GERENCIAR')")
     public ResponseEntity<PecaResposta> atualizar(@PathVariable Long id, @Valid @RequestBody PecaRequisicao req) {
         return ResponseEntity.ok(servico.atualizar(id, req));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('PECA_GERENCIAR')")
     public ResponseEntity<Void> inativar(@PathVariable Long id) {
         servico.inativar(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/reativar")
-    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('PECA_GERENCIAR')")
     public ResponseEntity<Void> reativar(@PathVariable Long id) {
         servico.reativar(id);
         return ResponseEntity.noContent().build();

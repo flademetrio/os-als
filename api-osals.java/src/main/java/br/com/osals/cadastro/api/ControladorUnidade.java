@@ -30,7 +30,7 @@ public class ControladorUnidade {
     }
 
     @GetMapping("/clientes/{clienteId}/unidades")
-    @PreAuthorize("hasAuthority('CADASTRO_VER')")
+    @PreAuthorize("hasAuthority('CLIENTE_VER')")
     public ResponseEntity<List<UnidadeResposta>> listar(
             @PathVariable Long clienteId,
             @RequestParam(defaultValue = "true") boolean apenasAtivas
@@ -39,7 +39,7 @@ public class ControladorUnidade {
     }
 
     @PostMapping("/clientes/{clienteId}/unidades")
-    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('CLIENTE_GERENCIAR')")
     @Operation(summary = "Cria nova unidade vinculada ao cliente.")
     public ResponseEntity<UnidadeResposta> criar(
             @PathVariable Long clienteId,
@@ -50,13 +50,13 @@ public class ControladorUnidade {
     }
 
     @GetMapping("/unidades/{id}")
-    @PreAuthorize("hasAuthority('CADASTRO_VER')")
+    @PreAuthorize("hasAuthority('CLIENTE_VER')")
     public ResponseEntity<UnidadeResposta> buscar(@PathVariable Long id) {
         return ResponseEntity.ok(servico.buscarPorId(id));
     }
 
     @PutMapping("/unidades/{id}")
-    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('CLIENTE_GERENCIAR')")
     public ResponseEntity<UnidadeResposta> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody UnidadeRequisicao req
@@ -65,7 +65,7 @@ public class ControladorUnidade {
     }
 
     @DeleteMapping("/unidades/{id}")
-    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('CLIENTE_GERENCIAR')")
     public ResponseEntity<Void> inativar(@PathVariable Long id) {
         servico.inativar(id);
         return ResponseEntity.noContent().build();

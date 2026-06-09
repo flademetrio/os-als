@@ -32,7 +32,7 @@ public class ControladorFornecedor {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('CADASTRO_VER')")
+    @PreAuthorize("hasAuthority('FORNECEDOR_VER')")
     public ResponseEntity<PaginaResposta<FornecedorResposta>> listar(
             @RequestParam(required = false) String busca,
             @RequestParam(defaultValue = "true") boolean apenasAtivos,
@@ -42,33 +42,33 @@ public class ControladorFornecedor {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('CADASTRO_VER')")
+    @PreAuthorize("hasAuthority('FORNECEDOR_VER')")
     public ResponseEntity<FornecedorResposta> buscar(@PathVariable Long id) {
         return ResponseEntity.ok(servico.buscarPorId(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('FORNECEDOR_GERENCIAR')")
     public ResponseEntity<FornecedorResposta> criar(@Valid @RequestBody FornecedorRequisicao req) {
         var f = servico.criar(req);
         return ResponseEntity.created(URI.create("/fornecedores/" + f.id())).body(f);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('FORNECEDOR_GERENCIAR')")
     public ResponseEntity<FornecedorResposta> atualizar(@PathVariable Long id, @Valid @RequestBody FornecedorRequisicao req) {
         return ResponseEntity.ok(servico.atualizar(id, req));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('FORNECEDOR_GERENCIAR')")
     public ResponseEntity<Void> inativar(@PathVariable Long id) {
         servico.inativar(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/reativar")
-    @PreAuthorize("hasAuthority('CADASTRO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('FORNECEDOR_GERENCIAR')")
     public ResponseEntity<Void> reativar(@PathVariable Long id) {
         servico.reativar(id);
         return ResponseEntity.noContent().build();

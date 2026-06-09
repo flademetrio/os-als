@@ -20,11 +20,11 @@ export type ItemNavegacao = {
 export const NAV_PRINCIPAL: ItemNavegacao[] = [
   { rotulo: 'Dashboard', href: '/dashboard' },
   { rotulo: 'Servicos', href: '/servicos' },
-  { rotulo: 'Clientes', href: '/clientes' },
-  { rotulo: 'Equipamentos', href: '/equipamentos' },
-  { rotulo: 'Tecnicos', href: '/tecnicos' },
-  { rotulo: 'Veiculos', href: '/veiculos' },
-  { rotulo: 'Pecas', href: '/pecas' },
+  { rotulo: 'Clientes', href: '/clientes', permissao: 'CLIENTE_VER' },
+  { rotulo: 'Equipamentos', href: '/equipamentos', permissao: 'EQUIPAMENTO_VER' },
+  { rotulo: 'Tecnicos', href: '/tecnicos', permissao: 'TECNICO_VER' },
+  { rotulo: 'Veiculos', href: '/veiculos', permissao: 'VEICULO_VER' },
+  { rotulo: 'Pecas', href: '/pecas', permissao: 'PECA_VER' },
   { rotulo: 'Relatorios', href: '/relatorios', permissao: 'RELATORIO_VER' },
 ]
 

@@ -22,8 +22,23 @@ public enum Permissao {
 
     RELATORIO_VER("Relatorios", "Ver relatorios de custo (por cliente e por servico)"),
 
-    CADASTRO_VER("Cadastros", "Ver cadastros (clientes, equipamentos, pecas, fornecedores, veiculos, tecnicos)"),
-    CADASTRO_GERENCIAR("Cadastros", "Criar, editar e inativar cadastros"),
+    CLIENTE_VER("Cadastros", "Ver clientes (inclui contatos e unidades)"),
+    CLIENTE_GERENCIAR("Cadastros", "Criar, editar e inativar clientes, contatos e unidades"),
+
+    EQUIPAMENTO_VER("Cadastros", "Ver equipamentos"),
+    EQUIPAMENTO_GERENCIAR("Cadastros", "Criar, editar e inativar equipamentos"),
+
+    PECA_VER("Cadastros", "Ver pecas"),
+    PECA_GERENCIAR("Cadastros", "Criar, editar e inativar pecas"),
+
+    FORNECEDOR_VER("Cadastros", "Ver fornecedores"),
+    FORNECEDOR_GERENCIAR("Cadastros", "Criar, editar e inativar fornecedores"),
+
+    VEICULO_VER("Cadastros", "Ver veiculos"),
+    VEICULO_GERENCIAR("Cadastros", "Criar, editar e inativar veiculos"),
+
+    TECNICO_VER("Cadastros", "Ver tecnicos"),
+    TECNICO_GERENCIAR("Cadastros", "Criar, editar e inativar tecnicos"),
 
     CONFIG_GERENCIAR("Configuracao", "Configurar markup, categorias de custo, tipos de servico e unidades de medida"),
 
