@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { lerSessao } from '@/app/lib/sessao'
+import { temPermissao } from '@/app/lib/permissoes'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type { PaginaResposta, TecnicoResumoDto } from '@/app/lib/definicoes'
 import { Badge } from '@/components/ui/Badge'
@@ -24,7 +25,7 @@ export default async function TecnicosPage({ searchParams }: Props) {
     clienteApi<PaginaResposta<TecnicoResumoDto>>(`/tecnicos?${q.toString()}`),
     lerSessao(),
   ])
-  const podeCriar = sessao?.papel === 'ADMIN' || sessao?.papel === 'GERENTE'
+  const podeCriar = temPermissao(sessao, 'TECNICO_GERENCIAR')
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">

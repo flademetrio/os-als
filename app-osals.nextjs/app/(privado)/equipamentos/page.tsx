@@ -9,6 +9,8 @@ import {
   STATUS_EQUIPAMENTO_LABEL,
   TIPOS_EQUIPAMENTO_LABEL,
 } from '@/app/lib/esquemas/equipamento'
+import { lerSessao } from '@/app/lib/sessao'
+import { temPermissao } from '@/app/lib/permissoes'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { BotaoNovoEquipamento } from './botao-novo-equipamento'
@@ -37,10 +39,12 @@ export default async function EquipamentosPage({ searchParams }: Props) {
   q.set('tamanho', '20')
   q.set('apenasAtivos', String(apenasAtivos))
 
-  const [dados, clientes] = await Promise.all([
+  const [dados, clientes, sessao] = await Promise.all([
     clienteApi<PaginaResposta<EquipamentoResumoDto>>(`/equipamentos?${q.toString()}`),
     clienteApi<PaginaResposta<ClienteResumoDto>>('/clientes?tamanho=200&apenasAtivos=true'),
+    lerSessao(),
   ])
+  const podeGerenciar = temPermissao(sessao, 'EQUIPAMENTO_GERENCIAR')
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -52,18 +56,20 @@ export default async function EquipamentosPage({ searchParams }: Props) {
             {apenasAtivos ? ' ativos' : ' no total'}
           </p>
         </div>
-        <BotaoNovoEquipamento clientes={clientes.conteudo} />
+        {podeGerenciar && <BotaoNovoEquipamento clientes={clientes.conteudo} />}
       </div>
 
       <Card padding="none">
         {dados.conteudo.length === 0 ? (
           <div className="p-10 text-center">
             <p className="text-slate-500 mb-4">Nenhum equipamento cadastrado.</p>
-            <BotaoNovoEquipamento
-              clientes={clientes.conteudo}
-              rotulo="Cadastrar primeiro equipamento"
-              size="sm"
-            />
+            {podeGerenciar && (
+              <BotaoNovoEquipamento
+                clientes={clientes.conteudo}
+                rotulo="Cadastrar primeiro equipamento"
+                size="sm"
+              />
+            )}
             <p className="text-xs text-slate-400 mt-4">
               Equipamentos sao vinculados a uma unidade de um cliente.
               <br />

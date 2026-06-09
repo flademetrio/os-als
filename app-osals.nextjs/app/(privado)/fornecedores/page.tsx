@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type { FornecedorResposta, PaginaResposta } from '@/app/lib/definicoes'
+import { lerSessao } from '@/app/lib/sessao'
+import { temPermissao } from '@/app/lib/permissoes'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -19,7 +21,11 @@ export default async function FornecedoresPage({ searchParams }: Props) {
   q.set('tamanho', '20')
   q.set('apenasAtivos', String(apenasAtivos))
 
-  const dados = await clienteApi<PaginaResposta<FornecedorResposta>>(`/fornecedores?${q.toString()}`)
+  const [dados, sessao] = await Promise.all([
+    clienteApi<PaginaResposta<FornecedorResposta>>(`/fornecedores?${q.toString()}`),
+    lerSessao(),
+  ])
+  const podeGerenciar = temPermissao(sessao, 'FORNECEDOR_GERENCIAR')
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -31,18 +37,22 @@ export default async function FornecedoresPage({ searchParams }: Props) {
             {apenasAtivos ? ' ativos' : ' no total'}
           </p>
         </div>
-        <Link href="/fornecedores/novo">
-          <Button variant="primary">+ Novo fornecedor</Button>
-        </Link>
+        {podeGerenciar && (
+          <Link href="/fornecedores/novo">
+            <Button variant="primary">+ Novo fornecedor</Button>
+          </Link>
+        )}
       </div>
 
       <Card padding="none">
         {dados.conteudo.length === 0 ? (
           <div className="p-10 text-center">
             <p className="text-slate-500">Nenhum fornecedor encontrado.</p>
-            <Link href="/fornecedores/novo" className="inline-block mt-4">
-              <Button size="sm">Cadastrar o primeiro fornecedor</Button>
-            </Link>
+            {podeGerenciar && (
+              <Link href="/fornecedores/novo" className="inline-block mt-4">
+                <Button size="sm">Cadastrar o primeiro fornecedor</Button>
+              </Link>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">

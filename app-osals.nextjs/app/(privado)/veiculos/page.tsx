@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type { PaginaResposta, VeiculoResumoDto } from '@/app/lib/definicoes'
 import { STATUS_VEICULO_LABEL } from '@/app/lib/esquemas/equipamento'
+import { lerSessao } from '@/app/lib/sessao'
+import { temPermissao } from '@/app/lib/permissoes'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { BotaoNovoVeiculo } from './botao-novo-veiculo'
@@ -22,7 +24,11 @@ export default async function VeiculosPage({ searchParams }: Props) {
   q.set('tamanho', '20')
   q.set('apenasAtivos', String(apenasAtivos))
 
-  const dados = await clienteApi<PaginaResposta<VeiculoResumoDto>>(`/veiculos?${q.toString()}`)
+  const [dados, sessao] = await Promise.all([
+    clienteApi<PaginaResposta<VeiculoResumoDto>>(`/veiculos?${q.toString()}`),
+    lerSessao(),
+  ])
+  const podeGerenciar = temPermissao(sessao, 'VEICULO_GERENCIAR')
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -34,14 +40,14 @@ export default async function VeiculosPage({ searchParams }: Props) {
             {apenasAtivos ? ' ativos' : ' no total'}
           </p>
         </div>
-        <BotaoNovoVeiculo />
+        {podeGerenciar && <BotaoNovoVeiculo />}
       </div>
 
       <Card padding="none">
         {dados.conteudo.length === 0 ? (
           <div className="p-10 text-center">
             <p className="text-slate-500 mb-4">Nenhum veiculo encontrado.</p>
-            <BotaoNovoVeiculo rotulo="Cadastrar o primeiro veiculo" size="sm" />
+            {podeGerenciar && <BotaoNovoVeiculo rotulo="Cadastrar o primeiro veiculo" size="sm" />}
           </div>
         ) : (
           <div className="overflow-x-auto">

@@ -5,6 +5,8 @@ import type {
   PecaResposta,
   UnidadeMedidaResposta,
 } from '@/app/lib/definicoes'
+import { lerSessao } from '@/app/lib/sessao'
+import { temPermissao } from '@/app/lib/permissoes'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { BotaoNovaPeca } from './botao-nova-peca'
@@ -23,10 +25,12 @@ export default async function PecasPage({ searchParams }: Props) {
   q.set('tamanho', '20')
   q.set('apenasAtivos', String(apenasAtivos))
 
-  const [dados, unidadesMedida] = await Promise.all([
+  const [dados, unidadesMedida, sessao] = await Promise.all([
     clienteApi<PaginaResposta<PecaResposta>>(`/pecas?${q.toString()}`),
     clienteApi<UnidadeMedidaResposta[]>('/unidades-medida'),
+    lerSessao(),
   ])
+  const podeGerenciar = temPermissao(sessao, 'PECA_GERENCIAR')
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -38,18 +42,20 @@ export default async function PecasPage({ searchParams }: Props) {
             {apenasAtivos ? ' (apenas ativos)' : ''}
           </p>
         </div>
-        <BotaoNovaPeca unidadesMedida={unidadesMedida} />
+        {podeGerenciar && <BotaoNovaPeca unidadesMedida={unidadesMedida} />}
       </div>
 
       <Card padding="none">
         {dados.conteudo.length === 0 ? (
           <div className="p-10 text-center">
             <p className="text-slate-500 mb-4">Nenhuma peca cadastrada.</p>
-            <BotaoNovaPeca
-              unidadesMedida={unidadesMedida}
-              rotulo="Cadastrar primeira peca"
-              size="sm"
-            />
+            {podeGerenciar && (
+              <BotaoNovaPeca
+                unidadesMedida={unidadesMedida}
+                rotulo="Cadastrar primeira peca"
+                size="sm"
+              />
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">

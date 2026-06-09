@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type { ClienteResumoDto, PaginaResposta } from '@/app/lib/definicoes'
+import { lerSessao } from '@/app/lib/sessao'
+import { temPermissao } from '@/app/lib/permissoes'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { BotaoNovoCliente } from './botao-novo-cliente'
@@ -27,9 +29,11 @@ export default async function ClientesPage({ searchParams }: Props) {
   url.searchParams.set('tamanho', '20')
   url.searchParams.set('apenasAtivos', String(apenasAtivos))
 
-  const dados = await clienteApi<PaginaResposta<ClienteResumoDto>>(
-    `/clientes?${url.searchParams.toString()}`,
-  )
+  const [dados, sessao] = await Promise.all([
+    clienteApi<PaginaResposta<ClienteResumoDto>>(`/clientes?${url.searchParams.toString()}`),
+    lerSessao(),
+  ])
+  const podeGerenciar = temPermissao(sessao, 'CLIENTE_GERENCIAR')
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -41,7 +45,7 @@ export default async function ClientesPage({ searchParams }: Props) {
             {apenasAtivos ? ' ativos' : ' no total'}
           </p>
         </div>
-        <BotaoNovoCliente />
+        {podeGerenciar && <BotaoNovoCliente />}
       </div>
 
       <Card padding="md">
@@ -57,7 +61,7 @@ export default async function ClientesPage({ searchParams }: Props) {
                 Tente outra busca ou desmarque &ldquo;Apenas ativos&rdquo;.
               </p>
             )}
-            {!busca && (
+            {!busca && podeGerenciar && (
               <div className="mt-4">
                 <BotaoNovoCliente rotulo="Cadastrar o primeiro cliente" size="sm" />
               </div>
