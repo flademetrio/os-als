@@ -409,6 +409,7 @@ export type LancamentoCustoResposta = {
   tipoLancamento: TipoLancamentoCusto
   descricao: string | null
   valorTotalCentavos: number
+  dataCusto: string
   tecnicoId: number | null
   tecnicoNome: string | null
   horas: number | null

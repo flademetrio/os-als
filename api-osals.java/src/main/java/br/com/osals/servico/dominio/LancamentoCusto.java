@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 /**
@@ -43,6 +44,9 @@ public class LancamentoCusto {
 
     @Column(name = "valor_total_centavos", nullable = false)
     private long valorTotalCentavos;
+
+    @Column(name = "data_custo", nullable = false)
+    private LocalDate dataCusto;
 
     @ManyToOne
     @JoinColumn(name = "tecnico_id")
@@ -118,6 +122,11 @@ public class LancamentoCusto {
         this.valorHoraSnapshotCentavos = null;
     }
 
+    /** Data a que o custo se refere (competencia). Vale para todas as categorias. */
+    public void definirDataCusto(LocalDate dataCusto) {
+        this.dataCusto = dataCusto;
+    }
+
     public void marcarAtualizadoPor(Usuario por) {
         this.updatedAt = OffsetDateTime.now();
         this.updatedBy = por;
@@ -136,6 +145,7 @@ public class LancamentoCusto {
     public CategoriaCusto getCategoriaCusto() { return categoriaCusto; }
     public String getDescricao() { return descricao; }
     public long getValorTotalCentavos() { return valorTotalCentavos; }
+    public LocalDate getDataCusto() { return dataCusto; }
     public Tecnico getTecnico() { return tecnico; }
     public BigDecimal getHoras() { return horas; }
     public Long getValorHoraSnapshotCentavos() { return valorHoraSnapshotCentavos; }

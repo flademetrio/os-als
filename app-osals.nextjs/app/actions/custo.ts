@@ -12,6 +12,7 @@ export type EstadoCusto = {
 
 type CorpoLancamento = {
   categoriaCustoId: number
+  dataCusto: string
   descricao?: string
   valorTotalCentavos?: number
   tecnicoId?: number
@@ -27,6 +28,11 @@ function montarCorpo(formData: FormData): CorpoLancamento | { erroCampo: [string
   const categoriaCustoId = Number(formData.get('categoriaCustoId'))
   if (!Number.isFinite(categoriaCustoId) || categoriaCustoId <= 0) {
     return { erroCampo: ['categoriaCustoId', 'Selecione a categoria'] }
+  }
+
+  const dataCusto = String(formData.get('dataCusto') ?? '').trim()
+  if (!dataCusto) {
+    return { erroCampo: ['dataCusto', 'Informe a data do custo'] }
   }
 
   const descricao = String(formData.get('descricao') ?? '').trim() || undefined
@@ -53,7 +59,7 @@ function montarCorpo(formData: FormData): CorpoLancamento | { erroCampo: [string
     }
   }
 
-  return { categoriaCustoId, descricao, valorTotalCentavos, tecnicoId, horas, km }
+  return { categoriaCustoId, dataCusto, descricao, valorTotalCentavos, tecnicoId, horas, km }
 }
 
 export async function lancarCusto(

@@ -144,6 +144,8 @@ public class GestorLancamentoCusto {
         }
         String descricao = normalizar(req.descricao());
 
+        lancamento.definirDataCusto(req.dataCusto());
+
         switch (categoria.getTipoLancamento()) {
             case ESTRUTURADO_MAO_OBRA -> aplicarMaoDeObra(lancamento, categoria, descricao, req);
             case ESTRUTURADO_DESLOCAMENTO -> aplicarDeslocamento(lancamento, categoria, descricao, req);

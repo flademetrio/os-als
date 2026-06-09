@@ -8,6 +8,7 @@ import type {
   ResumoFinanceiroServico,
   TecnicoResumoDto,
 } from '@/app/lib/definicoes'
+import { formatarDataIso } from '@/app/lib/data'
 import { centavosParaReais } from '@/app/lib/moeda'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
@@ -55,6 +56,7 @@ export function TabCustos({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-y border-slate-200 bg-slate-50">
+                <th className="px-5 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Data</th>
                 <th className="px-5 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Categoria</th>
                 <th className="px-5 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Detalhe</th>
                 <th className="px-5 py-2.5 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Valor</th>
@@ -64,6 +66,7 @@ export function TabCustos({
             <tbody>
               {lancamentos.map((l) => (
                 <tr key={l.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                  <td className="px-5 py-2.5 whitespace-nowrap text-slate-600">{formatarDataIso(l.dataCusto)}</td>
                   <td className="px-5 py-2.5 text-slate-700">{l.categoriaNome}</td>
                   <td className="px-5 py-2.5 text-slate-600">{detalhe(l)}</td>
                   <td className="px-5 py-2.5 text-right font-medium text-slate-900">

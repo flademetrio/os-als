@@ -21,6 +21,7 @@ public class MapperLancamentoCusto {
                 l.getCategoriaCusto().getTipoLancamento(),
                 l.getDescricao(),
                 l.getValorTotalCentavos(),
+                l.getDataCusto(),
                 t == null ? null : t.getUsuarioId(),
                 t == null ? null : t.getUsuario().getNome(),
                 l.getHoras(),

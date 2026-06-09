@@ -41,6 +41,10 @@ export function ModalCusto({ servicoId, categorias, tecnicos, lancamento, onClos
     lancamento ? String(lancamento.categoriaCustoId) : '',
   )
 
+  // Data de hoje no fuso local (YYYY-MM-DD) — default do campo "Data do custo".
+  const hoje = new Date()
+  const dataHoje = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`
+
   useEffect(() => {
     if (estado.sucesso) onClose()
   }, [estado.sucesso, onClose])
@@ -79,6 +83,16 @@ export function ModalCusto({ servicoId, categorias, tecnicos, lancamento, onClos
             </option>
           ))}
         </Select>
+
+        <Input
+          label="Data do custo"
+          name="dataCusto"
+          type="date"
+          required
+          defaultValue={lancamento?.dataCusto ?? dataHoje}
+          error={estado.errosCampos?.dataCusto}
+          fullWidth
+        />
 
         {tipo === 'ESTRUTURADO_MAO_OBRA' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

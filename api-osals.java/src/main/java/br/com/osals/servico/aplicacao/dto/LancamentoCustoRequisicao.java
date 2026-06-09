@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 /**
  * Requisicao de lancamento de custo. Os campos exigidos variam conforme a
@@ -18,6 +19,9 @@ public record LancamentoCustoRequisicao(
 
         @NotNull(message = "categoriaCustoId e obrigatorio")
         Integer categoriaCustoId,
+
+        @NotNull(message = "dataCusto e obrigatorio")
+        LocalDate dataCusto,
 
         @Size(max = 255, message = "descricao deve ter no maximo 255 caracteres")
         String descricao,
