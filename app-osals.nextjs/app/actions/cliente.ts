@@ -5,6 +5,7 @@ import { clienteApi, ErroApi, ErroConexao } from '@/app/lib/cliente-api'
 import {
   criacaoClienteSchema,
   atualizacaoClienteSchema,
+  unidadeSchema,
 } from '@/app/lib/esquemas/cliente'
 import type { ClienteResposta } from '@/app/lib/definicoes'
 
@@ -33,6 +34,34 @@ export async function criarClienteRetornando(
     return { errosCampos }
   }
 
+  // Endereco opcional: se algum campo veio preenchido, validamos ANTES de criar
+  // o cliente e, no sucesso, criamos a unidade "Matriz" junto.
+  const CAMPOS_ENDERECO = ['cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado'] as const
+  const temEndereco = CAMPOS_ENDERECO.some((c) => String(dados[c] ?? '').trim() !== '')
+
+  let unidadeBody: ReturnType<typeof unidadeSchema.parse> | null = null
+  if (temEndereco) {
+    const parseUnidade = unidadeSchema.safeParse({
+      identificacaoInterna: 'Matriz',
+      cep: dados.cep,
+      logradouro: dados.logradouro,
+      numero: dados.numero,
+      complemento: dados.complemento,
+      bairro: dados.bairro,
+      cidade: dados.cidade,
+      estado: dados.estado,
+    })
+    if (!parseUnidade.success) {
+      const errosCampos: Record<string, string> = {}
+      for (const issue of parseUnidade.error.issues) {
+        const campo = String(issue.path[0])
+        if (campo && !errosCampos[campo]) errosCampos[campo] = issue.message
+      }
+      return { errosCampos }
+    }
+    unidadeBody = parseUnidade.data
+  }
+
   let criado: ClienteResposta
   try {
     criado = await clienteApi<ClienteResposta>('/clientes', {
@@ -46,6 +75,22 @@ export async function criarClienteRetornando(
     }
     if (err instanceof ErroConexao) return { erro: 'Falha de conexao com a API.' }
     return { erro: 'Erro ao criar cliente.' }
+  }
+
+  // Cliente criado. Se houver endereco, cria a unidade "Matriz".
+  if (unidadeBody) {
+    try {
+      await clienteApi(`/clientes/${criado.id}/unidades`, {
+        method: 'POST',
+        body: unidadeBody,
+      })
+    } catch {
+      revalidatePath('/clientes')
+      return {
+        cliente: criado,
+        erro: 'Cliente criado, mas o endereco nao foi salvo. Adicione-o na aba Unidades do cliente.',
+      }
+    }
   }
 
   revalidatePath('/clientes')

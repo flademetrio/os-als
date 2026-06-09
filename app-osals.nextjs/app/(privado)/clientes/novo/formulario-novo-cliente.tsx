@@ -32,13 +32,15 @@ export function FormularioNovoCliente({ onCancelar, onCriado }: Props = {}) {
   const [tipoPessoa, setTipoPessoa] = useState<'PF' | 'PJ'>('PJ')
 
   useEffect(() => {
-    if (!estado.cliente) return
+    // Em caso de aviso (ex.: cliente criado mas endereco falhou), mantemos a
+    // tela aberta para o usuario ver o Alert, sem navegar.
+    if (!estado.cliente || estado.erro) return
     if (onCriado) {
       onCriado(estado.cliente)
     } else {
       router.push('/clientes')
     }
-  }, [estado.cliente, onCriado, router])
+  }, [estado.cliente, estado.erro, onCriado, router])
 
   return (
     <form action={dispatch} className="space-y-4">
@@ -87,6 +89,65 @@ export function FormularioNovoCliente({ onCancelar, onCriado }: Props = {}) {
           fullWidth
         />
       )}
+
+      <div className="border-t border-slate-200 pt-4">
+        <p className="text-sm font-medium text-slate-700">Endereco (opcional)</p>
+        <p className="text-xs text-slate-500 mb-3">
+          Se informado, cria a unidade &quot;Matriz&quot; do cliente com este endereco.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Input
+            label="CEP"
+            name="cep"
+            placeholder="00000000"
+            error={estado.errosCampos?.cep}
+            fullWidth
+          />
+          <div className="sm:col-span-2">
+            <Input
+              label="Logradouro"
+              name="logradouro"
+              error={estado.errosCampos?.logradouro}
+              fullWidth
+            />
+          </div>
+          <Input
+            label="Numero"
+            name="numero"
+            error={estado.errosCampos?.numero}
+            fullWidth
+          />
+          <div className="sm:col-span-2">
+            <Input
+              label="Complemento"
+              name="complemento"
+              error={estado.errosCampos?.complemento}
+              fullWidth
+            />
+          </div>
+          <Input
+            label="Bairro"
+            name="bairro"
+            error={estado.errosCampos?.bairro}
+            fullWidth
+          />
+          <Input
+            label="Cidade"
+            name="cidade"
+            error={estado.errosCampos?.cidade}
+            fullWidth
+          />
+          <Input
+            label="UF"
+            name="estado"
+            placeholder="SP"
+            maxLength={2}
+            error={estado.errosCampos?.estado}
+            fullWidth
+          />
+        </div>
+      </div>
 
       <div className="flex items-center justify-end gap-3 pt-2">
         {onCancelar ? (
