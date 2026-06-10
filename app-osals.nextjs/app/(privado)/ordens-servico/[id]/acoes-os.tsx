@@ -94,8 +94,32 @@ export function AcoesOs({
       }
       const blob = await resp.blob()
       const url = URL.createObjectURL(blob)
-      window.open(url, '_blank', 'noopener,noreferrer')
-      setTimeout(() => URL.revokeObjectURL(url), 60_000)
+
+      // Carrega o PDF num iframe escondido e abre a caixa de impressao direto
+      // (sem aba nova). Se o navegador bloquear, cai pra abrir em aba nova.
+      const iframe = document.createElement('iframe')
+      iframe.style.position = 'fixed'
+      iframe.style.width = '0'
+      iframe.style.height = '0'
+      iframe.style.border = '0'
+      iframe.style.right = '0'
+      iframe.style.bottom = '0'
+      iframe.src = url
+      iframe.onload = () => {
+        try {
+          iframe.contentWindow?.focus()
+          iframe.contentWindow?.print()
+        } catch {
+          window.open(url, '_blank', 'noopener,noreferrer')
+        }
+      }
+      document.body.appendChild(iframe)
+
+      // Limpa o blob e o iframe depois de um tempo (apos a caixa de impressao).
+      setTimeout(() => {
+        URL.revokeObjectURL(url)
+        iframe.remove()
+      }, 120_000)
       router.refresh()
     } catch {
       setErro('Falha de conexao ao gerar o PDF.')
