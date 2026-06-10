@@ -15,6 +15,7 @@ public enum Permissao {
 
     SERVICO_VER("Servicos", "Ver e listar servicos e ordens de servico"),
     SERVICO_GERENCIAR("Servicos", "Criar e editar servico e OS, encerrar, imprimir e digitar"),
+    ORDEM_SERVICO_EDITAR("Servicos", "Editar dados de uma OS nao encerrada"),
     SERVICO_EXCLUIR("Servicos", "Excluir servico ou ordem de servico"),
 
     CUSTO_VER("Custos", "Ver custos, markup e preco de venda"),

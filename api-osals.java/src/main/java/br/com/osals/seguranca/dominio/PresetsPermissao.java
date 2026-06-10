@@ -23,6 +23,7 @@ public final class PresetsPermissao {
             case GERENTE -> EnumSet.of(
                     Permissao.SERVICO_VER,
                     Permissao.SERVICO_GERENCIAR,
+                    Permissao.ORDEM_SERVICO_EDITAR,
                     Permissao.SERVICO_EXCLUIR,
                     Permissao.CUSTO_VER,
                     Permissao.CUSTO_EDITAR,
@@ -50,6 +51,7 @@ public final class PresetsPermissao {
             case OPERADOR -> EnumSet.of(
                     Permissao.SERVICO_VER,
                     Permissao.SERVICO_GERENCIAR,
+                    Permissao.ORDEM_SERVICO_EDITAR,
                     Permissao.CLIENTE_VER, Permissao.CLIENTE_GERENCIAR,
                     Permissao.EQUIPAMENTO_VER, Permissao.EQUIPAMENTO_GERENCIAR,
                     Permissao.PECA_VER, Permissao.PECA_GERENCIAR,

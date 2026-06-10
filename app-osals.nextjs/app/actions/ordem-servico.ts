@@ -70,6 +70,39 @@ export async function abrirOrdemServico(
   return { sucesso: true }
 }
 
+export async function editarOrdemServico(
+  osId: number,
+  servicoId: number,
+  _estado: EstadoOrdemServico,
+  formData: FormData,
+): Promise<EstadoOrdemServico> {
+  const parse = aberturaOsSchema.safeParse({
+    descricaoAtividade: formData.get('descricaoAtividade') ?? '',
+    dataAgendada: formData.get('dataAgendada') ?? '',
+    tecnicoIds: idsDe(formData, 'tecnicoIds'),
+    equipamentoIds: idsDe(formData, 'equipamentoIds'),
+    veiculoIds: idsDe(formData, 'veiculoIds'),
+    contatoIds: idsDe(formData, 'contatoIds'),
+  })
+  if (!parse.success) return aplicarErros(parse.error)
+
+  try {
+    await clienteApi<OrdemServicoResposta>(`/ordens-servico/${osId}`, {
+      method: 'PUT',
+      body: parse.data,
+    })
+  } catch (err) {
+    if (err instanceof ErroApi) return { erro: err.body.mensagem }
+    if (err instanceof ErroConexao) return { erro: 'Falha de conexao com a API.' }
+    return { erro: 'Erro ao editar ordem de servico.' }
+  }
+
+  revalidatePath(`/servicos/${servicoId}`)
+  revalidatePath(`/ordens-servico/${osId}`)
+  revalidatePath('/ordens-servico')
+  return { sucesso: true }
+}
+
 export async function digitarExecucaoOs(
   osId: number,
   _estado: EstadoOrdemServico,

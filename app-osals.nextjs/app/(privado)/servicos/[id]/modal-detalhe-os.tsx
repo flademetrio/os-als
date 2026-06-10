@@ -1,13 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { AnexoOsResposta, OrdemServicoResposta } from '@/app/lib/definicoes'
 import { badgeStatusOs } from '@/app/lib/esquemas/ordem-servico'
 import { Alert } from '@/components/ui/Alert'
 import { Badge } from '@/components/ui/Badge'
 import { Modal } from '@/components/ui/Modal'
-import { AcoesOs } from '../../ordens-servico/[id]/acoes-os'
+import { AcoesOs, type DadosEdicaoOs } from '../../ordens-servico/[id]/acoes-os'
 import { AnexoOsCard } from '../../ordens-servico/[id]/anexo-os-card'
 
 type RespostaProxy = { os: OrdemServicoResposta; anexo: AnexoOsResposta | null }
@@ -16,16 +16,26 @@ type Props = {
   osId: number
   ehGestor: boolean
   ehAdmin?: boolean
+  /** Permissao ORDEM_SERVICO_EDITAR — habilita o botao Editar. */
+  podeEditarOs?: boolean
+  /** Listas-candidatas para o modal de edicao da OS. */
+  dadosEdicaoOs?: DadosEdicaoOs
   onClose: () => void
 }
 
 /** Modal (drawer) com o detalhe completo de uma OS, aberto a partir do Servico. */
-export function ModalDetalheOs({ osId, ehGestor, ehAdmin = false, onClose }: Props) {
+export function ModalDetalheOs({
+  osId,
+  ehGestor,
+  ehAdmin = false,
+  podeEditarOs = false,
+  dadosEdicaoOs,
+  onClose,
+}: Props) {
   const [dados, setDados] = useState<RespostaProxy | null>(null)
   const [erro, setErro] = useState<string | null>(null)
 
-  useEffect(() => {
-    let ativo = true
+  const carregar = useCallback(() => {
     fetch(`/api-proxy/ordens-servico/${osId}`)
       .then(async (r) => {
         if (!r.ok) {
@@ -34,12 +44,13 @@ export function ModalDetalheOs({ osId, ehGestor, ehAdmin = false, onClose }: Pro
         }
         return r.json() as Promise<RespostaProxy>
       })
-      .then((d) => ativo && setDados(d))
-      .catch((e) => ativo && setErro(e.message))
-    return () => {
-      ativo = false
-    }
+      .then((d) => setDados(d))
+      .catch((e) => setErro(e.message))
   }, [osId])
+
+  useEffect(() => {
+    carregar()
+  }, [carregar])
 
   const os = dados?.os
   const encerrada = os?.status === 'CONCLUIDA' || os?.status === 'CANCELADA'
@@ -87,7 +98,14 @@ export function ModalDetalheOs({ osId, ehGestor, ehAdmin = false, onClose }: Pro
                 {os.dataImpressao ? ` · Impressa em ${dataHora(os.dataImpressao)}` : ''}
               </p>
             </div>
-            <AcoesOs os={os} ehAdmin={ehAdmin} onConcluido={onClose} />
+            <AcoesOs
+              os={os}
+              ehAdmin={ehAdmin}
+              podeEditar={podeEditarOs}
+              dadosEdicao={dadosEdicaoOs}
+              onEditado={carregar}
+              onConcluido={onClose}
+            />
           </div>
 
           {/* Dados — grade de 2 colunas */}

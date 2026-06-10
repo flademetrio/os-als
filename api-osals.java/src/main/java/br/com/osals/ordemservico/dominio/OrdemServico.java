@@ -138,6 +138,20 @@ public class OrdemServico {
         return status.encerrada();
     }
 
+    /**
+     * Edita os dados de cabecalho (descricao e data agendada) de uma OS ainda
+     * nao encerrada. Equipe e contatos sao atualizados por definirEquipe/
+     * definirContatos.
+     */
+    public void editarCabecalho(String descricaoAtividade, LocalDate dataAgendada) {
+        if (estaEncerrada()) {
+            throw new NegocioException(
+                    "OS " + status.getRotulo().toLowerCase() + " nao pode ser editada.");
+        }
+        this.descricaoAtividade = descricaoAtividade;
+        this.dataAgendada = dataAgendada;
+    }
+
     public void definirEquipe(Set<Tecnico> tecnicos, Set<Veiculo> veiculos, Set<Equipamento> equipamentos) {
         this.tecnicos = new LinkedHashSet<>(tecnicos);
         this.veiculos = new LinkedHashSet<>(veiculos);

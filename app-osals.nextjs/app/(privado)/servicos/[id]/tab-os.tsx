@@ -20,6 +20,7 @@ type Props = {
   ordens: OrdemServicoResumoDto[]
   ehGestor: boolean
   ehAdmin?: boolean
+  podeEditarOs?: boolean
   tecnicos: TecnicoResumoDto[]
   veiculos: VeiculoResumoDto[]
   equipamentos: EquipamentoResumoDto[]
@@ -35,6 +36,7 @@ export function TabOs({
   ordens,
   ehGestor,
   ehAdmin = false,
+  podeEditarOs = false,
   tecnicos,
   veiculos,
   equipamentos,
@@ -113,6 +115,14 @@ export function TabOs({
           osId={osAberta}
           ehGestor={ehGestor}
           ehAdmin={ehAdmin}
+          podeEditarOs={podeEditarOs}
+          dadosEdicaoOs={{
+            tecnicos,
+            veiculos,
+            equipamentos,
+            contatos,
+            descricaoServico: servico.descricao,
+          }}
           onClose={fechar}
         />
       )}

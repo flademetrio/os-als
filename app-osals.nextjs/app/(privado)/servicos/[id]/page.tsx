@@ -29,6 +29,7 @@ export default async function ServicoDetalhePage({ params }: Props) {
   const permissoes = sessao?.permissoes ?? []
   const podeVerCustos = permissoes.includes('CUSTO_VER')
   const podeEditarCustos = permissoes.includes('CUSTO_EDITAR')
+  const podeEditarOs = permissoes.includes('ORDEM_SERVICO_EDITAR')
 
   const servico = await clienteApi<ServicoResposta>(`/servicos/${id}`)
 
@@ -128,6 +129,7 @@ export default async function ServicoDetalhePage({ params }: Props) {
         anexos={anexos}
         ehGestor={ehGestor}
         ehAdmin={ehAdmin}
+        podeEditarOs={podeEditarOs}
       />
     </div>
   )

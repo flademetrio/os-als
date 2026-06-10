@@ -1,11 +1,19 @@
 import Link from 'next/link'
 import { clienteApi, ErroApi } from '@/app/lib/cliente-api'
 import { lerSessao } from '@/app/lib/sessao'
-import type { AnexoOsResposta, OrdemServicoResposta } from '@/app/lib/definicoes'
+import type {
+  AnexoOsResposta,
+  ContatoClienteResposta,
+  EquipamentoResumoDto,
+  OrdemServicoResposta,
+  PaginaResposta,
+  TecnicoResumoDto,
+  VeiculoResumoDto,
+} from '@/app/lib/definicoes'
 import { badgeStatusOs } from '@/app/lib/esquemas/ordem-servico'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
-import { AcoesOs } from './acoes-os'
+import { AcoesOs, type DadosEdicaoOs } from './acoes-os'
 import { AnexoOsCard } from './anexo-os-card'
 
 type Props = { params: Promise<{ id: string }> }
@@ -27,6 +35,27 @@ export default async function OrdemServicoDetalhePage({ params }: Props) {
   const ehGestor = sessao?.papel === 'GERENTE' || sessao?.papel === 'ADMIN'
   const ehAdmin = sessao?.papel === 'ADMIN'
   const podeAlterarAnexo = !encerrada || ehGestor
+  const podeEditarOs = (sessao?.permissoes ?? []).includes('ORDEM_SERVICO_EDITAR')
+
+  // Listas-candidatas para o modal de edicao (so carrega quando faz sentido).
+  let dadosEdicaoOs: DadosEdicaoOs | undefined
+  if (podeEditarOs && !encerrada) {
+    const [tecnicos, veiculos, equipamentos, contatos] = await Promise.all([
+      clienteApi<PaginaResposta<TecnicoResumoDto>>('/tecnicos?apenasAtivos=true&tamanho=200'),
+      clienteApi<PaginaResposta<VeiculoResumoDto>>('/veiculos?apenasAtivos=true&tamanho=200'),
+      clienteApi<PaginaResposta<EquipamentoResumoDto>>(
+        `/equipamentos?clienteId=${os.clienteId}&apenasAtivos=true&tamanho=200`,
+      ),
+      clienteApi<ContatoClienteResposta[]>(`/clientes/${os.clienteId}/contatos`),
+    ])
+    dadosEdicaoOs = {
+      tecnicos: tecnicos.conteudo,
+      veiculos: veiculos.conteudo,
+      equipamentos: equipamentos.conteudo,
+      contatos,
+      descricaoServico: '',
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -67,7 +96,12 @@ export default async function OrdemServicoDetalhePage({ params }: Props) {
               {os.dataImpressao ? ` · Impressa em ${formatarDataHora(os.dataImpressao)}` : ''}
             </p>
           </div>
-          <AcoesOs os={os} ehAdmin={ehAdmin} />
+          <AcoesOs
+            os={os}
+            ehAdmin={ehAdmin}
+            podeEditar={podeEditarOs}
+            dadosEdicao={dadosEdicaoOs}
+          />
         </div>
       </Card>
 

@@ -1,10 +1,15 @@
 'use client'
 
 import { useActionState, useEffect, useState } from 'react'
-import { abrirOrdemServico, type EstadoOrdemServico } from '@/app/actions/ordem-servico'
+import {
+  abrirOrdemServico,
+  editarOrdemServico,
+  type EstadoOrdemServico,
+} from '@/app/actions/ordem-servico'
 import type {
   ContatoClienteResposta,
   EquipamentoResumoDto,
+  OrdemServicoResposta,
   TecnicoResumoDto,
   VeiculoResumoDto,
 } from '@/app/lib/definicoes'
@@ -24,6 +29,8 @@ type Props = {
   veiculos: VeiculoResumoDto[]
   equipamentos: EquipamentoResumoDto[]
   contatos: ContatoClienteResposta[]
+  /** Quando informado, o modal edita a OS existente em vez de abrir uma nova. */
+  os?: OrdemServicoResposta
   onClose: () => void
 }
 
@@ -34,22 +41,37 @@ export function ModalAbrirOs({
   veiculos,
   equipamentos,
   contatos,
+  os,
   onClose,
 }: Props) {
-  const acao = abrirOrdemServico.bind(null, servicoId)
+  const editando = os != null
+  const acao = editando
+    ? editarOrdemServico.bind(null, os.id, servicoId)
+    : abrirOrdemServico.bind(null, servicoId)
   const [estado, dispatch, pendente] = useActionState(acao, ESTADO_INICIAL)
-  const [descricaoAtividade, setDescricaoAtividade] = useState('')
+  const [descricaoAtividade, setDescricaoAtividade] = useState(os?.descricaoAtividade ?? '')
 
   // Data de hoje no fuso local (YYYY-MM-DD) — default do campo "Data agendada".
   const hoje = new Date()
   const dataHoje = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`
+
+  // Ids ja vinculados a OS (modo edicao) para pre-marcar os checkboxes.
+  const tecSel = new Set(os?.tecnicos.map((t) => t.id))
+  const eqSel = new Set(os?.equipamentos.map((e) => e.id))
+  const veiSel = new Set(os?.veiculos.map((v) => v.id))
+  const conSel = new Set(os?.contatos.map((c) => c.id))
 
   useEffect(() => {
     if (estado.sucesso) onClose()
   }, [estado.sucesso, onClose])
 
   return (
-    <Modal open onClose={onClose} title="Abrir ordem de servico" size="lg">
+    <Modal
+      open
+      onClose={onClose}
+      title={editando ? 'Editar ordem de servico' : 'Abrir ordem de servico'}
+      size="lg"
+    >
       <form action={dispatch} className="space-y-4">
         {estado.erro && (
           <Alert variant="danger" dismissible>
@@ -65,7 +87,7 @@ export function ModalAbrirOs({
             >
               Descricao da atividade<span className="text-red-500 ml-1">*</span>
             </label>
-            {descricaoServico.trim() && (
+            {!editando && descricaoServico.trim() && (
               <button
                 type="button"
                 onClick={() => setDescricaoAtividade(descricaoServico)}
@@ -106,7 +128,7 @@ export function ModalAbrirOs({
           name="dataAgendada"
           type="date"
           required
-          defaultValue={dataHoje}
+          defaultValue={os?.dataAgendada ?? dataHoje}
           hint="Dia previsto da visita da equipe ao cliente"
           error={estado.errosCampos?.dataAgendada}
           fullWidth
@@ -123,6 +145,7 @@ export function ModalAbrirOs({
               id={`tec-${t.id}`}
               name="tecnicoIds"
               value={t.id}
+              defaultChecked={tecSel.has(t.id)}
               label={t.especialidade ? `${t.nome} — ${t.especialidade}` : t.nome}
             />
           ))}
@@ -138,6 +161,7 @@ export function ModalAbrirOs({
               id={`eq-${e.id}`}
               name="equipamentoIds"
               value={e.id}
+              defaultChecked={eqSel.has(e.id)}
               label={
                 [e.marca, e.modelo].filter(Boolean).join(' ') +
                 (e.localizacaoInterna ? ` (${e.localizacaoInterna})` : '') || `Equipamento #${e.id}`
@@ -153,6 +177,7 @@ export function ModalAbrirOs({
               id={`vei-${v.id}`}
               name="veiculoIds"
               value={v.id}
+              defaultChecked={veiSel.has(v.id)}
               label={[v.placa, v.modelo].filter(Boolean).join(' — ')}
             />
           ))}
@@ -169,6 +194,7 @@ export function ModalAbrirOs({
               id={`con-${c.id}`}
               name="contatoIds"
               value={c.id}
+              defaultChecked={conSel.has(c.id)}
               label={
                 [c.nome, c.funcao].filter(Boolean).join(' — ') +
                 (i === 0 ? ' (principal)' : '') +
@@ -183,7 +209,13 @@ export function ModalAbrirOs({
             Cancelar
           </Button>
           <Button type="submit" variant="primary" loading={pendente}>
-            {pendente ? 'Abrindo...' : 'Abrir OS'}
+            {editando
+              ? pendente
+                ? 'Salvando...'
+                : 'Salvar'
+              : pendente
+                ? 'Abrindo...'
+                : 'Abrir OS'}
           </Button>
         </div>
       </form>

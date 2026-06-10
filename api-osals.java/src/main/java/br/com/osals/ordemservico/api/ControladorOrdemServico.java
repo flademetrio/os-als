@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -82,6 +83,17 @@ public class ControladorOrdemServico {
     @PreAuthorize("hasAuthority('SERVICO_VER')")
     public ResponseEntity<OrdemServicoResposta> buscar(@PathVariable Long id) {
         return ResponseEntity.ok(gestor.buscarPorId(id));
+    }
+
+    @PutMapping("/ordens-servico/{id}")
+    @PreAuthorize("hasAuthority('ORDEM_SERVICO_EDITAR')")
+    @Operation(summary = "Edita os dados de uma OS nao encerrada (descricao, data, equipe e contatos).")
+    public ResponseEntity<OrdemServicoResposta> editar(
+            @PathVariable Long id,
+            @Valid @RequestBody AberturaOsRequisicao req,
+            @AuthenticationPrincipal Usuario autor
+    ) {
+        return ResponseEntity.ok(gestor.editar(id, req, autor));
     }
 
     @PostMapping("/ordens-servico/{id}/imprimir")

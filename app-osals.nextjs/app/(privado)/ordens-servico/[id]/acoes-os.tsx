@@ -7,16 +7,38 @@ import {
   excluirOrdemServico,
   reabrirOrdemServicoCancelada,
 } from '@/app/actions/ordem-servico'
-import type { OrdemServicoResposta } from '@/app/lib/definicoes'
+import type {
+  ContatoClienteResposta,
+  EquipamentoResumoDto,
+  OrdemServicoResposta,
+  TecnicoResumoDto,
+  VeiculoResumoDto,
+} from '@/app/lib/definicoes'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { ModalDigitarExecucao } from './modal-digitar-execucao'
+import { ModalAbrirOs } from '../../servicos/[id]/modal-abrir-os'
+
+/** Listas-candidatas e dados para o modal de edicao da OS. */
+export type DadosEdicaoOs = {
+  tecnicos: TecnicoResumoDto[]
+  veiculos: VeiculoResumoDto[]
+  equipamentos: EquipamentoResumoDto[]
+  contatos: ContatoClienteResposta[]
+  descricaoServico: string
+}
 
 type Props = {
   os: OrdemServicoResposta
   /** Habilita acoes administrativas (reabrir cancelada, excluir). */
   ehAdmin?: boolean
+  /** Permissao ORDEM_SERVICO_EDITAR — habilita o botao Editar (junto com dadosEdicao). */
+  podeEditar?: boolean
+  /** Listas-candidatas para o modal de edicao. Sem elas, o botao Editar nao aparece. */
+  dadosEdicao?: DadosEdicaoOs
+  /** Chamado apos editar a OS (ex.: refresh do detalhe). */
+  onEditado?: () => void
   /**
    * Chamado quando a OS e concluida pela digitacao de execucao. Em modal
    * (detalhe da OS dentro do servico), fecha o drawer; sem callback, navega
@@ -25,17 +47,26 @@ type Props = {
   onConcluido?: () => void
 }
 
-export function AcoesOs({ os, ehAdmin = false, onConcluido }: Props) {
+export function AcoesOs({
+  os,
+  ehAdmin = false,
+  podeEditar = false,
+  dadosEdicao,
+  onEditado,
+  onConcluido,
+}: Props) {
   const router = useRouter()
   const [confirmarCancelar, setConfirmarCancelar] = useState(false)
   const [confirmarExcluir, setConfirmarExcluir] = useState(false)
   const [confirmarReabrir, setConfirmarReabrir] = useState(false)
+  const [editando, setEditando] = useState(false)
   const [digitando, setDigitando] = useState(false)
   const [imprimindo, setImprimindo] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [pendente, iniciar] = useTransition()
 
   const encerrada = os.status === 'CONCLUIDA' || os.status === 'CANCELADA'
+  const podeMostrarEditar = !encerrada && podeEditar && dadosEdicao != null
   const podeDigitar = os.status === 'IMPRESSA' || os.status === 'PENDENTE_DIGITACAO'
   const podeReabrir = ehAdmin && os.status === 'CANCELADA'
 
@@ -76,6 +107,11 @@ export function AcoesOs({ os, ehAdmin = false, onConcluido }: Props) {
   return (
     <div className="flex flex-col items-end gap-2 shrink-0">
       <div className="flex items-center gap-2">
+        {podeMostrarEditar && (
+          <Button variant="secondary" size="sm" onClick={() => setEditando(true)}>
+            Editar
+          </Button>
+        )}
         {!encerrada && (
           <Button variant="secondary" size="sm" onClick={imprimir} loading={imprimindo}>
             Imprimir
@@ -113,6 +149,23 @@ export function AcoesOs({ os, ehAdmin = false, onConcluido }: Props) {
           os={os}
           onClose={() => setDigitando(false)}
           onConcluido={execucaoConcluida}
+        />
+      )}
+
+      {editando && dadosEdicao && (
+        <ModalAbrirOs
+          servicoId={os.servicoId}
+          descricaoServico={dadosEdicao.descricaoServico}
+          tecnicos={dadosEdicao.tecnicos}
+          veiculos={dadosEdicao.veiculos}
+          equipamentos={dadosEdicao.equipamentos}
+          contatos={dadosEdicao.contatos}
+          os={os}
+          onClose={() => {
+            setEditando(false)
+            router.refresh()
+            onEditado?.()
+          }}
         />
       )}
 

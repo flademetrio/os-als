@@ -8,6 +8,7 @@ export type Papel = 'OPERADOR' | 'COMPRAS' | 'GERENTE' | 'ADMIN' | 'TECNICO'
 export type Permissao =
   | 'SERVICO_VER'
   | 'SERVICO_GERENCIAR'
+  | 'ORDEM_SERVICO_EDITAR'
   | 'SERVICO_EXCLUIR'
   | 'CUSTO_VER'
   | 'CUSTO_EDITAR'

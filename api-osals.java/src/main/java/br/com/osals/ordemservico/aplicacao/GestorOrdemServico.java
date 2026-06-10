@@ -109,6 +109,26 @@ public class GestorOrdemServico {
     }
 
     @Transactional
+    public OrdemServicoResposta editar(Long id, AberturaOsRequisicao req, Usuario autor) {
+        var os = obrigatorio(id);
+        if (os.estaEncerrada()) {
+            throw new NegocioException(
+                    "OS " + os.getStatus().getRotulo().toLowerCase() + " nao pode ser editada.");
+        }
+        Servico servico = os.getServico();
+        Set<Tecnico> tecnicos = resolverTecnicos(req.tecnicoIds());
+        Set<Equipamento> equipamentos = resolverEquipamentos(req.equipamentoIds(), servico);
+        Set<Veiculo> veiculos = resolverVeiculos(req.veiculoIds());
+        Set<ContatoCliente> contatos = resolverContatos(req.contatoIds(), servico);
+
+        os.editarCabecalho(req.descricaoAtividade().trim(), req.dataAgendada());
+        os.definirEquipe(tecnicos, veiculos, equipamentos);
+        os.definirContatos(contatos);
+        log.info("OS {} editada por usuario {}", id, autor.getId());
+        return mapper.paraResposta(os);
+    }
+
+    @Transactional
     public void imprimir(Long id) {
         var os = obrigatorio(id);
         os.imprimir();
