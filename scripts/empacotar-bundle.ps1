@@ -37,7 +37,9 @@ Set-Location $RepoRoot
 
 $ImgApi = "ghcr.io/flademetrio/osals-api:$Tag"
 $ImgApp = "ghcr.io/flademetrio/osals-app:$Tag"
-$BundleDir = "bundle-$Tag"
+# Pasta de saida nomeada por versao (ex.: versao-v1.4.0). O deploy.ps1 procura
+# tanto "versao-vX.Y.Z" quanto o antigo "bundle-vX.Y.Z".
+$BundleDir = "versao-$Tag"
 
 # ---------- Checar imagens locais ----------
 Write-Host "==> Verificando imagens locais..."
@@ -147,7 +149,7 @@ $tamanhoMB = "{0:N1}" -f ($tamanho / 1MB)
 
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Green
-Write-Host "  OK  Bundle $Tag pronto em ./$BundleDir/" -ForegroundColor Green
+Write-Host "  OK  Versao $Tag empacotada em ./$BundleDir/" -ForegroundColor Green
 Write-Host "  Tamanho total: $tamanhoMB MB" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Proximo passo:" -ForegroundColor Green

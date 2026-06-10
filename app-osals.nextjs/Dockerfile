@@ -17,6 +17,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Versao do release (ex.: v1.4.0). Passada pelo release.sh via --build-arg e
+# "carimbada" no bundle do Next (NEXT_PUBLIC_*) para exibir no rodape da sidebar.
+ARG VERSAO=dev
+ENV NEXT_PUBLIC_APP_VERSAO=$VERSAO
 RUN npm run build
 
 # ---------- Stage 3: runtime ----------

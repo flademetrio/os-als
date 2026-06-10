@@ -80,6 +80,7 @@ docker build \
 # ---------- Build App ----------
 echo "==> Build do App..."
 docker build \
+  --build-arg "VERSAO=${TAG}" \
   --tag "${IMG_APP}:${TAG}" \
   --tag "${IMG_APP}:latest" \
   ./app-osals.nextjs

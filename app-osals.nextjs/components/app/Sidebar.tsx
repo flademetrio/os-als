@@ -25,6 +25,10 @@ import {
   IconeRecolher,
 } from './icones'
 
+// Versao "carimbada" no build (release.sh -> Dockerfile ARG). Em dev local fica
+// vazia e a linha de versao nao aparece.
+const VERSAO_APP = process.env.NEXT_PUBLIC_APP_VERSAO
+
 const ICONE_POR_HREF: Record<string, ReactNode> = {
   '/dashboard': <IconeDashboard />,
   '/servicos': <IconeServico />,
@@ -124,6 +128,18 @@ export function Sidebar({ usuario }: { usuario: SessaoUsuario }) {
           <IconeRecolher className={`w-3.5 h-3.5 transition-transform ${!expandida ? 'rotate-180' : ''}`} />
           {expandida && <span>Recolher</span>}
         </button>
+
+        {VERSAO_APP && (
+          <p
+            className={[
+              'mt-1 text-white/40',
+              expandida ? 'px-3 text-[10px]' : 'text-center text-[9px]',
+            ].join(' ')}
+            title={`Versao ${VERSAO_APP}`}
+          >
+            {expandida ? `versao ${VERSAO_APP}` : VERSAO_APP}
+          </p>
+        )}
       </div>
     </aside>
   )
