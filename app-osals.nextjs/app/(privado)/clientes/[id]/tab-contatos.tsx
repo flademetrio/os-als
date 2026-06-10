@@ -9,10 +9,10 @@ import { ModalContato } from './modal-contato'
 type Props = {
   clienteId: number
   contatos: ContatoClienteResposta[]
-  podeRemover: boolean
+  podeGerenciar: boolean
 }
 
-export function TabContatos({ clienteId, contatos, podeRemover }: Props) {
+export function TabContatos({ clienteId, contatos, podeGerenciar }: Props) {
   const [modalNovo, setModalNovo] = useState(false)
   const [modalEdicao, setModalEdicao] = useState<ContatoClienteResposta | null>(null)
 
@@ -27,9 +27,11 @@ export function TabContatos({ clienteId, contatos, podeRemover }: Props) {
         <p className="text-sm text-slate-500">
           {contatos.length} {contatos.length === 1 ? 'contato cadastrado' : 'contatos cadastrados'}
         </p>
-        <Button size="sm" onClick={() => setModalNovo(true)}>
-          + Novo contato
-        </Button>
+        {podeGerenciar && (
+          <Button size="sm" onClick={() => setModalNovo(true)}>
+            + Novo contato
+          </Button>
+        )}
       </div>
 
       {contatos.length === 0 ? (
@@ -49,16 +51,16 @@ export function TabContatos({ clienteId, contatos, podeRemover }: Props) {
                     {c.email && <span>✉ {c.email}</span>}
                   </div>
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  <Button size="xs" variant="outline" onClick={() => setModalEdicao(c)}>
-                    Editar
-                  </Button>
-                  {podeRemover && (
+                {podeGerenciar && (
+                  <div className="flex gap-2 shrink-0">
+                    <Button size="xs" variant="outline" onClick={() => setModalEdicao(c)}>
+                      Editar
+                    </Button>
                     <Button size="xs" variant="ghost" onClick={() => remover(c)}>
                       Remover
                     </Button>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}

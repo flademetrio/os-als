@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { lerSessao } from '@/app/lib/sessao'
+import { temPermissao } from '@/app/lib/permissoes'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type {
   ClienteResposta,
@@ -26,7 +27,7 @@ export default async function ClienteDetalhePage({ params }: Props) {
     lerSessao(),
   ])
 
-  const podeInativar = sessao?.papel === 'ADMIN' || sessao?.papel === 'GERENTE'
+  const podeGerenciar = temPermissao(sessao, 'CLIENTE_GERENCIAR')
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -56,7 +57,7 @@ export default async function ClienteDetalhePage({ params }: Props) {
               {cliente.nomeFantasia ? ` · ${cliente.nomeFantasia}` : ''}
             </p>
           </div>
-          {podeInativar && <AcoesCabecalho cliente={cliente} />}
+          {podeGerenciar && <AcoesCabecalho cliente={cliente} />}
         </div>
       </Card>
 
@@ -64,7 +65,7 @@ export default async function ClienteDetalhePage({ params }: Props) {
         cliente={cliente}
         unidades={unidades}
         contatos={contatos}
-        podeInativarItens={podeInativar}
+        podeGerenciar={podeGerenciar}
       />
     </div>
   )

@@ -15,7 +15,13 @@ import { Select } from '@/components/ui/Select'
 
 const ESTADO_INICIAL: EstadoFornecedor = {}
 
-export function FormularioFornecedor({ fornecedor }: { fornecedor: FornecedorResposta | null }) {
+export function FormularioFornecedor({
+  fornecedor,
+  podeEditar = true,
+}: {
+  fornecedor: FornecedorResposta | null
+  podeEditar?: boolean
+}) {
   const acao = fornecedor ? atualizarFornecedor.bind(null, fornecedor.id) : criarFornecedor
   const [estado, dispatch, pendente] = useActionState(acao, ESTADO_INICIAL)
 
@@ -29,12 +35,13 @@ export function FormularioFornecedor({ fornecedor }: { fornecedor: FornecedorRes
         name="nome"
         defaultValue={fornecedor?.nome ?? ''}
         required
+        disabled={!podeEditar}
         error={estado.errosCampos?.nome}
         fullWidth
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Select label="Tipo de pessoa" name="tipoPessoa" defaultValue={fornecedor?.tipoPessoa ?? ''} fullWidth>
+        <Select label="Tipo de pessoa" name="tipoPessoa" defaultValue={fornecedor?.tipoPessoa ?? ''} disabled={!podeEditar} fullWidth>
           <option value="">— Nao informado</option>
           <option value="PJ">PJ — Pessoa Juridica</option>
           <option value="PF">PF — Pessoa Fisica</option>
@@ -45,6 +52,7 @@ export function FormularioFornecedor({ fornecedor }: { fornecedor: FornecedorRes
             name="documento"
             defaultValue={fornecedor?.documento ?? ''}
             placeholder="CPF (11) ou CNPJ (14) digitos"
+            disabled={!podeEditar}
             error={estado.errosCampos?.documento}
             fullWidth
           />
@@ -56,6 +64,7 @@ export function FormularioFornecedor({ fornecedor }: { fornecedor: FornecedorRes
           label="Telefone"
           name="telefone"
           defaultValue={fornecedor?.telefone ?? ''}
+          disabled={!podeEditar}
           error={estado.errosCampos?.telefone}
           fullWidth
         />
@@ -64,6 +73,7 @@ export function FormularioFornecedor({ fornecedor }: { fornecedor: FornecedorRes
           name="email"
           type="email"
           defaultValue={fornecedor?.email ?? ''}
+          disabled={!podeEditar}
           error={estado.errosCampos?.email}
           fullWidth
         />
@@ -71,11 +81,13 @@ export function FormularioFornecedor({ fornecedor }: { fornecedor: FornecedorRes
 
       <div className="flex items-center justify-end gap-3 pt-2">
         <Link href="/fornecedores">
-          <Button type="button" variant="ghost">Cancelar</Button>
+          <Button type="button" variant="ghost">{podeEditar ? 'Cancelar' : 'Voltar'}</Button>
         </Link>
-        <Button type="submit" variant="primary" loading={pendente}>
-          {pendente ? 'Salvando...' : fornecedor ? 'Salvar alteracoes' : 'Criar fornecedor'}
-        </Button>
+        {podeEditar && (
+          <Button type="submit" variant="primary" loading={pendente}>
+            {pendente ? 'Salvando...' : fornecedor ? 'Salvar alteracoes' : 'Criar fornecedor'}
+          </Button>
+        )}
       </div>
     </form>
   )

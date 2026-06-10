@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { lerSessao } from '@/app/lib/sessao'
+import { temPermissao } from '@/app/lib/permissoes'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type { TecnicoResposta } from '@/app/lib/definicoes'
 import { Badge } from '@/components/ui/Badge'
@@ -15,7 +16,7 @@ export default async function TecnicoDetalhePage({ params }: Props) {
     clienteApi<TecnicoResposta>(`/tecnicos/${id}`),
     lerSessao(),
   ])
-  const podeMexer = sessao?.papel === 'ADMIN' || sessao?.papel === 'GERENTE'
+  const podeMexer = temPermissao(sessao, 'TECNICO_GERENCIAR')
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">

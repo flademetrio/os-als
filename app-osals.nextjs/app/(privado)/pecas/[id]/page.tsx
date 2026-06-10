@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { lerSessao } from '@/app/lib/sessao'
+import { temPermissao } from '@/app/lib/permissoes'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type { PecaResposta, UnidadeMedidaResposta } from '@/app/lib/definicoes'
 import { Badge } from '@/components/ui/Badge'
@@ -16,7 +17,7 @@ export default async function PecaDetalhePage({ params }: Props) {
     clienteApi<UnidadeMedidaResposta[]>('/unidades-medida'),
     lerSessao(),
   ])
-  const podeInativar = sessao?.papel === 'ADMIN' || sessao?.papel === 'GERENTE'
+  const podeGerenciar = temPermissao(sessao, 'PECA_GERENCIAR')
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -37,12 +38,12 @@ export default async function PecaDetalhePage({ params }: Props) {
               <p className="text-sm text-slate-500">Unidade: {peca.unidadeMedidaSigla}</p>
             )}
           </div>
-          {podeInativar && <AcoesCabecalhoPeca peca={peca} />}
+          {podeGerenciar && <AcoesCabecalhoPeca peca={peca} />}
         </div>
       </Card>
 
       <Card padding="md" title="Dados da peca">
-        <FormularioPeca peca={peca} unidadesMedida={unidades} />
+        <FormularioPeca peca={peca} unidadesMedida={unidades} podeEditar={podeGerenciar} />
       </Card>
     </div>
   )

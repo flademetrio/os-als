@@ -14,8 +14,10 @@ const ESTADO_INICIAL: EstadoEquipamento = {}
 
 export function FormularioEdicaoEquipamento({
   equipamento,
+  podeEditar = true,
 }: {
   equipamento: EquipamentoResposta
+  podeEditar?: boolean
 }) {
   const router = useRouter()
   const acao = atualizarEquipamento.bind(null, equipamento.id)
@@ -30,8 +32,8 @@ export function FormularioEdicaoEquipamento({
       {estado.erro && <Alert variant="danger" dismissible>{estado.erro}</Alert>}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input label="Marca" name="marca" defaultValue={equipamento.marca ?? ''} fullWidth />
-        <Input label="Modelo" name="modelo" defaultValue={equipamento.modelo ?? ''} fullWidth />
+        <Input label="Marca" name="marca" defaultValue={equipamento.marca ?? ''} disabled={!podeEditar} fullWidth />
+        <Input label="Modelo" name="modelo" defaultValue={equipamento.modelo ?? ''} disabled={!podeEditar} fullWidth />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -39,9 +41,10 @@ export function FormularioEdicaoEquipamento({
           label="Numero de serie"
           name="numeroSerie"
           defaultValue={equipamento.numeroSerie ?? ''}
+          disabled={!podeEditar}
           fullWidth
         />
-        <Select label="Tipo" name="tipo" required defaultValue={equipamento.tipo} fullWidth>
+        <Select label="Tipo" name="tipo" required defaultValue={equipamento.tipo} disabled={!podeEditar} fullWidth>
           {Object.entries(TIPOS_EQUIPAMENTO_LABEL).map(([k, v]) => (
             <option key={k} value={k}>{v}</option>
           ))}
@@ -55,12 +58,14 @@ export function FormularioEdicaoEquipamento({
           type="number"
           min={0}
           defaultValue={equipamento.capacidadeBtus ?? ''}
+          disabled={!podeEditar}
           fullWidth
         />
         <Input
           label="Capacidade (TR)"
           name="capacidadeTr"
           defaultValue={equipamento.capacidadeTr?.toString().replace('.', ',') ?? ''}
+          disabled={!podeEditar}
           fullWidth
         />
       </div>
@@ -69,6 +74,7 @@ export function FormularioEdicaoEquipamento({
         label="Localizacao interna"
         name="localizacaoInterna"
         defaultValue={equipamento.localizacaoInterna ?? ''}
+        disabled={!podeEditar}
         fullWidth
       />
 
@@ -78,6 +84,7 @@ export function FormularioEdicaoEquipamento({
           name="dataInstalacao"
           type="date"
           defaultValue={equipamento.dataInstalacao ?? ''}
+          disabled={!podeEditar}
           fullWidth
         />
         <Input
@@ -85,22 +92,25 @@ export function FormularioEdicaoEquipamento({
           name="dataUltimaManutencao"
           type="date"
           defaultValue={equipamento.dataUltimaManutencao ?? ''}
+          disabled={!podeEditar}
           fullWidth
         />
       </div>
 
-      <Select label="Status" name="status" defaultValue={equipamento.status} fullWidth>
+      <Select label="Status" name="status" defaultValue={equipamento.status} disabled={!podeEditar} fullWidth>
         <option value="ATIVO">Ativo</option>
         <option value="EM_MANUTENCAO">Em manutencao</option>
         <option value="DESATIVADO">Desativado</option>
       </Select>
 
-      <div className="flex justify-end pt-2">
-        <Button type="submit" variant="primary" loading={pendente} disabled={!equipamento.ativo}>
-          {pendente ? 'Salvando...' : 'Salvar alteracoes'}
-        </Button>
-      </div>
-      {!equipamento.ativo && (
+      {podeEditar && (
+        <div className="flex justify-end pt-2">
+          <Button type="submit" variant="primary" loading={pendente} disabled={!equipamento.ativo}>
+            {pendente ? 'Salvando...' : 'Salvar alteracoes'}
+          </Button>
+        </div>
+      )}
+      {podeEditar && !equipamento.ativo && (
         <p className="text-xs text-slate-500">Equipamento inativo. Reative-o para editar.</p>
       )}
     </form>

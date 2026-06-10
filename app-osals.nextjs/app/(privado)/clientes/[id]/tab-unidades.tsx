@@ -10,10 +10,10 @@ import { ModalUnidade } from './modal-unidade'
 type Props = {
   clienteId: number
   unidades: UnidadeResposta[]
-  podeInativarItens: boolean
+  podeGerenciar: boolean
 }
 
-export function TabUnidades({ clienteId, unidades, podeInativarItens }: Props) {
+export function TabUnidades({ clienteId, unidades, podeGerenciar }: Props) {
   const [modalNova, setModalNova] = useState(false)
   const [modalEdicao, setModalEdicao] = useState<UnidadeResposta | null>(null)
 
@@ -28,9 +28,11 @@ export function TabUnidades({ clienteId, unidades, podeInativarItens }: Props) {
         <p className="text-sm text-slate-500">
           {unidades.length} {unidades.length === 1 ? 'unidade cadastrada' : 'unidades cadastradas'}
         </p>
-        <Button size="sm" onClick={() => setModalNova(true)}>
-          + Nova unidade
-        </Button>
+        {podeGerenciar && (
+          <Button size="sm" onClick={() => setModalNova(true)}>
+            + Nova unidade
+          </Button>
+        )}
       </div>
 
       {unidades.length === 0 ? (
@@ -59,16 +61,18 @@ export function TabUnidades({ clienteId, unidades, podeInativarItens }: Props) {
                   </div>
                   <p className="text-sm text-slate-600">{formatarEndereco(u)}</p>
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  <Button size="xs" variant="outline" onClick={() => setModalEdicao(u)}>
-                    Editar
-                  </Button>
-                  {podeInativarItens && u.ativo && (
-                    <Button size="xs" variant="ghost" onClick={() => inativar(u)}>
-                      Inativar
+                {podeGerenciar && (
+                  <div className="flex gap-2 shrink-0">
+                    <Button size="xs" variant="outline" onClick={() => setModalEdicao(u)}>
+                      Editar
                     </Button>
-                  )}
-                </div>
+                    {u.ativo && (
+                      <Button size="xs" variant="ghost" onClick={() => inativar(u)}>
+                        Inativar
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ))}

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { lerSessao } from '@/app/lib/sessao'
+import { temPermissao } from '@/app/lib/permissoes'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type { ClienteResposta, EquipamentoResposta, UnidadeResposta } from '@/app/lib/definicoes'
 import {
@@ -21,7 +22,7 @@ export default async function EquipamentoDetalhePage({ params }: Props) {
     clienteApi<UnidadeResposta>(`/unidades/${equipamento.unidadeId}`),
     lerSessao(),
   ])
-  const podeInativar = sessao?.papel === 'ADMIN' || sessao?.papel === 'GERENTE'
+  const podeGerenciar = temPermissao(sessao, 'EQUIPAMENTO_GERENCIAR')
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -56,12 +57,12 @@ export default async function EquipamentoDetalhePage({ params }: Props) {
               <p className="text-xs text-slate-400 mt-1">📍 {equipamento.localizacaoInterna}</p>
             )}
           </div>
-          {podeInativar && <AcoesCabecalhoEquipamento equipamento={equipamento} />}
+          {podeGerenciar && <AcoesCabecalhoEquipamento equipamento={equipamento} />}
         </div>
       </Card>
 
       <Card padding="md" title="Dados do equipamento">
-        <FormularioEdicaoEquipamento equipamento={equipamento} />
+        <FormularioEdicaoEquipamento equipamento={equipamento} podeEditar={podeGerenciar} />
       </Card>
     </div>
   )

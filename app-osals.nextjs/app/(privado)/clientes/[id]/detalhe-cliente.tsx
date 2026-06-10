@@ -16,10 +16,10 @@ type Props = {
   cliente: ClienteResposta
   unidades: UnidadeResposta[]
   contatos: ContatoClienteResposta[]
-  podeInativarItens: boolean
+  podeGerenciar: boolean
 }
 
-export function DetalheCliente({ cliente, unidades, contatos, podeInativarItens }: Props) {
+export function DetalheCliente({ cliente, unidades, contatos, podeGerenciar }: Props) {
   const [tab, setTab] = useState<'dados' | 'unidades' | 'contatos'>('dados')
 
   return (
@@ -37,19 +37,19 @@ export function DetalheCliente({ cliente, unidades, contatos, podeInativarItens 
       </div>
 
       <div className="p-5">
-        {tab === 'dados' && <TabDados cliente={cliente} />}
+        {tab === 'dados' && <TabDados cliente={cliente} podeEditar={podeGerenciar} />}
         {tab === 'unidades' && (
           <TabUnidades
             clienteId={cliente.id}
             unidades={unidades}
-            podeInativarItens={podeInativarItens}
+            podeGerenciar={podeGerenciar}
           />
         )}
         {tab === 'contatos' && (
           <TabContatos
             clienteId={cliente.id}
             contatos={contatos}
-            podeRemover={podeInativarItens}
+            podeGerenciar={podeGerenciar}
           />
         )}
       </div>

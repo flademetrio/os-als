@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { lerSessao } from '@/app/lib/sessao'
+import { temPermissao } from '@/app/lib/permissoes'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type { VeiculoResposta } from '@/app/lib/definicoes'
 import { STATUS_VEICULO_LABEL } from '@/app/lib/esquemas/equipamento'
@@ -17,7 +18,7 @@ export default async function VeiculoDetalhePage({ params }: Props) {
     clienteApi<VeiculoResposta>(`/veiculos/${veiculoId}`),
     lerSessao(),
   ])
-  const podeInativar = sessao?.papel === 'ADMIN' || sessao?.papel === 'GERENTE'
+  const podeGerenciar = temPermissao(sessao, 'VEICULO_GERENCIAR')
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -43,12 +44,12 @@ export default async function VeiculoDetalhePage({ params }: Props) {
               {[veiculo.marca, veiculo.modelo, veiculo.ano].filter(Boolean).join(' · ') || 'Sem detalhes'}
             </p>
           </div>
-          {podeInativar && <AcoesCabecalhoVeiculo veiculo={veiculo} />}
+          {podeGerenciar && <AcoesCabecalhoVeiculo veiculo={veiculo} />}
         </div>
       </Card>
 
       <Card padding="md" title="Dados do veiculo">
-        <FormularioEdicaoVeiculo veiculo={veiculo} />
+        <FormularioEdicaoVeiculo veiculo={veiculo} podeEditar={podeGerenciar} />
       </Card>
     </div>
   )

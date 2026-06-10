@@ -23,9 +23,11 @@ type Props = {
    * para o detalhe; com callback (drawer), o pai decide o destino.
    */
   onCriado?: (peca: PecaResposta) => void
+  /** No modo editar: quando false, campos somente-leitura e sem botao Salvar. */
+  podeEditar?: boolean
 }
 
-export function FormularioPeca({ peca, unidadesMedida, onCancelar, onCriado }: Props) {
+export function FormularioPeca({ peca, unidadesMedida, onCancelar, onCriado, podeEditar = true }: Props) {
   const router = useRouter()
   const acao = peca ? atualizarPeca.bind(null, peca.id) : criarPeca
   const [estado, dispatch, pendente] = useActionState(acao, ESTADO_INICIAL)
@@ -50,6 +52,7 @@ export function FormularioPeca({ peca, unidadesMedida, onCancelar, onCriado }: P
         name="nome"
         defaultValue={peca?.nome ?? ''}
         required
+        disabled={!podeEditar}
         error={estado.errosCampos?.nome}
         fullWidth
       />
@@ -60,6 +63,7 @@ export function FormularioPeca({ peca, unidadesMedida, onCancelar, onCriado }: P
         defaultValue={peca?.descricao ?? ''}
         hint="Opcional — detalhes tecnicos da peca"
         rows={3}
+        disabled={!podeEditar}
         error={estado.errosCampos?.descricao}
         fullWidth
       />
@@ -68,6 +72,7 @@ export function FormularioPeca({ peca, unidadesMedida, onCancelar, onCriado }: P
         label="Unidade de medida"
         name="unidadeMedidaId"
         defaultValue={peca?.unidadeMedidaId?.toString() ?? ''}
+        disabled={!podeEditar}
         error={estado.errosCampos?.unidadeMedidaId}
         fullWidth
       >
@@ -86,12 +91,14 @@ export function FormularioPeca({ peca, unidadesMedida, onCancelar, onCriado }: P
           </Button>
         ) : (
           <Link href="/pecas">
-            <Button type="button" variant="ghost">Cancelar</Button>
+            <Button type="button" variant="ghost">{podeEditar ? 'Cancelar' : 'Voltar'}</Button>
           </Link>
         )}
-        <Button type="submit" variant="primary" loading={pendente}>
-          {pendente ? 'Salvando...' : peca ? 'Salvar alteracoes' : 'Criar peca'}
-        </Button>
+        {podeEditar && (
+          <Button type="submit" variant="primary" loading={pendente}>
+            {pendente ? 'Salvando...' : peca ? 'Salvar alteracoes' : 'Criar peca'}
+          </Button>
+        )}
       </div>
     </form>
   )

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { lerSessao } from '@/app/lib/sessao'
+import { temPermissao } from '@/app/lib/permissoes'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type { FornecedorResposta } from '@/app/lib/definicoes'
 import { Badge } from '@/components/ui/Badge'
@@ -15,7 +16,7 @@ export default async function FornecedorDetalhePage({ params }: Props) {
     clienteApi<FornecedorResposta>(`/fornecedores/${id}`),
     lerSessao(),
   ])
-  const podeInativar = sessao?.papel === 'ADMIN' || sessao?.papel === 'GERENTE'
+  const podeGerenciar = temPermissao(sessao, 'FORNECEDOR_GERENCIAR')
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -36,12 +37,12 @@ export default async function FornecedorDetalhePage({ params }: Props) {
               <p className="text-sm text-slate-500">{fornecedor.tipoPessoa}</p>
             )}
           </div>
-          {podeInativar && <AcoesCabecalhoFornecedor fornecedor={fornecedor} />}
+          {podeGerenciar && <AcoesCabecalhoFornecedor fornecedor={fornecedor} />}
         </div>
       </Card>
 
       <Card padding="md" title="Dados do fornecedor">
-        <FormularioFornecedor fornecedor={fornecedor} />
+        <FormularioFornecedor fornecedor={fornecedor} podeEditar={podeGerenciar} />
       </Card>
     </div>
   )

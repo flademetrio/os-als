@@ -10,7 +10,13 @@ import { Input } from '@/components/ui/Input'
 
 const ESTADO_INICIAL: EstadoAtualizacaoCliente = {}
 
-export function TabDados({ cliente }: { cliente: ClienteResposta }) {
+export function TabDados({
+  cliente,
+  podeEditar = true,
+}: {
+  cliente: ClienteResposta
+  podeEditar?: boolean
+}) {
   const router = useRouter()
   const acaoVinculada = atualizarCliente.bind(null, cliente.id)
   const [estado, dispatch, pendente] = useActionState(acaoVinculada, ESTADO_INICIAL)
@@ -32,6 +38,7 @@ export function TabDados({ cliente }: { cliente: ClienteResposta }) {
         name="nome"
         defaultValue={cliente.nome}
         required
+        disabled={!podeEditar}
         error={estado.errosCampos?.nome}
         fullWidth
       />
@@ -41,18 +48,21 @@ export function TabDados({ cliente }: { cliente: ClienteResposta }) {
           name="nomeFantasia"
           defaultValue={cliente.nomeFantasia ?? ''}
           hint="Opcional"
+          disabled={!podeEditar}
           error={estado.errosCampos?.nomeFantasia}
           fullWidth
         />
       )}
 
-      <div className="flex justify-end pt-2">
-        <Button type="submit" variant="primary" loading={pendente} disabled={!cliente.ativo}>
-          {pendente ? 'Salvando...' : 'Salvar alteracoes'}
-        </Button>
-      </div>
+      {podeEditar && (
+        <div className="flex justify-end pt-2">
+          <Button type="submit" variant="primary" loading={pendente} disabled={!cliente.ativo}>
+            {pendente ? 'Salvando...' : 'Salvar alteracoes'}
+          </Button>
+        </div>
+      )}
 
-      {!cliente.ativo && (
+      {podeEditar && !cliente.ativo && (
         <p className="text-xs text-slate-500">
           Cliente inativo. Reative-o no topo da tela para editar.
         </p>
