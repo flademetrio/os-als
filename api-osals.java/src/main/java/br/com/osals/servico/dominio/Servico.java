@@ -45,6 +45,10 @@ public class Servico {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String descricao;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private EmpresaServico empresa = EmpresaServico.ALS;
+
     @Column(name = "data_inicio_prevista")
     private LocalDate dataInicioPrevista;
 
@@ -81,11 +85,13 @@ public class Servico {
     }
 
     public Servico(Integer numero, Cliente cliente, TipoServico tipoServico, String descricao,
-                   LocalDate dataInicioPrevista, LocalDate dataFimPrevista, Usuario criadoPor) {
+                   EmpresaServico empresa, LocalDate dataInicioPrevista, LocalDate dataFimPrevista,
+                   Usuario criadoPor) {
         this.numero = numero;
         this.cliente = cliente;
         this.tipoServico = tipoServico;
         this.descricao = descricao;
+        this.empresa = empresa != null ? empresa : EmpresaServico.ALS;
         this.dataInicioPrevista = dataInicioPrevista;
         this.dataFimPrevista = dataFimPrevista;
         this.status = StatusServico.EM_ABERTO;
@@ -109,7 +115,7 @@ public class Servico {
     /**
      * Atualiza os dados editaveis. Falha com 422 se o Servico ja estiver encerrado.
      */
-    public void atualizarDados(TipoServico tipoServico, String descricao,
+    public void atualizarDados(TipoServico tipoServico, String descricao, EmpresaServico empresa,
                                LocalDate dataInicioPrevista, LocalDate dataFimPrevista, Usuario por) {
         if (!podeEditar()) {
             throw new NegocioException(
@@ -117,6 +123,9 @@ public class Servico {
         }
         this.tipoServico = tipoServico;
         this.descricao = descricao;
+        if (empresa != null) {
+            this.empresa = empresa;
+        }
         this.dataInicioPrevista = dataInicioPrevista;
         this.dataFimPrevista = dataFimPrevista;
         marcarAtualizacao(por);
@@ -167,6 +176,7 @@ public class Servico {
     public Cliente getCliente() { return cliente; }
     public TipoServico getTipoServico() { return tipoServico; }
     public String getDescricao() { return descricao; }
+    public EmpresaServico getEmpresa() { return empresa; }
     public LocalDate getDataInicioPrevista() { return dataInicioPrevista; }
     public LocalDate getDataFimPrevista() { return dataFimPrevista; }
     public StatusServico getStatus() { return status; }

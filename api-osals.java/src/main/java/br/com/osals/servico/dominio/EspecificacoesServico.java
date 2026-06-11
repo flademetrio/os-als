@@ -22,6 +22,7 @@ public final class EspecificacoesServico {
     private EspecificacoesServico() {}
 
     public static Specification<Servico> comFiltros(List<StatusServico> status,
+                                                    EmpresaServico empresa,
                                                     Long clienteId,
                                                     Integer tipoServicoId,
                                                     LocalDate inicio,
@@ -41,6 +42,9 @@ public final class EspecificacoesServico {
 
             if (status != null && !status.isEmpty()) {
                 predicates.add(root.get("status").in(status));
+            }
+            if (empresa != null) {
+                predicates.add(cb.equal(root.get("empresa"), empresa));
             }
             if (clienteId != null) {
                 predicates.add(cb.equal(root.get("cliente").get("id"), clienteId));

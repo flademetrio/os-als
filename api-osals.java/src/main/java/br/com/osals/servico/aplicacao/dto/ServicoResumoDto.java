@@ -1,5 +1,6 @@
 package br.com.osals.servico.aplicacao.dto;
 
+import br.com.osals.servico.dominio.EmpresaServico;
 import br.com.osals.servico.dominio.StatusServico;
 import java.time.LocalDate;
 
@@ -12,6 +13,7 @@ public record ServicoResumoDto(
         String clienteNome,
         String tipoServicoNome,
         String descricao,
+        EmpresaServico empresa,
         LocalDate dataInicioPrevista,
         StatusServico status,
         String statusRotulo

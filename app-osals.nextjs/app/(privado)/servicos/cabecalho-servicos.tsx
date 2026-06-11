@@ -13,6 +13,7 @@ type Props = {
   vista: 'lista' | 'cards'
   busca: string
   situacao: string
+  empresa: string
   inicio: string
   fim: string
   /** Indica se ha algum filtro aplicado (define se o painel ja abre aberto). */
@@ -33,6 +34,7 @@ export function CabecalhoServicos({
   vista,
   busca,
   situacao,
+  empresa,
   inicio,
   fim,
   temFiltroAtivo,
@@ -75,7 +77,13 @@ export function CabecalhoServicos({
 
       {aberto && (
         <div className="mt-4 pt-4 border-t border-slate-100">
-          <FiltrosServicos busca={busca} situacao={situacao} inicio={inicio} fim={fim} />
+          <FiltrosServicos
+            busca={busca}
+            situacao={situacao}
+            empresa={empresa}
+            inicio={inicio}
+            fim={fim}
+          />
         </div>
       )}
     </Card>

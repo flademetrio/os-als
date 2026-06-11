@@ -9,12 +9,19 @@ const dataOpcional = z
   .optional()
   .transform((v) => (v && v.trim() ? v : undefined))
 
+/** Empresas do grupo, usadas para separar servicos em relatorios. */
+export const EMPRESA_SERVICO_LABEL: Record<string, string> = {
+  ALS: 'ALS',
+  FRYO: 'FRYO',
+}
+
 export const servicoSchema = z.object({
   tipoServicoId: z
     .string()
     .min(1, 'Selecione o tipo de servico')
     .transform((s) => Number(s)),
   descricao: z.string().trim().min(1, 'Descricao e obrigatoria'),
+  empresa: z.enum(['ALS', 'FRYO'], { message: 'Selecione a empresa' }),
   dataInicioPrevista: dataOpcional,
   dataFimPrevista: dataOpcional,
 })

@@ -14,7 +14,6 @@ import br.com.osals.ordemservico.aplicacao.dto.AberturaOsRequisicao;
 import br.com.osals.ordemservico.aplicacao.dto.DigitacaoExecucaoRequisicao;
 import br.com.osals.ordemservico.aplicacao.dto.OrdemServicoResposta;
 import br.com.osals.ordemservico.aplicacao.dto.OrdemServicoResumoDto;
-import br.com.osals.ordemservico.dominio.EmpresaOrdemServico;
 import br.com.osals.ordemservico.dominio.EspecificacoesOrdemServico;
 import br.com.osals.ordemservico.dominio.OrdemServico;
 import br.com.osals.ordemservico.dominio.RepositorioOrdemServico;
@@ -69,10 +68,9 @@ public class GestorOrdemServico {
         this.mapper = mapper;
     }
 
-    public PaginaResposta<OrdemServicoResumoDto> listar(StatusOrdemServico status, EmpresaOrdemServico empresa,
-                                                        Long servicoId, Long clienteId, String busca,
-                                                        Pageable pageable) {
-        var spec = EspecificacoesOrdemServico.comFiltros(status, empresa, servicoId, clienteId, busca);
+    public PaginaResposta<OrdemServicoResumoDto> listar(StatusOrdemServico status, Long servicoId,
+                                                        Long clienteId, String busca, Pageable pageable) {
+        var spec = EspecificacoesOrdemServico.comFiltros(status, servicoId, clienteId, busca);
         var page = repositorio.findAll(spec, pageable);
         return PaginaResposta.de(page.map(mapper::paraResumo));
     }
@@ -102,7 +100,7 @@ public class GestorOrdemServico {
 
         int numero = repositorio.proximoNumero().intValue();
         var os = new OrdemServico(numero, servico, req.descricaoAtividade().trim(),
-                req.empresa(), req.dataAgendada(), autor);
+                req.dataAgendada(), autor);
         os.definirEquipe(tecnicos, veiculos, equipamentos);
         os.definirContatos(contatos);
         var salva = repositorio.save(os);
@@ -123,7 +121,7 @@ public class GestorOrdemServico {
         Set<Veiculo> veiculos = resolverVeiculos(req.veiculoIds());
         Set<ContatoCliente> contatos = resolverContatos(req.contatoIds(), servico);
 
-        os.editarCabecalho(req.descricaoAtividade().trim(), req.empresa(), req.dataAgendada());
+        os.editarCabecalho(req.descricaoAtividade().trim(), req.dataAgendada());
         os.definirEquipe(tecnicos, veiculos, equipamentos);
         os.definirContatos(contatos);
         log.info("OS {} editada por usuario {}", id, autor.getId());

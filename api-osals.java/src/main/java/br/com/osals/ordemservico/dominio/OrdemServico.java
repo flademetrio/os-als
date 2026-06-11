@@ -49,10 +49,6 @@ public class OrdemServico {
     private String descricaoAtividade;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
-    private EmpresaOrdemServico empresa = EmpresaOrdemServico.ALS;
-
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 25)
     private StatusOrdemServico status = StatusOrdemServico.ABERTA;
 
@@ -127,11 +123,10 @@ public class OrdemServico {
     }
 
     public OrdemServico(Integer numero, Servico servico, String descricaoAtividade,
-                        EmpresaOrdemServico empresa, LocalDate dataAgendada, Usuario criadoPor) {
+                        LocalDate dataAgendada, Usuario criadoPor) {
         this.numero = numero;
         this.servico = servico;
         this.descricaoAtividade = descricaoAtividade;
-        this.empresa = empresa != null ? empresa : EmpresaOrdemServico.ALS;
         this.dataAgendada = dataAgendada;
         this.status = StatusOrdemServico.ABERTA;
         this.dataAbertura = OffsetDateTime.now();
@@ -148,16 +143,12 @@ public class OrdemServico {
      * nao encerrada. Equipe e contatos sao atualizados por definirEquipe/
      * definirContatos.
      */
-    public void editarCabecalho(String descricaoAtividade, EmpresaOrdemServico empresa,
-                                LocalDate dataAgendada) {
+    public void editarCabecalho(String descricaoAtividade, LocalDate dataAgendada) {
         if (estaEncerrada()) {
             throw new NegocioException(
                     "OS " + status.getRotulo().toLowerCase() + " nao pode ser editada.");
         }
         this.descricaoAtividade = descricaoAtividade;
-        if (empresa != null) {
-            this.empresa = empresa;
-        }
         this.dataAgendada = dataAgendada;
     }
 
@@ -245,7 +236,6 @@ public class OrdemServico {
     public Integer getNumero() { return numero; }
     public Servico getServico() { return servico; }
     public String getDescricaoAtividade() { return descricaoAtividade; }
-    public EmpresaOrdemServico getEmpresa() { return empresa; }
     public StatusOrdemServico getStatus() { return status; }
     public OffsetDateTime getDataAbertura() { return dataAbertura; }
     public LocalDate getDataAgendada() { return dataAgendada; }

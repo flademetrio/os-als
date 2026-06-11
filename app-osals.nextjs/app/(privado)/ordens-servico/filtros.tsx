@@ -2,17 +2,16 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
-import { EMPRESA_OS_LABEL, STATUS_OS_LABEL } from '@/app/lib/esquemas/ordem-servico'
+import { STATUS_OS_LABEL } from '@/app/lib/esquemas/ordem-servico'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { Select } from '@/components/ui/Select'
 
 type Props = {
   busca: string
   status: string
-  empresa: string
 }
 
-export function FiltrosOrdensServico({ busca: buscaInicial, status, empresa }: Props) {
+export function FiltrosOrdensServico({ busca: buscaInicial, status }: Props) {
   const router = useRouter()
   const params = useSearchParams()
   const [busca, setBusca] = useState(buscaInicial)
@@ -47,26 +46,6 @@ export function FiltrosOrdensServico({ busca: buscaInicial, status, empresa }: P
           }
           fullWidth
         />
-      </div>
-      <div className="sm:w-44">
-        <Select
-          label="Empresa"
-          value={empresa}
-          onChange={(e) =>
-            navegar((p) => {
-              if (e.target.value) p.set('empresa', e.target.value)
-              else p.delete('empresa')
-            })
-          }
-          fullWidth
-        >
-          <option value="">Todas</option>
-          {Object.entries(EMPRESA_OS_LABEL).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
-            </option>
-          ))}
-        </Select>
       </div>
       <div className="sm:w-56">
         <Select

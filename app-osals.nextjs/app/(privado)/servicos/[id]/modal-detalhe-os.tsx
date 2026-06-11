@@ -77,7 +77,6 @@ export function ModalDetalheOs({
                 <Badge variant={badgeStatusOs(os.status)} dot>
                   {os.statusRotulo}
                 </Badge>
-                <Badge variant="default">{os.empresaRotulo}</Badge>
                 <Link
                   href={`/ordens-servico/${os.id}`}
                   className="text-xs text-primary hover:underline"

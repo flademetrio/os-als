@@ -29,6 +29,7 @@ export function TabDados({ servico, tipos }: Props) {
       <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
         <Campo titulo="Cliente" valor={servico.clienteNome} />
         <Campo titulo="Tipo de servico" valor={servico.tipoServicoNome} />
+        <Campo titulo="Empresa" valor={servico.empresaRotulo} />
         <Campo titulo="Status" valor={servico.statusRotulo} />
         <Campo titulo="Data de inicio prevista" valor={formatarData(servico.dataInicioPrevista)} />
         <Campo titulo="Data de fim prevista" valor={formatarData(servico.dataFimPrevista)} />

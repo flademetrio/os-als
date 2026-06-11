@@ -11,7 +11,6 @@ type Props = {
   searchParams: Promise<{
     busca?: string
     status?: string
-    empresa?: string
     pagina?: string
   }>
 }
@@ -20,20 +19,18 @@ export default async function OrdensServicoPage({ searchParams }: Props) {
   const p = await searchParams
   const busca = p.busca ?? ''
   const status = p.status ?? ''
-  const empresa = p.empresa ?? ''
   const pagina = Number(p.pagina ?? '0')
 
   const q = new URLSearchParams()
   if (busca) q.set('busca', busca)
   if (status) q.set('status', status)
-  if (empresa) q.set('empresa', empresa)
   q.set('pagina', String(pagina))
   q.set('tamanho', '20')
 
   const dados = await clienteApi<PaginaResposta<OrdemServicoResumoDto>>(
     `/ordens-servico?${q.toString()}`,
   )
-  const base = { busca, status, empresa }
+  const base = { busca, status }
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -45,7 +42,7 @@ export default async function OrdensServicoPage({ searchParams }: Props) {
       </div>
 
       <Card padding="md">
-        <FiltrosOrdensServico busca={busca} status={status} empresa={empresa} />
+        <FiltrosOrdensServico busca={busca} status={status} />
       </Card>
 
       <Card padding="none">
@@ -62,7 +59,6 @@ export default async function OrdensServicoPage({ searchParams }: Props) {
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50">
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Codigo</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Empresa</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Cliente</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Atividade</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Abertura</th>
@@ -80,7 +76,6 @@ export default async function OrdensServicoPage({ searchParams }: Props) {
                         {os.codigoExibicao}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{os.empresa}</td>
                     <td className="px-4 py-3 text-slate-700">{os.clienteNome}</td>
                     <td className="px-4 py-3 text-slate-600">
                       <span className="block truncate max-w-sm">{os.descricaoAtividade}</span>

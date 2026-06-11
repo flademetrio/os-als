@@ -20,7 +20,6 @@ public final class EspecificacoesOrdemServico {
     private EspecificacoesOrdemServico() {}
 
     public static Specification<OrdemServico> comFiltros(StatusOrdemServico status,
-                                                         EmpresaOrdemServico empresa,
                                                          Long servicoId,
                                                          Long clienteId,
                                                          String busca) {
@@ -36,9 +35,6 @@ public final class EspecificacoesOrdemServico {
 
             if (status != null) {
                 predicates.add(cb.equal(root.get("status"), status));
-            }
-            if (empresa != null) {
-                predicates.add(cb.equal(root.get("empresa"), empresa));
             }
             if (servicoId != null) {
                 predicates.add(cb.equal(root.get("servico").get("id"), servicoId));

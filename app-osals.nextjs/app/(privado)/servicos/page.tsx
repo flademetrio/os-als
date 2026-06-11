@@ -28,6 +28,7 @@ type Props = {
   searchParams: Promise<{
     busca?: string
     situacao?: string
+    empresa?: string
     inicio?: string
     fim?: string
     pagina?: string
@@ -39,6 +40,7 @@ export default async function ServicosPage({ searchParams }: Props) {
   const p = await searchParams
   const busca = p.busca ?? ''
   const situacao = p.situacao && p.situacao in STATUS_POR_SITUACAO ? p.situacao : 'andamento'
+  const empresa = p.empresa ?? ''
   const inicio = p.inicio ?? ''
   const fim = p.fim ?? ''
   const pagina = Number(p.pagina ?? '0')
@@ -47,6 +49,7 @@ export default async function ServicosPage({ searchParams }: Props) {
   const q = new URLSearchParams()
   if (busca) q.set('busca', busca)
   for (const s of STATUS_POR_SITUACAO[situacao]) q.append('status', s)
+  if (empresa) q.set('empresa', empresa)
   if (inicio) q.set('inicio', inicio)
   if (fim) q.set('fim', fim)
   q.set('pagina', String(pagina))
@@ -58,10 +61,10 @@ export default async function ServicosPage({ searchParams }: Props) {
     clienteApi<TipoServicoResposta[]>('/tipos-servico?apenasAtivos=true'),
   ])
 
-  const base = { busca, situacao, inicio, fim, vista }
+  const base = { busca, situacao, empresa, inicio, fim, vista }
   const vazio = dados.conteudo.length === 0
   const temFiltroAtivo =
-    busca !== '' || inicio !== '' || fim !== '' || situacao !== 'andamento'
+    busca !== '' || inicio !== '' || fim !== '' || empresa !== '' || situacao !== 'andamento'
 
   return (
     <div className="max-w-6xl mx-auto space-y-5">
@@ -70,6 +73,7 @@ export default async function ServicosPage({ searchParams }: Props) {
         vista={vista}
         busca={busca}
         situacao={situacao}
+        empresa={empresa}
         inicio={inicio}
         fim={fim}
         temFiltroAtivo={temFiltroAtivo}
@@ -103,7 +107,9 @@ export default async function ServicosPage({ searchParams }: Props) {
                   </Badge>
                 </div>
                 <p className="text-sm font-medium text-slate-800 mt-2 truncate">{s.clienteNome}</p>
-                <p className="text-xs text-slate-500 truncate">{s.tipoServicoNome}</p>
+                <p className="text-xs text-slate-500 truncate">
+                  {s.tipoServicoNome} · {s.empresa}
+                </p>
                 <p className="text-sm text-slate-600 mt-2 line-clamp-2">{s.descricao}</p>
                 <p className="text-xs text-slate-400 mt-3">
                   Inicio previsto: {formatarData(s.dataInicioPrevista)}
@@ -119,6 +125,7 @@ export default async function ServicosPage({ searchParams }: Props) {
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50">
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">No</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Empresa</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Cliente</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Tipo</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Inicio previsto</th>
@@ -136,6 +143,7 @@ export default async function ServicosPage({ searchParams }: Props) {
                         {s.numeroFormatado}
                       </Link>
                     </td>
+                    <td className="px-4 py-3 text-slate-600">{s.empresa}</td>
                     <td className="px-4 py-3">
                       <span className="text-slate-700">{s.clienteNome}</span>
                       <span className="block text-xs text-slate-400 truncate max-w-xs">

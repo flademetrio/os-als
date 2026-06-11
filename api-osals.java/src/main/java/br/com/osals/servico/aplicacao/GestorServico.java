@@ -15,6 +15,7 @@ import br.com.osals.servico.aplicacao.dto.AtualizacaoServicoRequisicao;
 import br.com.osals.servico.aplicacao.dto.CriacaoServicoRequisicao;
 import br.com.osals.servico.aplicacao.dto.ServicoResposta;
 import br.com.osals.servico.aplicacao.dto.ServicoResumoDto;
+import br.com.osals.servico.dominio.EmpresaServico;
 import br.com.osals.servico.dominio.EspecificacoesServico;
 import br.com.osals.servico.dominio.RepositorioLancamentoCusto;
 import br.com.osals.servico.dominio.RepositorioServico;
@@ -65,14 +66,15 @@ public class GestorServico {
         this.mapper = mapper;
     }
 
-    public PaginaResposta<ServicoResumoDto> listar(List<StatusServico> status, Long clienteId,
-                                                   Integer tipoServicoId, LocalDate inicio,
-                                                   LocalDate fim, String busca, Pageable pageable) {
+    public PaginaResposta<ServicoResumoDto> listar(List<StatusServico> status, EmpresaServico empresa,
+                                                   Long clienteId, Integer tipoServicoId,
+                                                   LocalDate inicio, LocalDate fim, String busca,
+                                                   Pageable pageable) {
         // Sem filtro de status -> considera todos (evita IN com lista vazia).
         List<StatusServico> statusFiltro =
                 (status == null || status.isEmpty()) ? List.of(StatusServico.values()) : status;
         var spec = EspecificacoesServico.comFiltros(
-                statusFiltro, clienteId, tipoServicoId, inicio, fim, busca);
+                statusFiltro, empresa, clienteId, tipoServicoId, inicio, fim, busca);
         var page = repositorio.findAll(spec, pageable);
         return PaginaResposta.de(page.map(mapper::paraResumo));
     }
@@ -93,7 +95,7 @@ public class GestorServico {
 
         int numero = repositorio.proximoNumero().intValue();
         var servico = new Servico(numero, cliente, tipo, req.descricao().trim(),
-                req.dataInicioPrevista(), req.dataFimPrevista(), autor);
+                req.empresa(), req.dataInicioPrevista(), req.dataFimPrevista(), autor);
         var salvo = repositorio.save(servico);
         log.info("Servico criado: id={} numero={} cliente={}",
                 salvo.getId(), salvo.getNumero(), cliente.getId());
@@ -105,7 +107,7 @@ public class GestorServico {
         var s = obrigatorio(id);
         TipoServico tipo = tipoServicoAtivo(req.tipoServicoId());
         validarDatas(req.dataInicioPrevista(), req.dataFimPrevista());
-        s.atualizarDados(tipo, req.descricao().trim(),
+        s.atualizarDados(tipo, req.descricao().trim(), req.empresa(),
                 req.dataInicioPrevista(), req.dataFimPrevista(), autor);
         return mapper.paraResposta(s);
     }

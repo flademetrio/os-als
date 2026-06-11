@@ -1,5 +1,6 @@
 package br.com.osals.servico.aplicacao.dto;
 
+import br.com.osals.servico.dominio.EmpresaServico;
 import br.com.osals.servico.dominio.StatusServico;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -16,6 +17,8 @@ public record ServicoResposta(
         Integer tipoServicoId,
         String tipoServicoNome,
         String descricao,
+        EmpresaServico empresa,
+        String empresaRotulo,
         LocalDate dataInicioPrevista,
         LocalDate dataFimPrevista,
         StatusServico status,

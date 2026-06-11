@@ -1,15 +1,8 @@
 import { z } from 'zod'
 
-/** Empresas do grupo, usadas para separar OS em relatorios. */
-export const EMPRESA_OS_LABEL: Record<string, string> = {
-  ALS: 'ALS',
-  FRYO: 'FRYO',
-}
-
 /** Esquema de abertura de OS. Tecnicos sao obrigatorios; equipamentos e veiculos opcionais. */
 export const aberturaOsSchema = z.object({
   descricaoAtividade: z.string().trim().min(1, 'Descreva a atividade'),
-  empresa: z.enum(['ALS', 'FRYO'], { message: 'Selecione a empresa' }),
   dataAgendada: z.string().trim().min(1, 'Informe a data agendada'),
   tecnicoIds: z.array(z.number()).min(1, 'Selecione ao menos um tecnico'),
   equipamentoIds: z.array(z.number()),

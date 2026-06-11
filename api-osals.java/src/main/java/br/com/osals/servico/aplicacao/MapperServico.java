@@ -20,6 +20,8 @@ public class MapperServico {
                 s.getTipoServico().getId(),
                 s.getTipoServico().getNome(),
                 s.getDescricao(),
+                s.getEmpresa(),
+                s.getEmpresa().getRotulo(),
                 s.getDataInicioPrevista(),
                 s.getDataFimPrevista(),
                 s.getStatus(),
@@ -41,6 +43,7 @@ public class MapperServico {
                 s.getCliente().getNome(),
                 s.getTipoServico().getNome(),
                 s.getDescricao(),
+                s.getEmpresa(),
                 s.getDataInicioPrevista(),
                 s.getStatus(),
                 s.getStatus().getRotulo()

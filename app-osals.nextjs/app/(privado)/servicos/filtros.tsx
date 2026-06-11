@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
+import { EMPRESA_SERVICO_LABEL } from '@/app/lib/esquemas/servico'
 import { Input } from '@/components/ui/Input'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { Select } from '@/components/ui/Select'
@@ -20,12 +21,13 @@ export const OPCOES_SITUACAO: { valor: string; rotulo: string }[] = [
 type Props = {
   busca: string
   situacao: string
+  empresa: string
   inicio: string
   fim: string
 }
 
 /** Barra de filtros da listagem de servicos — compacta, em uma linha. */
-export function FiltrosServicos({ busca: buscaInicial, situacao, inicio, fim }: Props) {
+export function FiltrosServicos({ busca: buscaInicial, situacao, empresa, inicio, fim }: Props) {
   const router = useRouter()
   const params = useSearchParams()
   const [busca, setBusca] = useState(buscaInicial)
@@ -68,6 +70,21 @@ export function FiltrosServicos({ busca: buscaInicial, situacao, inicio, fim }: 
           {OPCOES_SITUACAO.map((o) => (
             <option key={o.valor} value={o.valor}>
               {o.rotulo}
+            </option>
+          ))}
+        </Select>
+      </div>
+      <div className="w-36">
+        <Select
+          label="Empresa"
+          value={empresa}
+          onChange={(e) => definir('empresa', e.target.value)}
+          fullWidth
+        >
+          <option value="">Todas</option>
+          {Object.entries(EMPRESA_SERVICO_LABEL).map(([k, v]) => (
+            <option key={k} value={k}>
+              {v}
             </option>
           ))}
         </Select>

@@ -7,7 +7,6 @@ import br.com.osals.ordemservico.aplicacao.dto.AberturaOsRequisicao;
 import br.com.osals.ordemservico.aplicacao.dto.DigitacaoExecucaoRequisicao;
 import br.com.osals.ordemservico.aplicacao.dto.OrdemServicoResposta;
 import br.com.osals.ordemservico.aplicacao.dto.OrdemServicoResumoDto;
-import br.com.osals.ordemservico.dominio.EmpresaOrdemServico;
 import br.com.osals.ordemservico.dominio.StatusOrdemServico;
 import br.com.osals.seguranca.dominio.Usuario;
 import io.swagger.v3.oas.annotations.Operation;
@@ -72,13 +71,12 @@ public class ControladorOrdemServico {
     @Operation(summary = "Lista OS com filtros (status, servico, cliente) e paginacao.")
     public ResponseEntity<PaginaResposta<OrdemServicoResumoDto>> listar(
             @RequestParam(required = false) StatusOrdemServico status,
-            @RequestParam(required = false) EmpresaOrdemServico empresa,
             @RequestParam(required = false) Long servicoId,
             @RequestParam(required = false) Long clienteId,
             @RequestParam(required = false) String busca,
             Pageable pageable
     ) {
-        return ResponseEntity.ok(gestor.listar(status, empresa, servicoId, clienteId, busca, pageable));
+        return ResponseEntity.ok(gestor.listar(status, servicoId, clienteId, busca, pageable));
     }
 
     @GetMapping("/ordens-servico/{id}")

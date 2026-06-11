@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect } from 'react'
 import { atualizarServico, type EstadoServico } from '@/app/actions/servico'
+import { EMPRESA_SERVICO_LABEL } from '@/app/lib/esquemas/servico'
 import type { ServicoResposta, TipoServicoResposta } from '@/app/lib/definicoes'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
@@ -62,6 +63,23 @@ export function ModalEditarServico({ servico, tipos, onClose }: Props) {
           error={estado.errosCampos?.descricao}
           fullWidth
         />
+
+        <div className="sm:w-48">
+          <Select
+            label="Empresa"
+            name="empresa"
+            required
+            defaultValue={servico.empresa}
+            error={estado.errosCampos?.empresa}
+            fullWidth
+          >
+            {Object.entries(EMPRESA_SERVICO_LABEL).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v}
+              </option>
+            ))}
+          </Select>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input

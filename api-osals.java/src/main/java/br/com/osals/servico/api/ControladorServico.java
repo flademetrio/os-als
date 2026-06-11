@@ -8,6 +8,7 @@ import br.com.osals.servico.aplicacao.dto.CriacaoServicoRequisicao;
 import br.com.osals.servico.aplicacao.dto.MudancaStatusRequisicao;
 import br.com.osals.servico.aplicacao.dto.ServicoResposta;
 import br.com.osals.servico.aplicacao.dto.ServicoResumoDto;
+import br.com.osals.servico.dominio.EmpresaServico;
 import br.com.osals.servico.dominio.StatusServico;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -52,6 +53,7 @@ public class ControladorServico {
             + "O parametro status aceita multiplos valores.")
     public ResponseEntity<PaginaResposta<ServicoResumoDto>> listar(
             @RequestParam(required = false) List<StatusServico> status,
+            @RequestParam(required = false) EmpresaServico empresa,
             @RequestParam(required = false) Long clienteId,
             @RequestParam(required = false) Integer tipoServicoId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
@@ -60,7 +62,7 @@ public class ControladorServico {
             Pageable pageable
     ) {
         return ResponseEntity.ok(
-                gestor.listar(status, clienteId, tipoServicoId, inicio, fim, busca, pageable));
+                gestor.listar(status, empresa, clienteId, tipoServicoId, inicio, fim, busca, pageable));
     }
 
     @GetMapping("/{id}")

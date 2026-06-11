@@ -76,7 +76,6 @@ export default async function OrdemServicoDetalhePage({ params }: Props) {
               <Badge variant={badgeStatusOs(os.status)} dot>
                 {os.statusRotulo}
               </Badge>
-              <Badge variant="default">{os.empresaRotulo}</Badge>
             </div>
             <p className="text-sm text-slate-500">
               {os.clienteNome} · {os.tipoServicoNome} ·{' '}
@@ -108,10 +107,6 @@ export default async function OrdemServicoDetalhePage({ params }: Props) {
 
       <Card padding="md" title="Dados da OS">
         <div className="space-y-4">
-          <Campo titulo="Empresa">
-            <p className="text-sm text-slate-700">{os.empresaRotulo}</p>
-          </Campo>
-
           <Campo titulo="Data agendada">
             <p className="text-sm text-slate-700">{formatarData(os.dataAgendada)}</p>
           </Campo>
