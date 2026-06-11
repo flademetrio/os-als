@@ -1,5 +1,6 @@
 package br.com.osals.ordemservico.aplicacao.dto;
 
+import br.com.osals.ordemservico.dominio.EmpresaOrdemServico;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +16,9 @@ public record AberturaOsRequisicao(
 
         @NotBlank(message = "descricaoAtividade e obrigatoria")
         String descricaoAtividade,
+
+        @NotNull(message = "informe a empresa")
+        EmpresaOrdemServico empresa,
 
         @NotNull(message = "informe a data agendada")
         LocalDate dataAgendada,

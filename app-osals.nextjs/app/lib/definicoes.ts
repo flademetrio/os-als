@@ -349,6 +349,8 @@ export type StatusOrdemServico =
   | 'CONCLUIDA'
   | 'CANCELADA'
 
+export type EmpresaOrdemServico = 'ALS' | 'FRYO'
+
 export type OsTecnicoDto = {
   id: number
   nome: string
@@ -389,6 +391,8 @@ export type OrdemServicoResposta = {
   clienteNome: string
   tipoServicoNome: string
   descricaoAtividade: string
+  empresa: EmpresaOrdemServico
+  empresaRotulo: string
   status: StatusOrdemServico
   statusRotulo: string
   dataAgendada: string | null
@@ -456,6 +460,7 @@ export type OrdemServicoResumoDto = {
   clienteId: number
   clienteNome: string
   descricaoAtividade: string
+  empresa: EmpresaOrdemServico
   status: StatusOrdemServico
   statusRotulo: string
   dataAgendada: string | null

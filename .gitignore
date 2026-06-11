@@ -89,6 +89,7 @@ anexos-local/
 # .env, chaves JWT e imagens em .tar (segredos).
 # ---------------------------------------------------------------------
 bundle-*/
+versao-v*/
 
 # ---------------------------------------------------------------------
 # IDEs e editores — o projeto e desenvolvido em VS Code e IntelliJ IDEA

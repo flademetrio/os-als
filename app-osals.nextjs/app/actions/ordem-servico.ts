@@ -46,6 +46,7 @@ export async function abrirOrdemServico(
 ): Promise<EstadoOrdemServico> {
   const parse = aberturaOsSchema.safeParse({
     descricaoAtividade: formData.get('descricaoAtividade') ?? '',
+    empresa: formData.get('empresa') ?? '',
     dataAgendada: formData.get('dataAgendada') ?? '',
     tecnicoIds: idsDe(formData, 'tecnicoIds'),
     equipamentoIds: idsDe(formData, 'equipamentoIds'),
@@ -78,6 +79,7 @@ export async function editarOrdemServico(
 ): Promise<EstadoOrdemServico> {
   const parse = aberturaOsSchema.safeParse({
     descricaoAtividade: formData.get('descricaoAtividade') ?? '',
+    empresa: formData.get('empresa') ?? '',
     dataAgendada: formData.get('dataAgendada') ?? '',
     tecnicoIds: idsDe(formData, 'tecnicoIds'),
     equipamentoIds: idsDe(formData, 'equipamentoIds'),

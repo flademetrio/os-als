@@ -18,7 +18,9 @@ import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
+import { Select } from '@/components/ui/Select'
 import { Textarea } from '@/components/ui/Textarea'
+import { EMPRESA_OS_LABEL } from '@/app/lib/esquemas/ordem-servico'
 
 const ESTADO_INICIAL: EstadoOrdemServico = {}
 
@@ -123,16 +125,34 @@ export function ModalAbrirOs({
           />
         </div>
 
-        <Input
-          label="Data agendada"
-          name="dataAgendada"
-          type="date"
-          required
-          defaultValue={os?.dataAgendada ?? dataHoje}
-          hint="Dia previsto da visita da equipe ao cliente"
-          error={estado.errosCampos?.dataAgendada}
-          fullWidth
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Select
+            label="Empresa"
+            name="empresa"
+            required
+            defaultValue={os?.empresa ?? 'ALS'}
+            hint="Empresa responsavel pela OS"
+            error={estado.errosCampos?.empresa}
+            fullWidth
+          >
+            {Object.entries(EMPRESA_OS_LABEL).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v}
+              </option>
+            ))}
+          </Select>
+
+          <Input
+            label="Data agendada"
+            name="dataAgendada"
+            type="date"
+            required
+            defaultValue={os?.dataAgendada ?? dataHoje}
+            hint="Dia previsto da visita da equipe ao cliente"
+            error={estado.errosCampos?.dataAgendada}
+            fullWidth
+          />
+        </div>
 
         <ListaSelecao
           titulo="Tecnicos"
