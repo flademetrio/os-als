@@ -15,9 +15,12 @@ import br.com.osals.servico.aplicacao.dto.AtualizacaoServicoRequisicao;
 import br.com.osals.servico.aplicacao.dto.CriacaoServicoRequisicao;
 import br.com.osals.servico.aplicacao.dto.ServicoResposta;
 import br.com.osals.servico.aplicacao.dto.ServicoResumoDto;
+import br.com.osals.servico.dominio.Cobranca;
 import br.com.osals.servico.dominio.EmpresaServico;
 import br.com.osals.servico.dominio.EspecificacoesServico;
+import br.com.osals.servico.dominio.RepositorioCobranca;
 import br.com.osals.servico.dominio.RepositorioLancamentoCusto;
+import br.com.osals.servico.dominio.RepositorioNotaFiscal;
 import br.com.osals.servico.dominio.RepositorioServico;
 import br.com.osals.servico.dominio.Servico;
 import br.com.osals.servico.dominio.StatusServico;
@@ -44,6 +47,8 @@ public class GestorServico {
     private final RepositorioTipoServico repositorioTipoServico;
     private final RepositorioOrdemServico repositorioOrdemServico;
     private final RepositorioLancamentoCusto repositorioLancamentoCusto;
+    private final RepositorioCobranca repositorioCobranca;
+    private final RepositorioNotaFiscal repositorioNotaFiscal;
     private final GestorOrdemServico gestorOrdemServico;
     private final GestorAnexo gestorAnexo;
     private final MapperServico mapper;
@@ -53,6 +58,8 @@ public class GestorServico {
                          RepositorioTipoServico repositorioTipoServico,
                          RepositorioOrdemServico repositorioOrdemServico,
                          RepositorioLancamentoCusto repositorioLancamentoCusto,
+                         RepositorioCobranca repositorioCobranca,
+                         RepositorioNotaFiscal repositorioNotaFiscal,
                          GestorOrdemServico gestorOrdemServico,
                          GestorAnexo gestorAnexo,
                          MapperServico mapper) {
@@ -61,6 +68,8 @@ public class GestorServico {
         this.repositorioTipoServico = repositorioTipoServico;
         this.repositorioOrdemServico = repositorioOrdemServico;
         this.repositorioLancamentoCusto = repositorioLancamentoCusto;
+        this.repositorioCobranca = repositorioCobranca;
+        this.repositorioNotaFiscal = repositorioNotaFiscal;
         this.gestorOrdemServico = gestorOrdemServico;
         this.gestorAnexo = gestorAnexo;
         this.mapper = mapper;
@@ -97,6 +106,8 @@ public class GestorServico {
         var servico = new Servico(numero, cliente, tipo, req.descricao().trim(),
                 req.empresa(), req.dataInicioPrevista(), req.dataFimPrevista(), autor);
         var salvo = repositorio.save(servico);
+        // Toda OS de servico nasce com uma cobranca (SEM_COBRANCA por padrao).
+        repositorioCobranca.save(new Cobranca(salvo, autor));
         log.info("Servico criado: id={} numero={} cliente={}",
                 salvo.getId(), salvo.getNumero(), cliente.getId());
         return mapper.paraResposta(salvo);
@@ -160,7 +171,11 @@ public class GestorServico {
         // 3. Apaga anexos do proprio servico (storage + registros)
         gestorAnexo.apagarTodosAnexosDoServico(id);
 
-        // 4. Apaga o Servico
+        // 4. Apaga faturamento (notas fiscais) e a cobranca do servico
+        repositorioNotaFiscal.deleteByServicoId(id);
+        repositorioCobranca.deleteByServicoId(id);
+
+        // 5. Apaga o Servico
         repositorio.delete(s);
 
         log.info("Servico {} (numero {}) excluido por usuario {} (admin) — "

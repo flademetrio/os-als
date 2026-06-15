@@ -21,6 +21,9 @@ public enum Permissao {
     CUSTO_VER("Custos", "Ver custos, markup e preco de venda"),
     CUSTO_EDITAR("Custos", "Lancar, editar e excluir custos"),
 
+    FATURAMENTO_VER("Faturamento", "Ver cobranca e faturamento (notas fiscais) do servico"),
+    FATURAMENTO_EDITAR("Faturamento", "Editar cobranca, lancar notas fiscais e fechar o faturamento"),
+
     RELATORIO_VER("Relatorios", "Ver relatorios de custo (por cliente e por servico)"),
 
     CLIENTE_VER("Cadastros", "Ver clientes (inclui contatos e unidades)"),

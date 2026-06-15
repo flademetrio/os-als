@@ -4,8 +4,10 @@ import { lerSessao } from '@/app/lib/sessao'
 import type {
   AnexoServicoResposta,
   CategoriaCustoResposta,
+  CobrancaResposta,
   ContatoClienteResposta,
   EquipamentoResumoDto,
+  FaturamentoResposta,
   LancamentoCustoResposta,
   OrdemServicoResumoDto,
   PaginaResposta,
@@ -15,10 +17,6 @@ import type {
   TipoServicoResposta,
   VeiculoResumoDto,
 } from '@/app/lib/definicoes'
-import { badgeTipoServico } from '@/app/lib/esquemas/servico'
-import { Badge } from '@/components/ui/Badge'
-import { Card } from '@/components/ui/Card'
-import { AcoesCabecalhoServico } from './acoes-cabecalho-servico'
 import { DetalheServico } from './detalhe-servico'
 
 type Props = { params: Promise<{ id: string }> }
@@ -30,6 +28,8 @@ export default async function ServicoDetalhePage({ params }: Props) {
   const podeVerCustos = permissoes.includes('CUSTO_VER')
   const podeEditarCustos = permissoes.includes('CUSTO_EDITAR')
   const podeEditarOs = permissoes.includes('ORDEM_SERVICO_EDITAR')
+  const podeVerFaturamento = permissoes.includes('FATURAMENTO_VER')
+  const podeEditarFaturamento = permissoes.includes('FATURAMENTO_EDITAR')
 
   const servico = await clienteApi<ServicoResposta>(`/servicos/${id}`)
 
@@ -59,59 +59,26 @@ export default async function ServicoDetalhePage({ params }: Props) {
       ])
     : [[], resumoVazio(servico.id), []]
 
+  // Cobranca e faturamento so sao buscados quando o usuario tem FATURAMENTO_VER.
+  const [cobranca, faturamento]: [CobrancaResposta | undefined, FaturamentoResposta | undefined] =
+    podeVerFaturamento
+      ? await Promise.all([
+          clienteApi<CobrancaResposta>(`/servicos/${id}/cobranca`),
+          clienteApi<FaturamentoResposta>(`/servicos/${id}/faturamento`),
+        ])
+      : [undefined, undefined]
+
   const encerrado = servico.status === 'CONCLUIDO' || servico.status === 'CANCELADO'
   const ehGestor = sessao?.papel === 'GERENTE' || sessao?.papel === 'ADMIN'
   const ehAdmin = sessao?.papel === 'ADMIN'
   const podeAlterarCustos = podeEditarCustos && (!encerrado || ehGestor)
+  const podeAlterarFaturamento = podeEditarFaturamento && (!encerrado || ehGestor)
 
   return (
     <div className="space-y-6">
       <Link href="/servicos" className="text-sm text-slate-500 hover:text-slate-700">
         ← Voltar para servicos
       </Link>
-
-      <Card padding="md">
-        {/* Cliente como titulo (esquerda) + numero do servico (canto direito) */}
-        <div className="flex items-baseline justify-between gap-3">
-          <h1 className="min-w-0">
-            <Link
-              href={`/clientes/${servico.clienteId}`}
-              className="text-xl font-semibold text-primary hover:underline"
-            >
-              {servico.clienteNome}
-            </Link>
-          </h1>
-          <span className="text-xl font-mono text-slate-400 shrink-0">
-            Serviço {servico.numeroFormatado}
-          </span>
-        </div>
-
-        {/* Descricao e painel de acoes lado a lado, mesma altura */}
-        <div className="mt-3 flex items-stretch gap-4 flex-wrap">
-          <div className="flex-1 min-w-[15rem] rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-            <div className="flex items-center justify-between gap-2 mb-1">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                Descricao do servico
-              </p>
-              <Badge variant={badgeTipoServico(servico.tipoServicoNome)} size="sm">
-                {servico.tipoServicoNome}
-              </Badge>
-            </div>
-            <p className="text-xs text-slate-600 whitespace-pre-wrap">
-              {servico.descricao || '—'}
-            </p>
-          </div>
-
-          <AcoesCabecalhoServico servico={servico} ehAdmin={ehAdmin} />
-        </div>
-
-        {servico.finalizadoEm && (
-          <p className="text-xs text-slate-400 mt-2">
-            Encerrado em {formatarDataHora(servico.finalizadoEm)}
-            {servico.finalizadoPorNome ? ` por ${servico.finalizadoPorNome}` : ''}
-          </p>
-        )}
-      </Card>
 
       <DetalheServico
         servico={servico}
@@ -127,6 +94,10 @@ export default async function ServicoDetalhePage({ params }: Props) {
         podeVerCustos={podeVerCustos}
         podeAlterarCustos={podeAlterarCustos}
         anexos={anexos}
+        cobranca={cobranca}
+        faturamento={faturamento}
+        podeVerFaturamento={podeVerFaturamento}
+        podeAlterarFaturamento={podeAlterarFaturamento}
         ehGestor={ehGestor}
         ehAdmin={ehAdmin}
         podeEditarOs={podeEditarOs}
@@ -143,11 +114,4 @@ function resumoVazio(servicoId: number): ResumoFinanceiroServico {
     markupPercentual: 0,
     precoVendaCentavos: 0,
   }
-}
-
-function formatarDataHora(iso: string): string {
-  const d = new Date(iso)
-  return Number.isNaN(d.getTime())
-    ? iso
-    : d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
 }

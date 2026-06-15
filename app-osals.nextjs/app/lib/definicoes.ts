@@ -12,6 +12,8 @@ export type Permissao =
   | 'SERVICO_EXCLUIR'
   | 'CUSTO_VER'
   | 'CUSTO_EDITAR'
+  | 'FATURAMENTO_VER'
+  | 'FATURAMENTO_EDITAR'
   | 'RELATORIO_VER'
   | 'CLIENTE_VER'
   | 'CLIENTE_GERENCIAR'
@@ -543,4 +545,51 @@ export type CustosPorClienteItem = {
   custoTotalCentavos: number
   markupPercentual: number
   precoVendaCentavos: number
+}
+
+// ===== Cobranca e Faturamento =====
+
+export type TipoCobranca = 'COBRADO' | 'GARANTIA' | 'ORCAMENTO' | 'SEM_COBRANCA'
+
+export type StatusFaturamento = 'AGUARDANDO' | 'FECHADO'
+
+export type CobrancaResposta = {
+  servicoId: number
+  tipo: TipoCobranca
+  tipoRotulo: string
+  valorCentavos: number | null
+  diasPrevistos: number | null
+  qtdePessoas: number | null
+  obs: string | null
+  faturamentoStatus: StatusFaturamento
+  faturamentoStatusRotulo: string
+  fechadoEm: string | null
+  fechadoPorNome: string | null
+  updatedAt: string | null
+}
+
+export type NotaFiscalResposta = {
+  id: number
+  servicoId: number
+  numero: string
+  dataEmissao: string
+  valorCentavos: number
+  createdAt: string
+  createdByNome: string | null
+  updatedAt: string | null
+}
+
+export type FaturamentoResposta = {
+  servicoId: number
+  tipoCobranca: TipoCobranca
+  aplicavel: boolean
+  status: StatusFaturamento
+  statusRotulo: string
+  valorCobrancaCentavos: number | null
+  totalNfCentavos: number
+  diferencaCentavos: number | null
+  podeFechar: boolean
+  fechadoEm: string | null
+  fechadoPorNome: string | null
+  notas: NotaFiscalResposta[]
 }
