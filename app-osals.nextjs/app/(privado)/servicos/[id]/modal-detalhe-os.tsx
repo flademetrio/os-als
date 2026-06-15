@@ -18,6 +18,8 @@ type Props = {
   ehAdmin?: boolean
   /** Permissao ORDEM_SERVICO_EDITAR — habilita o botao Editar. */
   podeEditarOs?: boolean
+  /** Perfil de faturamento pode anexar scan na OS mesmo sem gerenciar servico. */
+  podeAnexarFaturamento?: boolean
   /** Listas-candidatas para o modal de edicao da OS. */
   dadosEdicaoOs?: DadosEdicaoOs
   onClose: () => void
@@ -29,6 +31,7 @@ export function ModalDetalheOs({
   ehGestor,
   ehAdmin = false,
   podeEditarOs = false,
+  podeAnexarFaturamento = false,
   dadosEdicaoOs,
   onClose,
 }: Props) {
@@ -180,7 +183,7 @@ export function ModalDetalheOs({
           <AnexoOsCard
             osId={os.id}
             anexo={dados.anexo}
-            podeAlterar={!encerrada || ehGestor}
+            podeAlterar={!encerrada || ehGestor || podeAnexarFaturamento}
           />
         </div>
       )}

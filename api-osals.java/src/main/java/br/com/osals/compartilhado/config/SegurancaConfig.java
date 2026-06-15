@@ -67,7 +67,9 @@ public class SegurancaConfig {
                                 "/v3/api-docs/**",
                                 "/auth/login",
                                 "/auth/refresh",
-                                "/auth/logout"
+                                "/auth/logout",
+                                "/auth/redefinir-senha",
+                                "/auth/redefinir-senha/validar"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

@@ -8,7 +8,6 @@ import br.com.osals.seguranca.aplicacao.dto.AtualizacaoUsuarioRequisicao;
 import br.com.osals.seguranca.aplicacao.dto.CatalogoPermissoesResposta;
 import br.com.osals.seguranca.aplicacao.dto.CriacaoUsuarioRequisicao;
 import br.com.osals.seguranca.aplicacao.dto.PermissaoDto;
-import br.com.osals.seguranca.aplicacao.dto.RedefinicaoSenhaUsuarioRequisicao;
 import br.com.osals.seguranca.aplicacao.dto.UsuarioAdminResposta;
 import br.com.osals.seguranca.aplicacao.dto.UsuarioAdminResumoDto;
 import br.com.osals.seguranca.dominio.Papel;
@@ -122,14 +121,6 @@ public class ServicoUsuario {
         usuario.definirPermissoes(novas);
         log.info("Permissoes do usuario {} atualizadas para {}", id, novas);
         return UsuarioAdminResposta.de(usuario);
-    }
-
-    @Transactional
-    public void redefinirSenha(Long id, RedefinicaoSenhaUsuarioRequisicao req) {
-        var usuario = obrigatorio(id);
-        usuario.setSenhaHash(passwordEncoder.encode(req.novaSenha()));
-        usuario.invalidarTokens();
-        log.info("Senha redefinida do usuario id={}", id);
     }
 
     @Transactional

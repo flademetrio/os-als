@@ -1,10 +1,11 @@
 package br.com.osals.seguranca.api;
 
+import br.com.osals.seguranca.aplicacao.ServicoRedefinicaoSenha;
 import br.com.osals.seguranca.aplicacao.ServicoUsuario;
 import br.com.osals.seguranca.aplicacao.dto.AtualizacaoPermissoesRequisicao;
 import br.com.osals.seguranca.aplicacao.dto.AtualizacaoUsuarioRequisicao;
 import br.com.osals.seguranca.aplicacao.dto.CriacaoUsuarioRequisicao;
-import br.com.osals.seguranca.aplicacao.dto.RedefinicaoSenhaUsuarioRequisicao;
+import br.com.osals.seguranca.aplicacao.dto.LinkRedefinicaoResposta;
 import br.com.osals.seguranca.aplicacao.dto.UsuarioAdminResposta;
 import br.com.osals.seguranca.aplicacao.dto.UsuarioAdminResumoDto;
 import br.com.osals.seguranca.dominio.Usuario;
@@ -39,9 +40,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ControladorUsuario {
 
     private final ServicoUsuario servico;
+    private final ServicoRedefinicaoSenha servicoRedefinicao;
 
-    public ControladorUsuario(ServicoUsuario servico) {
+    public ControladorUsuario(ServicoUsuario servico, ServicoRedefinicaoSenha servicoRedefinicao) {
         this.servico = servico;
+        this.servicoRedefinicao = servicoRedefinicao;
     }
 
     @GetMapping
@@ -82,14 +85,14 @@ public class ControladorUsuario {
         return ResponseEntity.ok(servico.definirPermissoes(id, req, autor));
     }
 
-    @PutMapping("/{id}/senha")
-    @Operation(summary = "Redefine a senha do usuario. Invalida sessoes vigentes.")
-    public ResponseEntity<Void> redefinirSenha(
+    @PostMapping("/{id}/link-redefinicao-senha")
+    @Operation(summary = "Gera um link de redefinicao de senha (token com validade) para o usuario "
+            + "enviar manualmente. Invalida links anteriores nao usados.")
+    public ResponseEntity<LinkRedefinicaoResposta> gerarLinkRedefinicao(
             @PathVariable Long id,
-            @Valid @RequestBody RedefinicaoSenhaUsuarioRequisicao req
+            @AuthenticationPrincipal Usuario autor
     ) {
-        servico.redefinirSenha(id, req);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(servicoRedefinicao.gerar(id, autor));
     }
 
     @PostMapping("/{id}/ativar")

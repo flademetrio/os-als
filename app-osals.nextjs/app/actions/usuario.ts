@@ -53,17 +53,18 @@ export async function definirPermissoes(
   return { sucesso: true }
 }
 
-export async function redefinirSenhaUsuario(
+export async function gerarLinkRedefinicaoSenha(
   id: number,
-  novaSenha: string,
-): Promise<ResultadoUsuario> {
+): Promise<{ token?: string; expiraEm?: string; erro?: string }> {
   try {
-    await clienteApi(`/usuarios/${id}/senha`, { method: 'PUT', body: { novaSenha } })
+    const r = await clienteApi<{ token: string; expiraEm: string }>(
+      `/usuarios/${id}/link-redefinicao-senha`,
+      { method: 'POST' },
+    )
+    return { token: r.token, expiraEm: r.expiraEm }
   } catch (err) {
-    return tratar(err, 'Erro ao redefinir senha.')
+    return tratar(err, 'Erro ao gerar o link de redefinicao.')
   }
-  revalidatePath('/usuarios')
-  return { sucesso: true }
 }
 
 export async function ativarUsuario(id: number): Promise<ResultadoUsuario> {

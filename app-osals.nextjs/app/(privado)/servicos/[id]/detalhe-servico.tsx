@@ -181,6 +181,7 @@ export function DetalheServico({
             ehGestor={ehGestor}
             ehAdmin={ehAdmin}
             podeEditarOs={podeEditarOs}
+            podeAnexarFaturamento={podeAlterarFaturamento}
             tecnicos={tecnicos}
             veiculos={veiculos}
             equipamentos={equipamentos}
@@ -215,7 +216,7 @@ export function DetalheServico({
         {aba === 'anexos' && (
           <TabAnexos
             servicoId={servico.id}
-            podeRemover={podeAlterarCustos}
+            podeRemover={podeAlterarCustos || podeAlterarFaturamento}
             anexos={anexos}
           />
         )}

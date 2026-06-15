@@ -47,7 +47,7 @@ public class ControladorAnexoServico {
     }
 
     @PostMapping(value = "/servicos/{servicoId}/anexos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR') or hasAuthority('FATURAMENTO_EDITAR')")
     @Operation(summary = "Anexa um PDF ao Servico (multipart/form-data).")
     public ResponseEntity<AnexoServicoResposta> anexar(
             @PathVariable Long servicoId,
@@ -70,7 +70,7 @@ public class ControladorAnexoServico {
     }
 
     @DeleteMapping("/servicos/{servicoId}/anexos/{anexoId}")
-    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR') or hasAuthority('FATURAMENTO_EDITAR')")
     @Operation(summary = "Remove um anexo do Servico.")
     public ResponseEntity<Void> remover(
             @PathVariable Long servicoId,

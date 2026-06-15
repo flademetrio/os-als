@@ -67,6 +67,19 @@ public final class PresetsPermissao {
                     Permissao.FORNECEDOR_VER,
                     Permissao.VEICULO_VER,
                     Permissao.TECNICO_VER);
+
+            // Faturamento: ve tudo (menos custos internos) e so edita o faturamento
+            // (lancar NF, fechar) + anexar scan. Nao cria/edita servico, OS nem cadastros.
+            case FATURAMENTO -> EnumSet.of(
+                    Permissao.SERVICO_VER,
+                    Permissao.FATURAMENTO_VER,
+                    Permissao.FATURAMENTO_EDITAR,
+                    Permissao.CLIENTE_VER,
+                    Permissao.EQUIPAMENTO_VER,
+                    Permissao.PECA_VER,
+                    Permissao.FORNECEDOR_VER,
+                    Permissao.VEICULO_VER,
+                    Permissao.TECNICO_VER);
         };
     }
 }

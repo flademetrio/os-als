@@ -21,6 +21,8 @@ type Props = {
   ehGestor: boolean
   ehAdmin?: boolean
   podeEditarOs?: boolean
+  /** Perfil de faturamento pode anexar scan na OS mesmo sem gerenciar servico. */
+  podeAnexarFaturamento?: boolean
   tecnicos: TecnicoResumoDto[]
   veiculos: VeiculoResumoDto[]
   equipamentos: EquipamentoResumoDto[]
@@ -37,6 +39,7 @@ export function TabOs({
   ehGestor,
   ehAdmin = false,
   podeEditarOs = false,
+  podeAnexarFaturamento = false,
   tecnicos,
   veiculos,
   equipamentos,
@@ -116,6 +119,7 @@ export function TabOs({
           ehGestor={ehGestor}
           ehAdmin={ehAdmin}
           podeEditarOs={podeEditarOs}
+          podeAnexarFaturamento={podeAnexarFaturamento}
           dadosEdicaoOs={{
             tecnicos,
             veiculos,

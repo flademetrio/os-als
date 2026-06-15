@@ -8,5 +8,6 @@ public enum Papel {
     COMPRAS,
     GERENTE,
     ADMIN,
-    TECNICO
+    TECNICO,
+    FATURAMENTO
 }

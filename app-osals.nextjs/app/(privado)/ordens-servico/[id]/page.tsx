@@ -34,7 +34,8 @@ export default async function OrdemServicoDetalhePage({ params }: Props) {
   const encerrada = os.status === 'CONCLUIDA' || os.status === 'CANCELADA'
   const ehGestor = sessao?.papel === 'GERENTE' || sessao?.papel === 'ADMIN'
   const ehAdmin = sessao?.papel === 'ADMIN'
-  const podeAlterarAnexo = !encerrada || ehGestor
+  const podeEditarFaturamento = (sessao?.permissoes ?? []).includes('FATURAMENTO_EDITAR')
+  const podeAlterarAnexo = !encerrada || ehGestor || podeEditarFaturamento
   const podeEditarOs = (sessao?.permissoes ?? []).includes('ORDEM_SERVICO_EDITAR')
 
   // Listas-candidatas para o modal de edicao (so carrega quando faz sentido).

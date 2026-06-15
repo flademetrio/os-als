@@ -3,7 +3,7 @@
  * Manter em sincronia com br.com.osals.seguranca.aplicacao.dto.*
  */
 
-export type Papel = 'OPERADOR' | 'COMPRAS' | 'GERENTE' | 'ADMIN' | 'TECNICO'
+export type Papel = 'OPERADOR' | 'COMPRAS' | 'GERENTE' | 'ADMIN' | 'TECNICO' | 'FATURAMENTO'
 
 export type Permissao =
   | 'SERVICO_VER'

@@ -8,8 +8,8 @@ import {
   buscarUsuario,
   criarUsuario,
   definirPermissoes,
+  gerarLinkRedefinicaoSenha,
   inativarUsuario,
-  redefinirSenhaUsuario,
 } from '@/app/actions/usuario'
 import type {
   CatalogoPermissoesResposta,
@@ -27,11 +27,12 @@ import { Modal } from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Select'
 
 /** Papeis editaveis pela administracao (TECNICO e gerenciado em /tecnicos). */
-const PAPEIS_EDITAVEIS: Papel[] = ['OPERADOR', 'COMPRAS', 'GERENTE', 'ADMIN']
+const PAPEIS_EDITAVEIS: Papel[] = ['OPERADOR', 'COMPRAS', 'FATURAMENTO', 'GERENTE', 'ADMIN']
 
 const LABEL_PAPEL: Record<Papel, string> = {
   OPERADOR: 'Operador',
   COMPRAS: 'Compras',
+  FATURAMENTO: 'Faturamento',
   GERENTE: 'Gerente',
   ADMIN: 'Admin',
   TECNICO: 'Tecnico',
@@ -148,11 +149,7 @@ export function ListaUsuarios({
         />
       )}
       {senhaDe && (
-        <ModalSenha
-          usuario={senhaDe}
-          aoFechar={() => setSenhaDe(null)}
-          aoSalvar={() => router.refresh()}
-        />
+        <ModalSenha usuario={senhaDe} aoFechar={() => setSenhaDe(null)} />
       )}
     </>
   )
@@ -289,31 +286,42 @@ function ModalEditar({
   )
 }
 
-// ---------- Modal: redefinir senha ----------
+// ---------- Modal: link de redefinicao de senha ----------
 
 function ModalSenha({
   usuario,
   aoFechar,
-  aoSalvar,
 }: {
   usuario: UsuarioAdminResumoDto
   aoFechar: () => void
-  aoSalvar: () => void
 }) {
-  const [senha, setSenha] = useState('')
+  const [link, setLink] = useState<string | null>(null)
   const [erro, setErro] = useState<string | null>(null)
+  const [copiado, setCopiado] = useState(false)
   const [pendente, iniciar] = useTransition()
 
-  function salvar() {
+  function gerar() {
     setErro(null)
+    setCopiado(false)
     iniciar(async () => {
-      const r = await redefinirSenhaUsuario(usuario.id, senha)
-      if (r.erro) setErro(r.erro)
-      else {
-        aoSalvar()
-        aoFechar()
+      const r = await gerarLinkRedefinicaoSenha(usuario.id)
+      if (r.erro || !r.token) {
+        setErro(r.erro ?? 'Erro ao gerar o link.')
+      } else {
+        setLink(`${window.location.origin}/redefinir-senha?token=${r.token}`)
       }
     })
+  }
+
+  async function copiar() {
+    if (!link) return
+    try {
+      await navigator.clipboard.writeText(link)
+      setCopiado(true)
+      setTimeout(() => setCopiado(false), 2000)
+    } catch {
+      setErro('Nao foi possivel copiar. Copie manualmente.')
+    }
   }
 
   return (
@@ -323,28 +331,39 @@ function ModalSenha({
       title={`Redefinir senha — ${usuario.nome}`}
       size="sm"
       footer={
-        <>
-          <Button variant="ghost" onClick={aoFechar} disabled={pendente}>
-            Cancelar
-          </Button>
-          <Button loading={pendente} onClick={salvar}>
-            Salvar
-          </Button>
-        </>
+        <Button variant="ghost" onClick={aoFechar} disabled={pendente}>
+          Fechar
+        </Button>
       }
     >
       {erro && <Alert variant="danger" dismissible>{erro}</Alert>}
-      <div className="space-y-2 mt-2">
-        <Input
-          label="Nova senha"
-          type="password"
-          fullWidth
-          required
-          hint="Minimo 8 caracteres. Invalida as sessoes atuais do usuario."
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-        />
-      </div>
+
+      {!link ? (
+        <div className="space-y-3 mt-2">
+          <p className="text-sm text-slate-600">
+            Gere um link para <strong>{usuario.nome}</strong> definir a propria senha. O link vale
+            por 3 horas e deve ser enviado manualmente (mensagem ou e-mail).
+          </p>
+          <Button variant="primary" loading={pendente} onClick={gerar} fullWidth>
+            {pendente ? 'Gerando...' : 'Gerar link'}
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3 mt-2">
+          <p className="text-sm text-slate-600">
+            Copie o link abaixo e envie para o usuario. Valido por 3 horas e de uso unico.
+          </p>
+          <Input label="Link de redefinicao" value={link} readOnly fullWidth />
+          <div className="flex gap-2">
+            <Button variant="primary" onClick={copiar} fullWidth>
+              {copiado ? 'Copiado!' : 'Copiar link'}
+            </Button>
+            <Button variant="ghost" onClick={gerar} loading={pendente}>
+              Gerar outro
+            </Button>
+          </div>
+        </div>
+      )}
     </Modal>
   )
 }

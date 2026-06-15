@@ -45,7 +45,7 @@ public class ControladorAnexoOs {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR') or hasAuthority('FATURAMENTO_EDITAR')")
     @Operation(summary = "Anexa (ou substitui) o PDF da OS.")
     public ResponseEntity<AnexoOsResposta> anexar(
             @PathVariable Long osId,
@@ -64,7 +64,7 @@ public class ControladorAnexoOs {
     }
 
     @DeleteMapping
-    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
+    @PreAuthorize("hasAuthority('SERVICO_GERENCIAR') or hasAuthority('FATURAMENTO_EDITAR')")
     @Operation(summary = "Remove o anexo da OS.")
     public ResponseEntity<Void> remover(
             @PathVariable Long osId,
