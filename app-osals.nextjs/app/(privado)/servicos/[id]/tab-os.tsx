@@ -97,12 +97,12 @@ export function TabOs({
         <div className="overflow-x-auto -mx-5">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-y border-slate-200 bg-slate-50">
-                <th className="px-5 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Codigo</th>
-                <th className="px-5 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Data</th>
-                <th className="px-5 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Atividade</th>
-                <th className="px-5 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-5 py-2.5 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Acoes</th>
+              <tr className="border-y border-slate-200 bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="pl-5 pr-2 py-2.5 text-left whitespace-nowrap">Codigo</th>
+                <th className="px-2 py-2.5 text-left whitespace-nowrap">Data</th>
+                <th className="px-3 py-2.5 text-left w-full">Atividade</th>
+                <th className="pl-3 pr-2 py-2.5 text-left whitespace-nowrap">Status</th>
+                <th className="pl-2 pr-5 py-2.5 text-left whitespace-nowrap">Acoes</th>
               </tr>
             </thead>
             <tbody>
@@ -112,22 +112,20 @@ export function TabOs({
                   onClick={() => setOsAberta(os.id)}
                   className="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer"
                 >
-                  <td className="px-5 py-2.5 font-medium font-mono text-primary">
+                  <td className="pl-5 pr-2 py-2.5 font-medium font-mono text-primary whitespace-nowrap">
                     {os.codigoExibicao}
                   </td>
-                  <td className="px-5 py-2.5 text-slate-600 whitespace-nowrap">
+                  <td className="px-2 py-2.5 text-slate-600 whitespace-nowrap">
                     {os.dataAgendada ? formatarDataIso(os.dataAgendada) : '—'}
                   </td>
-                  <td className="px-5 py-2.5 text-slate-600">
-                    <span className="block truncate max-w-md">{os.descricaoAtividade}</span>
-                  </td>
-                  <td className="px-5 py-2.5">
+                  <td className="px-3 py-2.5 text-slate-600 w-full">{os.descricaoAtividade}</td>
+                  <td className="pl-3 pr-2 py-2.5 whitespace-nowrap">
                     <Badge variant={badgeStatusOs(os.status)} dot size="sm">
                       {os.statusRotulo}
                     </Badge>
                   </td>
-                  <td className="px-5 py-2.5" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center justify-end gap-1">
+                  <td className="pl-2 pr-5 py-2.5" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center justify-start gap-1">
                       <button
                         type="button"
                         onClick={() => setOsAberta(os.id)}
