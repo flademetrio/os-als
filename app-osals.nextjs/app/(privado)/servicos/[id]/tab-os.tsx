@@ -10,7 +10,9 @@ import type {
   TecnicoResumoDto,
   VeiculoResumoDto,
 } from '@/app/lib/definicoes'
+import { formatarDataIso } from '@/app/lib/data'
 import { badgeStatusOs } from '@/app/lib/esquemas/ordem-servico'
+import { imprimirOs } from '@/app/lib/imprimir-os'
 import { Badge } from '@/components/ui/Badge'
 import { BotaoAbrirOs } from './botao-abrir-os'
 import { ModalDetalheOs } from './modal-detalhe-os'
@@ -47,6 +49,7 @@ export function TabOs({
 }: Props) {
   const router = useRouter()
   const [osAberta, setOsAberta] = useState<number | null>(null)
+  const [imprimindoId, setImprimindoId] = useState<number | null>(null)
 
   const encerrado = servico.status === 'CONCLUIDO' || servico.status === 'CANCELADO'
 
@@ -54,6 +57,18 @@ export function TabOs({
     setOsAberta(null)
     // a OS pode ter mudado (impressa, concluida, cancelada) — atualiza a lista
     router.refresh()
+  }
+
+  async function imprimir(id: number) {
+    setImprimindoId(id)
+    try {
+      await imprimirOs(id)
+      router.refresh()
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Falha ao imprimir.')
+    } finally {
+      setImprimindoId(null)
+    }
   }
 
   return (
@@ -84,8 +99,10 @@ export function TabOs({
             <thead>
               <tr className="border-y border-slate-200 bg-slate-50">
                 <th className="px-5 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Codigo</th>
+                <th className="px-5 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Data</th>
                 <th className="px-5 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Atividade</th>
                 <th className="px-5 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                <th className="px-5 py-2.5 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Acoes</th>
               </tr>
             </thead>
             <tbody>
@@ -98,6 +115,9 @@ export function TabOs({
                   <td className="px-5 py-2.5 font-medium font-mono text-primary">
                     {os.codigoExibicao}
                   </td>
+                  <td className="px-5 py-2.5 text-slate-600 whitespace-nowrap">
+                    {os.dataAgendada ? formatarDataIso(os.dataAgendada) : '—'}
+                  </td>
                   <td className="px-5 py-2.5 text-slate-600">
                     <span className="block truncate max-w-md">{os.descricaoAtividade}</span>
                   </td>
@@ -105,6 +125,31 @@ export function TabOs({
                     <Badge variant={badgeStatusOs(os.status)} dot size="sm">
                       {os.statusRotulo}
                     </Badge>
+                  </td>
+                  <td className="px-5 py-2.5" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setOsAberta(os.id)}
+                        title="Visualizar"
+                        aria-label={`Visualizar OS ${os.codigoExibicao}`}
+                        className="p-1.5 rounded text-slate-500 hover:text-primary hover:bg-slate-100 transition-colors"
+                      >
+                        <IconeOlho />
+                      </button>
+                      {os.status !== 'CONCLUIDA' && os.status !== 'CANCELADA' && (
+                        <button
+                          type="button"
+                          onClick={() => imprimir(os.id)}
+                          disabled={imprimindoId === os.id}
+                          title="Imprimir"
+                          aria-label={`Imprimir OS ${os.codigoExibicao}`}
+                          className="p-1.5 rounded text-slate-500 hover:text-primary hover:bg-slate-100 transition-colors disabled:opacity-50"
+                        >
+                          <IconeImpressora />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -131,5 +176,24 @@ export function TabOs({
         />
       )}
     </div>
+  )
+}
+
+function IconeOlho() {
+  return (
+    <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
+function IconeImpressora() {
+  return (
+    <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M6 9V3h12v6" />
+      <path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" />
+      <rect x="6" y="14" width="12" height="7" rx="1" />
+    </svg>
   )
 }

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import type { StatusOrdemServico } from '@/app/lib/definicoes'
+import { imprimirOs } from '@/app/lib/imprimir-os'
 
 type Props = {
   id: number
@@ -21,41 +22,10 @@ export function AcoesLinhaOs({ id, codigo, status }: Props) {
   async function imprimir() {
     setImprimindo(true)
     try {
-      const resp = await fetch(`/api-proxy/ordens-servico/${id}/imprimir`, { method: 'POST' })
-      if (!resp.ok) {
-        const corpo = await resp.json().catch(() => null)
-        alert(corpo?.mensagem ?? 'Falha ao gerar o PDF para impressao.')
-        return
-      }
-      const blob = await resp.blob()
-      const url = URL.createObjectURL(blob)
-
-      // Carrega o PDF num iframe escondido e abre a caixa de impressao direto
-      // (sem aba nova). Se o navegador bloquear, cai pra abrir em aba nova.
-      const iframe = document.createElement('iframe')
-      iframe.style.position = 'fixed'
-      iframe.style.width = '0'
-      iframe.style.height = '0'
-      iframe.style.border = '0'
-      iframe.style.right = '0'
-      iframe.style.bottom = '0'
-      iframe.src = url
-      iframe.onload = () => {
-        try {
-          iframe.contentWindow?.focus()
-          iframe.contentWindow?.print()
-        } catch {
-          window.open(url, '_blank', 'noopener,noreferrer')
-        }
-      }
-      document.body.appendChild(iframe)
-      setTimeout(() => {
-        URL.revokeObjectURL(url)
-        iframe.remove()
-      }, 120_000)
+      await imprimirOs(id)
       router.refresh()
-    } catch {
-      alert('Falha de conexao ao gerar o PDF.')
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Falha ao imprimir.')
     } finally {
       setImprimindo(false)
     }
