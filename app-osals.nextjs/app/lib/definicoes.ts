@@ -547,6 +547,20 @@ export type CustosPorClienteItem = {
   precoVendaCentavos: number
 }
 
+export type ServicoAbertoItem = {
+  servicoId: number
+  numero: number
+  numeroFormatado: string
+  clienteId: number
+  clienteNome: string
+  tipoServicoNome: string
+  descricao: string
+  statusRotulo: string
+  cobrado: boolean
+  numeroOs: number
+  valorCentavos: number | null
+}
+
 // ===== Cobranca e Faturamento =====
 
 export type TipoCobranca = 'COBRADO' | 'GARANTIA' | 'ORCAMENTO' | 'SEM_COBRANCA'

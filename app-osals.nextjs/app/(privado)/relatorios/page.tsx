@@ -3,6 +3,12 @@ import { Card } from '@/components/ui/Card'
 
 const RELATORIOS = [
   {
+    href: '/relatorios/servicos-abertos',
+    titulo: 'Servicos abertos',
+    descricao:
+      'Todos os servicos em andamento: cliente, tipo, se e cobrado, numero de OS e valor.',
+  },
+  {
     href: '/relatorios/os-por-status',
     titulo: 'OS por status',
     descricao:

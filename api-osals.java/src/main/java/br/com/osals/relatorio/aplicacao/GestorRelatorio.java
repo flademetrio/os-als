@@ -10,9 +10,11 @@ import br.com.osals.relatorio.aplicacao.dto.CustosPorServicoItem;
 import br.com.osals.relatorio.aplicacao.dto.OsPorStatusRelatorio;
 import br.com.osals.relatorio.aplicacao.dto.OsPorStatusRelatorio.ContagemStatus;
 import br.com.osals.relatorio.aplicacao.dto.OsPorStatusRelatorio.OsItem;
+import br.com.osals.relatorio.aplicacao.dto.ServicoAbertoItem;
 import br.com.osals.relatorio.infraestrutura.ConsultasRelatorio;
 import br.com.osals.servico.dominio.Servico;
 import br.com.osals.servico.dominio.StatusServico;
+import br.com.osals.servico.dominio.TipoCobranca;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -129,6 +131,36 @@ public class GestorRelatorio {
 
         int totalPaginas = tamanho > 0 ? (int) Math.ceil((double) total / tamanho) : 0;
         return new PaginaResposta<>(itens, pagina, tamanho, total, totalPaginas);
+    }
+
+    // ===== Servicos Abertos =====
+
+    public List<ServicoAbertoItem> servicosAbertos(Long clienteId, Integer tipoServicoId) {
+        var servicos = consultas.listarServicosAbertos(clienteId, tipoServicoId);
+        var ids = servicos.stream().map(Servico::getId).toList();
+
+        var osPorServico = new HashMap<Long, Long>();
+        for (Object[] linha : consultas.contarOsPorServico(ids)) {
+            osPorServico.put((Long) linha[0], (Long) linha[1]);
+        }
+        var cobrancaPorServico = new HashMap<Long, Object[]>(); // servicoId -> [tipo, valorCentavos]
+        for (Object[] linha : consultas.cobrancasPorServico(ids)) {
+            cobrancaPorServico.put((Long) linha[0], new Object[]{linha[1], linha[2]});
+        }
+
+        var itens = new ArrayList<ServicoAbertoItem>();
+        for (Servico s : servicos) {
+            Object[] cobranca = cobrancaPorServico.get(s.getId());
+            boolean cobrado = cobranca != null && cobranca[0] == TipoCobranca.COBRADO;
+            Long valor = cobrado ? (Long) cobranca[1] : null;
+            itens.add(new ServicoAbertoItem(
+                    s.getId(), s.getNumero(), String.format("%04d", s.getNumero()),
+                    s.getCliente().getId(), s.getCliente().getNome(),
+                    s.getTipoServico().getNome(), s.getDescricao(),
+                    s.getStatus().getRotulo(),
+                    cobrado, osPorServico.getOrDefault(s.getId(), 0L), valor));
+        }
+        return itens;
     }
 
     // ===== Custos por Cliente =====

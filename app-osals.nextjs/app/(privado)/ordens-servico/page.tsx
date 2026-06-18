@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { clienteApi } from '@/app/lib/cliente-api'
 import type { OrdemServicoResumoDto, PaginaResposta } from '@/app/lib/definicoes'
+import { formatarDataIso } from '@/app/lib/data'
 import { badgeStatusOs } from '@/app/lib/esquemas/ordem-servico'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
+import { AcoesLinhaOs } from './acoes-linha-os'
 import { FiltrosOrdensServico } from './filtros'
 import { LinkPaginacao } from './link-paginacao'
 
@@ -59,10 +61,10 @@ export default async function OrdensServicoPage({ searchParams }: Props) {
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50">
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Codigo</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Cliente</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Data</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Atividade</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Abertura</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Acoes</th>
                 </tr>
               </thead>
               <tbody>
@@ -76,15 +78,19 @@ export default async function OrdensServicoPage({ searchParams }: Props) {
                         {os.codigoExibicao}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-slate-700">{os.clienteNome}</td>
+                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                      {os.dataAgendada ? formatarDataIso(os.dataAgendada) : '—'}
+                    </td>
                     <td className="px-4 py-3 text-slate-600">
                       <span className="block truncate max-w-sm">{os.descricaoAtividade}</span>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{formatarData(os.dataAbertura)}</td>
                     <td className="px-4 py-3">
                       <Badge variant={badgeStatusOs(os.status)} dot size="sm">
                         {os.statusRotulo}
                       </Badge>
+                    </td>
+                    <td className="px-4 py-3">
+                      <AcoesLinhaOs id={os.id} codigo={os.codigoExibicao} status={os.status} />
                     </td>
                   </tr>
                 ))}
@@ -116,9 +122,4 @@ export default async function OrdensServicoPage({ searchParams }: Props) {
       </Card>
     </div>
   )
-}
-
-function formatarData(iso: string): string {
-  const d = new Date(iso)
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString('pt-BR')
 }

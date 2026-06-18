@@ -5,6 +5,7 @@ import br.com.osals.relatorio.aplicacao.GestorRelatorio;
 import br.com.osals.relatorio.aplicacao.dto.CustosPorClienteItem;
 import br.com.osals.relatorio.aplicacao.dto.CustosPorServicoItem;
 import br.com.osals.relatorio.aplicacao.dto.OsPorStatusRelatorio;
+import br.com.osals.relatorio.aplicacao.dto.ServicoAbertoItem;
 import br.com.osals.servico.dominio.StatusServico;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -62,6 +63,15 @@ public class ControladorRelatorio {
     ) {
         return ResponseEntity.ok(
                 gestor.custosPorServico(inicio, fim, clienteId, tipoServicoId, status, pagina, tamanho));
+    }
+
+    @GetMapping("/servicos-abertos")
+    @Operation(summary = "Servicos abertos (nao encerrados): cliente, tipo, cobranca, nº de OS e valor.")
+    public ResponseEntity<List<ServicoAbertoItem>> servicosAbertos(
+            @RequestParam(required = false) Long clienteId,
+            @RequestParam(required = false) Integer tipoServicoId
+    ) {
+        return ResponseEntity.ok(gestor.servicosAbertos(clienteId, tipoServicoId));
     }
 
     @GetMapping("/custos-por-cliente")

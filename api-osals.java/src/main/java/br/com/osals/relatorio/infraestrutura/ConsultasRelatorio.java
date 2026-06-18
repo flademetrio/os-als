@@ -150,6 +150,54 @@ public class ConsultasRelatorio {
                 .getResultList();
     }
 
+    // ===== Servicos Abertos =====
+
+    /** Servicos em status nao encerrado (EM_ABERTO, EM_EXECUCAO, AGUARDANDO). */
+    public List<Servico> listarServicosAbertos(Long clienteId, Integer tipoServicoId) {
+        var params = new LinkedHashMap<String, Object>();
+        var clausulas = new ArrayList<String>();
+        clausulas.add("s.status IN :statusAbertos");
+        params.put("statusAbertos", List.of(
+                StatusServico.EM_ABERTO, StatusServico.EM_EXECUCAO, StatusServico.AGUARDANDO));
+        if (clienteId != null) {
+            clausulas.add("s.cliente.id = :clienteId");
+            params.put("clienteId", clienteId);
+        }
+        if (tipoServicoId != null) {
+            clausulas.add("s.tipoServico.id = :tipoServicoId");
+            params.put("tipoServicoId", tipoServicoId);
+        }
+        var query = em.createQuery(
+                "SELECT s FROM Servico s WHERE " + String.join(" AND ", clausulas)
+                        + " ORDER BY s.cliente.nome, s.numero", Servico.class);
+        params.forEach(query::setParameter);
+        return query.getResultList();
+    }
+
+    /** Object[]{servicoId, quantidadeOs}. */
+    public List<Object[]> contarOsPorServico(List<Long> servicoIds) {
+        if (servicoIds == null || servicoIds.isEmpty()) {
+            return List.of();
+        }
+        return em.createQuery(
+                        "SELECT os.servico.id, COUNT(os) FROM OrdemServico os"
+                                + " WHERE os.servico.id IN :ids GROUP BY os.servico.id", Object[].class)
+                .setParameter("ids", servicoIds)
+                .getResultList();
+    }
+
+    /** Object[]{servicoId, TipoCobranca tipo, Long valorCentavos}. */
+    public List<Object[]> cobrancasPorServico(List<Long> servicoIds) {
+        if (servicoIds == null || servicoIds.isEmpty()) {
+            return List.of();
+        }
+        return em.createQuery(
+                        "SELECT c.servico.id, c.tipo, c.valorCentavos FROM Cobranca c"
+                                + " WHERE c.servico.id IN :ids", Object[].class)
+                .setParameter("ids", servicoIds)
+                .getResultList();
+    }
+
     // ===== Custos por Cliente =====
 
     /** Object[]{clienteId, clienteNome, quantidadeServicos}. */
