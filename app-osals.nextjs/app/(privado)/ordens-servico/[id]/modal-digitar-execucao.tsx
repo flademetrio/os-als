@@ -20,6 +20,12 @@ function paraDatetimeLocal(iso: string | null): string {
   return ajuste.toISOString().slice(0, 16)
 }
 
+/** Data de hoje no fuso local (YYYY-MM-DD) — fallback quando a OS nao tem data agendada. */
+function hojeLocal(): string {
+  const h = new Date()
+  return `${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, '0')}-${String(h.getDate()).padStart(2, '0')}`
+}
+
 export function ModalDigitarExecucao({
   os,
   onClose,
@@ -33,6 +39,16 @@ export function ModalDigitarExecucao({
 }) {
   const acao = digitarExecucaoOs.bind(null, os.id)
   const [estado, dispatch, pendente] = useActionState(acao, ESTADO_INICIAL)
+
+  // Pre-preenche com a data agendada da OS e o expediente padrao (07:00 / 17:00).
+  // Se ja houver hora digitada (reabertura), mantem o valor existente.
+  const diaAgendado = os.dataAgendada?.slice(0, 10) ?? hojeLocal()
+  const inicioPadrao = os.horaInicioExecucao
+    ? paraDatetimeLocal(os.horaInicioExecucao)
+    : `${diaAgendado}T07:00`
+  const fimPadrao = os.horaFimExecucao
+    ? paraDatetimeLocal(os.horaFimExecucao)
+    : `${diaAgendado}T17:00`
 
   useEffect(() => {
     if (estado.sucesso) onConcluido()
@@ -55,7 +71,7 @@ export function ModalDigitarExecucao({
             label="Hora de inicio"
             name="horaInicioExecucao"
             type="datetime-local"
-            defaultValue={paraDatetimeLocal(os.horaInicioExecucao)}
+            defaultValue={inicioPadrao}
             error={estado.errosCampos?.horaInicioExecucao}
             fullWidth
           />
@@ -63,7 +79,7 @@ export function ModalDigitarExecucao({
             label="Hora de fim"
             name="horaFimExecucao"
             type="datetime-local"
-            defaultValue={paraDatetimeLocal(os.horaFimExecucao)}
+            defaultValue={fimPadrao}
             error={estado.errosCampos?.horaFimExecucao}
             fullWidth
           />

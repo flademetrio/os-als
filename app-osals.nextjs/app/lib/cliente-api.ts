@@ -5,7 +5,7 @@
  * (cookies httpOnly so existem do lado servidor).
  *
  * Caracteristicas:
- *  - Timeout 15s
+ *  - Timeout 30s
  *  - Injeta cookies de sessao automaticamente
  *  - Erros padronizados: ErroApi (HTTP 4xx/5xx) e ErroConexao (timeout/rede)
  *  - Sem cache do Next por padrao (no-store) — usar wrappers para cache opcional
@@ -15,7 +15,7 @@ import { cookies } from 'next/headers'
 import type { ErroRespostaBackend } from './definicoes'
 
 const API_BASE_URL = process.env.API_BASE_URL ?? 'http://localhost:8080'
-const TIMEOUT_MS = 15_000
+const TIMEOUT_MS = 30_000
 
 export class ErroApi extends Error {
   constructor(

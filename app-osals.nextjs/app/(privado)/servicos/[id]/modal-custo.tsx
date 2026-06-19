@@ -50,7 +50,9 @@ export function ModalCusto({ servicoId, categorias, tecnicos, lancamento, onClos
   }, [estado.sucesso, onClose])
 
   const categoria = categorias.find((c) => String(c.id) === categoriaId)
-  const tipo = categoria?.tipoLancamento
+  // Ao editar, o tipo vem do proprio lancamento — assim os campos aparecem mesmo
+  // se a categoria estiver inativa (e portanto fora da lista de categorias ativas).
+  const tipo = editando ? lancamento.tipoLancamento : categoria?.tipoLancamento
 
   return (
     <Modal
@@ -66,23 +68,33 @@ export function ModalCusto({ servicoId, categorias, tecnicos, lancamento, onClos
           </Alert>
         )}
 
-        <Select
-          label="Categoria"
-          name="categoriaCustoId"
-          required
-          value={categoriaId}
-          onChange={(e) => setCategoriaId(e.target.value)}
-          error={estado.errosCampos?.categoriaCustoId}
-          disabled={editando}
-          fullWidth
-        >
-          <option value="">— Selecione</option>
-          {categorias.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nome}
-            </option>
-          ))}
-        </Select>
+        {editando ? (
+          // Categoria nao muda na edicao: select desabilitado so para exibir, e o
+          // valor vai por input oculto (select disabled nao e enviado no form).
+          <>
+            <Select label="Categoria" value={categoriaId} disabled fullWidth>
+              <option value={categoriaId}>{lancamento.categoriaNome}</option>
+            </Select>
+            <input type="hidden" name="categoriaCustoId" value={categoriaId} />
+          </>
+        ) : (
+          <Select
+            label="Categoria"
+            name="categoriaCustoId"
+            required
+            value={categoriaId}
+            onChange={(e) => setCategoriaId(e.target.value)}
+            error={estado.errosCampos?.categoriaCustoId}
+            fullWidth
+          >
+            <option value="">— Selecione</option>
+            {categorias.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nome}
+              </option>
+            ))}
+          </Select>
+        )}
 
         <Input
           label="Data do custo"
@@ -170,7 +182,7 @@ export function ModalCusto({ servicoId, categorias, tecnicos, lancamento, onClos
           <Button type="button" variant="ghost" onClick={onClose} disabled={pendente}>
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" loading={pendente} disabled={!categoria}>
+          <Button type="submit" variant="primary" loading={pendente} disabled={!editando && !categoria}>
             {pendente ? 'Salvando...' : editando ? 'Salvar' : 'Lancar'}
           </Button>
         </div>
