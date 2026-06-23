@@ -28,6 +28,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        # Radar de consultas lentas: registra (logger org.hibernate.SQL_SLOW) toda
+        # query acima deste limite, com o tempo. Barato e sempre ligado em producao.
+        session.events.log.LOG_QUERIES_SLOWER_THAN_MS: ${HIBERNATE_SLOW_QUERY_MS:1000}
     open-in-view: false
     show-sql: false
 
@@ -99,7 +102,13 @@ logging:
   level:
     root: WARN
     br.com.osals: INFO
-    org.hibernate.SQL: WARN
+    # SQL do Hibernate: desligado por padrao (WARN). Para estudar, suba via env:
+    #   HIBERNATE_SQL_LEVEL=DEBUG   -> loga o SQL gerado
+    #   HIBERNATE_BIND_LEVEL=TRACE  -> loga os valores dos parametros (?)
+    org.hibernate.SQL: ${HIBERNATE_SQL_LEVEL:WARN}
+    org.hibernate.orm.jdbc.bind: ${HIBERNATE_BIND_LEVEL:WARN}
+    # Consultas lentas: sempre registradas (radar) — ver LOG_QUERIES_SLOWER_THAN_MS.
+    org.hibernate.SQL_SLOW: INFO
     org.springframework.security: INFO
 
 # Springdoc / Swagger UI
