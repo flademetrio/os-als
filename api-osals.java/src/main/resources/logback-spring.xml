@@ -31,6 +31,19 @@
         </encoder>
     </appender>
 
+    <!-- Arquivo dedicado a acesso HTTP: uma linha por requisicao (logger ACESSO). -->
+    <appender name="ARQUIVO_ACESSO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_DIR}/os-als-acesso.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS_DIR}/os-als-acesso.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n</pattern>
+        </encoder>
+    </appender>
+
     <!-- Console: util para `docker-compose logs -f backend` -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -58,6 +71,12 @@
     <logger name="org.hibernate.SQL_SLOW" additivity="false">
         <appender-ref ref="ARQUIVO_SQL"/>
         <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- Acesso HTTP: nivel controlado pelo application.yml (env ACESSO_LOG_LEVEL),
+         saida isolada no arquivo dedicado. -->
+    <logger name="ACESSO" additivity="false">
+        <appender-ref ref="ARQUIVO_ACESSO"/>
     </logger>
 
     <logger name="com.zaxxer.hikari" level="WARN"/>

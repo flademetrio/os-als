@@ -109,6 +109,9 @@ logging:
     org.hibernate.orm.jdbc.bind: ${HIBERNATE_BIND_LEVEL:WARN}
     # Consultas lentas: sempre registradas (radar) — ver LOG_QUERIES_SLOWER_THAN_MS.
     org.hibernate.SQL_SLOW: INFO
+    # Log de acesso HTTP (1 linha/requisicao -> os-als-acesso.log). Para desligar:
+    # ACESSO_LOG_LEVEL=OFF.
+    ACESSO: ${ACESSO_LOG_LEVEL:INFO}
     org.springframework.security: INFO
 
 # Springdoc / Swagger UI
