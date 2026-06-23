@@ -2,6 +2,7 @@ package br.com.osals.seguranca.dominio;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
@@ -21,7 +22,7 @@ public class Tecnico {
     @Id
     private Long usuarioId;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
