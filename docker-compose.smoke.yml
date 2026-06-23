@@ -51,6 +51,7 @@ services:
       - "8080:8080"
     volumes:
       - ./api-osals.java/anexos-local:/var/os-als/anexos
+      - ./api-osals.java/logs:/var/log/os-als
       - ./api-osals.java/keys:/app/keys:ro
 
   frontend:
