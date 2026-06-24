@@ -61,6 +61,7 @@ public class MapperOrdemServico {
                 os.getNumero(),
                 codigoExibicao(s.getNumero(), os.getNumero()),
                 s.getId(),
+                s.getDescricao(),
                 s.getCliente().getId(),
                 s.getCliente().getNome(),
                 os.getDescricaoAtividade(),

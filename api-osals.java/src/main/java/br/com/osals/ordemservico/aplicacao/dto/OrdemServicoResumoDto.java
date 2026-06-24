@@ -10,6 +10,7 @@ public record OrdemServicoResumoDto(
         Integer numero,
         String codigoExibicao,
         Long servicoId,
+        String servicoDescricao,
         Long clienteId,
         String clienteNome,
         String descricaoAtividade,

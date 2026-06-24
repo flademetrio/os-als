@@ -460,6 +460,7 @@ export type OrdemServicoResumoDto = {
   numero: number
   codigoExibicao: string
   servicoId: number
+  servicoDescricao: string
   clienteId: number
   clienteNome: string
   descricaoAtividade: string

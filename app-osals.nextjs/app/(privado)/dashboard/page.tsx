@@ -148,7 +148,7 @@ function CardOrdemServico({ os }: { os: OrdemServicoResumoDto }) {
             <p className="line-clamp-1 text-base font-semibold leading-snug text-slate-900">
               {os.clienteNome}
             </p>
-            <p className="mt-1 line-clamp-2 text-sm text-slate-500">{os.descricaoAtividade}</p>
+            <p className="mt-1 line-clamp-2 text-sm text-slate-500">{os.servicoDescricao}</p>
           </div>
 
           <div className="mt-auto flex items-center gap-1.5 border-t border-slate-100 pt-2.5 text-xs text-slate-400">
