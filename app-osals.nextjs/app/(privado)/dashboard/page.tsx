@@ -23,32 +23,29 @@ const PAGINA_VAZIA: PaginaResposta<never> = {
   totalPaginas: 0,
 }
 
-// O negocio opera no horario de Brasilia; "hoje/ontem" sao calculados nesse fuso
-// (a data de abertura da OS vem como instante ISO em UTC).
+// O negocio opera no horario de Brasilia; "hoje/ontem" sao calculados nesse fuso.
 const FUSO = 'America/Sao_Paulo'
 
-/** Data (YYYY-MM-DD) do instante, no fuso de Brasilia. */
-function diaBR(iso: string | Date): string {
-  return new Date(iso).toLocaleDateString('en-CA', { timeZone: FUSO })
+/** Data (YYYY-MM-DD) do momento atual, no fuso de Brasilia. */
+function diaBR(d: Date): string {
+  return d.toLocaleDateString('en-CA', { timeZone: FUSO })
 }
 
-/** Hora (HH:mm) do instante, no fuso de Brasilia. */
-function horaBR(iso: string): string {
-  return new Date(iso).toLocaleTimeString('pt-BR', {
-    timeZone: FUSO,
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+/** Formata uma data ISO (YYYY-MM-DD) como DD/MM/AAAA. */
+function formatarData(iso: string | null): string {
+  if (!iso) return '-'
+  const [ano, mes, dia] = iso.split('-')
+  return dia && mes && ano ? `${dia}/${mes}/${ano}` : iso
 }
 
 export default async function DashboardPage() {
   const sessao = await lerSessao()
 
-  // Busca as OS mais recentes por data de abertura; o agrupamento hoje/ontem
-  // e feito aqui, no fuso de Brasilia. 200 cobre com folga 2 dias de aberturas.
+  // Busca as OS mais recentes por data agendada; o agrupamento hoje/ontem e
+  // feito pela data agendada. 200 cobre com folga 2 dias de agendamentos.
   const pagina = await seguro(
     clienteApi<PaginaResposta<OrdemServicoResumoDto>>(
-      '/ordens-servico?tamanho=200&sort=dataAbertura,desc',
+      '/ordens-servico?tamanho=200&sort=dataAgendada,desc',
     ),
     PAGINA_VAZIA,
   )
@@ -57,10 +54,10 @@ export default async function DashboardPage() {
   const hojeStr = diaBR(agora)
   const ontemStr = diaBR(new Date(agora.getTime() - 86_400_000))
 
-  // Canceladas nao entram no painel (ruido).
+  // Canceladas nao entram no painel (ruido). Agrupa pela data agendada da OS.
   const relevantes = pagina.conteudo.filter((os) => os.status !== 'CANCELADA')
-  const hoje = relevantes.filter((os) => diaBR(os.dataAbertura) === hojeStr)
-  const ontem = relevantes.filter((os) => diaBR(os.dataAbertura) === ontemStr)
+  const hoje = relevantes.filter((os) => os.dataAgendada === hojeStr)
+  const ontem = relevantes.filter((os) => os.dataAgendada === ontemStr)
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -80,13 +77,13 @@ export default async function DashboardPage() {
 
       <Secao
         titulo="Hoje"
-        descricao="Ordens de servico abertas hoje"
+        descricao="Ordens de servico agendadas para hoje"
         corDot="bg-primary"
         itens={hoje}
       />
       <Secao
         titulo="Ontem"
-        descricao="Ordens de servico abertas ontem"
+        descricao="Ordens de servico agendadas para ontem"
         corDot="bg-slate-400"
         itens={ontem}
       />
@@ -119,7 +116,7 @@ function Secao({
       {itens.length === 0 ? (
         <Card>
           <p className="py-6 text-center text-sm text-slate-400">
-            Nenhuma OS aberta {titulo.toLowerCase()}.
+            Nenhuma OS agendada para {titulo.toLowerCase()}.
           </p>
         </Card>
       ) : (
@@ -166,10 +163,10 @@ function CardOrdemServico({ os }: { os: OrdemServicoResumoDto }) {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0V11.25A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
               />
             </svg>
-            Aberta as {horaBR(os.dataAbertura)}
+            Agendada: {formatarData(os.dataAgendada)}
           </div>
         </div>
       </Card>
