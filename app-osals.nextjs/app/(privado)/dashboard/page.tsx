@@ -1,15 +1,8 @@
 import Link from 'next/link'
 import { clienteApi } from '@/app/lib/cliente-api'
 import { lerSessao } from '@/app/lib/sessao'
-import type {
-  CustosPorClienteItem,
-  OrdemServicoResumoDto,
-  PaginaResposta,
-  ServicoResumoDto,
-} from '@/app/lib/definicoes'
-import { centavosParaReais } from '@/app/lib/moeda'
+import type { OrdemServicoResumoDto, PaginaResposta } from '@/app/lib/definicoes'
 import { badgeStatusOs } from '@/app/lib/esquemas/ordem-servico'
-import { badgeStatusServico } from '@/app/lib/esquemas/servico'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 
@@ -30,187 +23,156 @@ const PAGINA_VAZIA: PaginaResposta<never> = {
   totalPaginas: 0,
 }
 
-function iso(d: Date): string {
-  return d.toISOString().slice(0, 10)
+// O negocio opera no horario de Brasilia; "hoje/ontem" sao calculados nesse fuso
+// (a data de abertura da OS vem como instante ISO em UTC).
+const FUSO = 'America/Sao_Paulo'
+
+/** Data (YYYY-MM-DD) do instante, no fuso de Brasilia. */
+function diaBR(iso: string | Date): string {
+  return new Date(iso).toLocaleDateString('en-CA', { timeZone: FUSO })
+}
+
+/** Hora (HH:mm) do instante, no fuso de Brasilia. */
+function horaBR(iso: string): string {
+  return new Date(iso).toLocaleTimeString('pt-BR', {
+    timeZone: FUSO,
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 export default async function DashboardPage() {
   const sessao = await lerSessao()
-  const ehGestor = sessao?.papel === 'GERENTE' || sessao?.papel === 'ADMIN'
 
-  const hoje = new Date()
-  const em7dias = new Date(hoje)
-  em7dias.setDate(hoje.getDate() + 7)
-  const primeiroDoMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
+  // Busca as OS mais recentes por data de abertura; o agrupamento hoje/ontem
+  // e feito aqui, no fuso de Brasilia. 200 cobre com folga 2 dias de aberturas.
+  const pagina = await seguro(
+    clienteApi<PaginaResposta<OrdemServicoResumoDto>>(
+      '/ordens-servico?tamanho=200&sort=dataAbertura,desc',
+    ),
+    PAGINA_VAZIA,
+  )
 
-  const [osAbertas, osPendentes, servicosExecucao, osImpressas, proximosServicos] =
-    await Promise.all([
-      seguro(
-        clienteApi<PaginaResposta<OrdemServicoResumoDto>>('/ordens-servico?status=ABERTA&tamanho=1'),
-        PAGINA_VAZIA,
-      ),
-      seguro(
-        clienteApi<PaginaResposta<OrdemServicoResumoDto>>(
-          '/ordens-servico?status=PENDENTE_DIGITACAO&tamanho=1',
-        ),
-        PAGINA_VAZIA,
-      ),
-      seguro(
-        clienteApi<PaginaResposta<ServicoResumoDto>>('/servicos?status=EM_EXECUCAO&tamanho=1'),
-        PAGINA_VAZIA,
-      ),
-      seguro(
-        clienteApi<PaginaResposta<OrdemServicoResumoDto>>('/ordens-servico?status=IMPRESSA&tamanho=10'),
-        PAGINA_VAZIA,
-      ),
-      seguro(
-        clienteApi<PaginaResposta<ServicoResumoDto>>(
-          `/servicos?inicio=${iso(hoje)}&fim=${iso(em7dias)}&tamanho=10`,
-        ),
-        PAGINA_VAZIA,
-      ),
-    ])
+  const agora = new Date()
+  const hojeStr = diaBR(agora)
+  const ontemStr = diaBR(new Date(agora.getTime() - 86_400_000))
 
-  let custoDoMes: number | null = null
-  if (ehGestor) {
-    const custos = await seguro(
-      clienteApi<CustosPorClienteItem[]>(
-        `/relatorios/custos-por-cliente?inicio=${iso(primeiroDoMes)}&fim=${iso(hoje)}`,
-      ),
-      [],
-    )
-    custoDoMes = custos.reduce((s, c) => s + c.precoVendaCentavos, 0)
-  }
+  // Canceladas nao entram no painel (ruido).
+  const relevantes = pagina.conteudo.filter((os) => os.status !== 'CANCELADA')
+  const hoje = relevantes.filter((os) => diaBR(os.dataAbertura) === hojeStr)
+  const ontem = relevantes.filter((os) => diaBR(os.dataAbertura) === ontemStr)
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-1">Bem-vindo, {sessao?.nome}.</p>
+    <div className="max-w-6xl mx-auto space-y-8">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-500 mt-1">Bem-vindo, {sessao?.nome}.</p>
+        </div>
+        <Link
+          href="/servicos"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-[0_3px_10px_rgba(14,165,233,0.25)] transition-all duration-150 hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+        >
+          Todos os servicos em aberto
+          <span aria-hidden>&rarr;</span>
+        </Link>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Kpi
-          titulo="OS abertas"
-          valor={osAbertas.totalElementos}
-          cor="text-primary"
-          href="/ordens-servico?status=ABERTA"
-        />
-        <Kpi
-          titulo="Pendentes de digitacao"
-          valor={osPendentes.totalElementos}
-          cor="text-amber-600"
-          href="/ordens-servico?status=PENDENTE_DIGITACAO"
-        />
-        <Kpi
-          titulo="Servicos em execucao"
-          valor={servicosExecucao.totalElementos}
-          cor="text-secondary"
-          href="/servicos?status=EM_EXECUCAO"
-        />
-        {custoDoMes != null && (
-          <Kpi
-            titulo="Preco de venda no mes"
-            valorTexto={centavosParaReais(custoDoMes)}
-            cor="text-primary-dark"
-            href="/relatorios/custos-por-cliente"
-          />
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card title="Ultimas OS impressas" subtitle="Aguardando devolucao/digitacao">
-          {osImpressas.conteudo.length === 0 ? (
-            <Vazio texto="Nenhuma OS impressa no momento." />
-          ) : (
-            <ul className="divide-y divide-slate-100 -mb-2">
-              {osImpressas.conteudo.map((os) => (
-                <li key={os.id} className="py-2 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <Link
-                      href={`/ordens-servico/${os.id}`}
-                      className="text-primary hover:underline font-medium font-mono text-sm"
-                    >
-                      {os.codigoExibicao}
-                    </Link>
-                    <span className="block text-xs text-slate-500 truncate">
-                      {os.clienteNome}
-                    </span>
-                  </div>
-                  <Badge variant={badgeStatusOs(os.status)} size="sm" dot>
-                    {os.statusRotulo}
-                  </Badge>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
-
-        <Card title="Proximos servicos" subtitle="Inicio previsto nos proximos 7 dias">
-          {proximosServicos.conteudo.length === 0 ? (
-            <Vazio texto="Nenhum servico com inicio previsto para a semana." />
-          ) : (
-            <ul className="divide-y divide-slate-100 -mb-2">
-              {proximosServicos.conteudo.map((s) => (
-                <li key={s.id} className="py-2 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <Link
-                      href={`/servicos/${s.id}`}
-                      className="text-primary hover:underline font-medium font-mono text-sm"
-                    >
-                      {s.numeroFormatado}
-                    </Link>
-                    <span className="block text-xs text-slate-500 truncate">{s.clienteNome}</span>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <Badge variant={badgeStatusServico(s.status)} size="sm" dot>
-                      {s.statusRotulo}
-                    </Badge>
-                    <span className="block text-xs text-slate-400 mt-0.5">
-                      {formatarData(s.dataInicioPrevista)}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
-      </div>
+      <Secao
+        titulo="Hoje"
+        descricao="Ordens de servico abertas hoje"
+        corDot="bg-primary"
+        itens={hoje}
+      />
+      <Secao
+        titulo="Ontem"
+        descricao="Ordens de servico abertas ontem"
+        corDot="bg-slate-400"
+        itens={ontem}
+      />
     </div>
   )
 }
 
-function Kpi({
+function Secao({
   titulo,
-  valor,
-  valorTexto,
-  cor,
-  href,
+  descricao,
+  corDot,
+  itens,
 }: {
   titulo: string
-  valor?: number
-  valorTexto?: string
-  cor: string
-  href: string
+  descricao: string
+  corDot: string
+  itens: OrdemServicoResumoDto[]
 }) {
   return (
-    <Link href={href} className="block">
-      <Card padding="md" hover>
-        <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{titulo}</p>
-        <p className={`text-2xl font-semibold mt-1 ${cor}`}>
-          {valorTexto ?? valor ?? 0}
-        </p>
-      </Card>
-    </Link>
+    <section className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2.5">
+        <span className={`h-2.5 w-2.5 rounded-full ${corDot}`} />
+        <h2 className="text-lg font-semibold text-slate-900">{titulo}</h2>
+        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+          {itens.length}
+        </span>
+        <span className="text-sm text-slate-400">&middot; {descricao}</span>
+      </div>
+
+      {itens.length === 0 ? (
+        <Card>
+          <p className="py-6 text-center text-sm text-slate-400">
+            Nenhuma OS aberta {titulo.toLowerCase()}.
+          </p>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {itens.map((os) => (
+            <CardOrdemServico key={os.id} os={os} />
+          ))}
+        </div>
+      )}
+    </section>
   )
 }
 
-function Vazio({ texto }: { texto: string }) {
-  return <p className="text-sm text-slate-400 py-4 text-center">{texto}</p>
-}
+function CardOrdemServico({ os }: { os: OrdemServicoResumoDto }) {
+  return (
+    <Link href={`/servicos/${os.servicoId}`} className="group block">
+      <Card hover padding="none" className="h-full">
+        <div className="flex h-full flex-col gap-3 p-5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-mono text-sm font-semibold text-primary group-hover:underline">
+              {os.codigoExibicao}
+            </span>
+            <Badge variant={badgeStatusOs(os.status)} size="sm" dot>
+              {os.statusRotulo}
+            </Badge>
+          </div>
 
-function formatarData(iso: string | null): string {
-  if (!iso) return '-'
-  const [ano, mes, dia] = iso.split('-')
-  return dia && mes && ano ? `${dia}/${mes}/${ano}` : iso
+          <div>
+            <p className="line-clamp-1 text-base font-semibold leading-snug text-slate-900">
+              {os.clienteNome}
+            </p>
+            <p className="mt-1 line-clamp-2 text-sm text-slate-500">{os.descricaoAtividade}</p>
+          </div>
+
+          <div className="mt-auto flex items-center gap-1.5 border-t border-slate-100 pt-2.5 text-xs text-slate-400">
+            <svg
+              className="h-3.5 w-3.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+              aria-hidden
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            Aberta as {horaBR(os.dataAbertura)}
+          </div>
+        </div>
+      </Card>
+    </Link>
+  )
 }
