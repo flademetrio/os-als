@@ -1,6 +1,7 @@
 package br.com.osals.ordemservico.aplicacao;
 
 import br.com.osals.anexo.aplicacao.GestorAnexo;
+import br.com.osals.anexo.dominio.RepositorioAnexoOs;
 import br.com.osals.cadastro.dominio.ContatoCliente;
 import br.com.osals.cadastro.dominio.Equipamento;
 import br.com.osals.cadastro.dominio.RepositorioContatoCliente;
@@ -23,6 +24,8 @@ import br.com.osals.seguranca.dominio.Tecnico;
 import br.com.osals.seguranca.dominio.Usuario;
 import br.com.osals.servico.dominio.RepositorioServico;
 import br.com.osals.servico.dominio.Servico;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +50,7 @@ public class GestorOrdemServico {
     private final RepositorioVeiculo repositorioVeiculo;
     private final RepositorioEquipamento repositorioEquipamento;
     private final RepositorioContatoCliente repositorioContato;
+    private final RepositorioAnexoOs repositorioAnexoOs;
     private final GestorAnexo gestorAnexo;
     private final MapperOrdemServico mapper;
 
@@ -56,6 +60,7 @@ public class GestorOrdemServico {
                               RepositorioVeiculo repositorioVeiculo,
                               RepositorioEquipamento repositorioEquipamento,
                               RepositorioContatoCliente repositorioContato,
+                              RepositorioAnexoOs repositorioAnexoOs,
                               GestorAnexo gestorAnexo,
                               MapperOrdemServico mapper) {
         this.repositorio = repositorio;
@@ -64,6 +69,7 @@ public class GestorOrdemServico {
         this.repositorioVeiculo = repositorioVeiculo;
         this.repositorioEquipamento = repositorioEquipamento;
         this.repositorioContato = repositorioContato;
+        this.repositorioAnexoOs = repositorioAnexoOs;
         this.gestorAnexo = gestorAnexo;
         this.mapper = mapper;
     }
@@ -72,12 +78,25 @@ public class GestorOrdemServico {
                                                         Long clienteId, String busca, Pageable pageable) {
         var spec = EspecificacoesOrdemServico.comFiltros(status, servicoId, clienteId, busca);
         var page = repositorio.findAll(spec, pageable);
-        return PaginaResposta.de(page.map(mapper::paraResumo));
+        Set<Long> comAnexo = idsComAnexo(page.getContent());
+        return PaginaResposta.de(page.map(os -> mapper.paraResumo(os, comAnexo.contains(os.getId()))));
     }
 
     public List<OrdemServicoResumoDto> listarDoServico(Long servicoId) {
-        return repositorio.findByServicoIdOrderByNumero(servicoId).stream()
-                .map(mapper::paraResumo).toList();
+        var lista = repositorio.findByServicoIdOrderByNumero(servicoId);
+        Set<Long> comAnexo = idsComAnexo(lista);
+        return lista.stream()
+                .map(os -> mapper.paraResumo(os, comAnexo.contains(os.getId())))
+                .toList();
+    }
+
+    /** os_ids da lista que possuem anexo (uma consulta — evita N+1 ao montar o resumo). */
+    private Set<Long> idsComAnexo(Collection<OrdemServico> ordens) {
+        if (ordens.isEmpty()) {
+            return Set.of();
+        }
+        var ids = ordens.stream().map(OrdemServico::getId).toList();
+        return new HashSet<>(repositorioAnexoOs.idsComAnexo(ids));
     }
 
     public OrdemServicoResposta buscarPorId(Long id) {

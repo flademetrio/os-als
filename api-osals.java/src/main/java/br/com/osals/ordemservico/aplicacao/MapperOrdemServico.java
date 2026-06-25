@@ -54,7 +54,7 @@ public class MapperOrdemServico {
         );
     }
 
-    public OrdemServicoResumoDto paraResumo(OrdemServico os) {
+    public OrdemServicoResumoDto paraResumo(OrdemServico os, boolean temAnexo) {
         Servico s = os.getServico();
         return new OrdemServicoResumoDto(
                 os.getId(),
@@ -68,7 +68,8 @@ public class MapperOrdemServico {
                 os.getStatus(),
                 os.getStatus().getRotulo(),
                 os.getDataAgendada(),
-                os.getDataAbertura()
+                os.getDataAbertura(),
+                temAnexo
         );
     }
 

@@ -468,6 +468,7 @@ export type OrdemServicoResumoDto = {
   statusRotulo: string
   dataAgendada: string | null
   dataAbertura: string
+  temAnexo: boolean
 }
 
 // ===== Anexos =====

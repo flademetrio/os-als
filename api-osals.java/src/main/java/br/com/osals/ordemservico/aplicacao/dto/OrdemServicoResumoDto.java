@@ -17,6 +17,7 @@ public record OrdemServicoResumoDto(
         StatusOrdemServico status,
         String statusRotulo,
         LocalDate dataAgendada,
-        OffsetDateTime dataAbertura
+        OffsetDateTime dataAbertura,
+        boolean temAnexo
 ) {
 }
