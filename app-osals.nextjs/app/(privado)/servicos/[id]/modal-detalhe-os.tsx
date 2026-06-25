@@ -184,6 +184,7 @@ export function ModalDetalheOs({
             osId={os.id}
             anexo={dados.anexo}
             podeAlterar={!encerrada || ehGestor || podeAnexarFaturamento}
+            onAnexado={onClose}
           />
         </div>
       )}

@@ -13,15 +13,25 @@ type Props = {
   osId: number
   anexo: AnexoOsResposta | null
   podeAlterar: boolean
+  /** Chamado apos anexar/substituir com sucesso. No modal, fecha o modal. */
+  onAnexado?: () => void
 }
 
 /** Anexo unico da OS — o scan do papel preenchido pela equipe. */
-export function AnexoOsCard({ osId, anexo, podeAlterar }: Props) {
+export function AnexoOsCard({ osId, anexo, podeAlterar, onAnexado }: Props) {
   const router = useRouter()
   const [confirmar, setConfirmar] = useState(false)
   const [substituindo, setSubstituindo] = useState(false)
   const [pendente, iniciar] = useTransition()
   const acao = anexarNaOs.bind(null, osId)
+
+  // Sucesso ao anexar/substituir: no modal fecha (onAnexado); na pagina inteira
+  // atualiza para exibir o arquivo recem-anexado.
+  function aoAnexado() {
+    setSubstituindo(false)
+    if (onAnexado) onAnexado()
+    else router.refresh()
+  }
 
   return (
     <Card padding="md" title="Anexo (scan da OS preenchida)">
@@ -62,13 +72,13 @@ export function AnexoOsCard({ osId, anexo, podeAlterar }: Props) {
               <UploadPDF
                 acao={acao}
                 rotuloBotao="Substituir anexo"
-                onSucesso={() => setSubstituindo(false)}
+                onSucesso={aoAnexado}
               />
             </div>
           )}
         </div>
       ) : podeAlterar ? (
-        <UploadPDF acao={acao} rotuloBotao="Anexar scan" />
+        <UploadPDF acao={acao} rotuloBotao="Anexar scan" onSucesso={aoAnexado} />
       ) : (
         <p className="text-sm text-slate-500">Nenhum anexo enviado.</p>
       )}
