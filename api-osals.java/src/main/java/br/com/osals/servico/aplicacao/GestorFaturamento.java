@@ -2,7 +2,6 @@ package br.com.osals.servico.aplicacao;
 
 import br.com.osals.compartilhado.excecoes.NegocioException;
 import br.com.osals.compartilhado.excecoes.RecursoNaoEncontradoException;
-import br.com.osals.seguranca.dominio.Papel;
 import br.com.osals.seguranca.dominio.Usuario;
 import br.com.osals.servico.aplicacao.dto.FaturamentoResposta;
 import br.com.osals.servico.aplicacao.dto.NotaFiscalRequisicao;
@@ -15,7 +14,6 @@ import br.com.osals.servico.dominio.RepositorioServico;
 import br.com.osals.servico.dominio.Servico;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,7 +54,7 @@ public class GestorFaturamento {
     @Transactional
     public NotaFiscalResposta adicionar(Long servicoId, NotaFiscalRequisicao req, Usuario autor) {
         Servico servico = servicoObrigatorio(servicoId);
-        validarPodeAlterarNotas(servico, servicoId, autor);
+        validarPodeAlterarNotas(servicoId);
 
         var nf = new NotaFiscal(servico, autor);
         nf.aplicar(req.numero().trim(), req.dataEmissao(), req.valorCentavos());
@@ -68,7 +66,7 @@ public class GestorFaturamento {
     @Transactional
     public NotaFiscalResposta editar(Long servicoId, Long nfId, NotaFiscalRequisicao req, Usuario autor) {
         var nf = notaObrigatoria(servicoId, nfId);
-        validarPodeAlterarNotas(nf.getServico(), servicoId, autor);
+        validarPodeAlterarNotas(servicoId);
         nf.aplicar(req.numero().trim(), req.dataEmissao(), req.valorCentavos());
         nf.marcarAtualizadoPor(autor);
         log.info("NF {} editada no servico {}", nfId, servicoId);
@@ -78,15 +76,14 @@ public class GestorFaturamento {
     @Transactional
     public void excluir(Long servicoId, Long nfId, Usuario autor) {
         var nf = notaObrigatoria(servicoId, nfId);
-        validarPodeAlterarNotas(nf.getServico(), servicoId, autor);
+        validarPodeAlterarNotas(servicoId);
         repositorio.delete(nf);
         log.info("NF {} excluida do servico {}", nfId, servicoId);
     }
 
     @Transactional
     public FaturamentoResposta fechar(Long servicoId, Usuario autor) {
-        Servico servico = servicoObrigatorio(servicoId);
-        validarPermissaoAlteracao(servico, autor);
+        servicoObrigatorio(servicoId);
         Cobranca cobranca = cobrancaObrigatoria(servicoId);
 
         if (!cobranca.ehCobrado()) {
@@ -114,20 +111,13 @@ public class GestorFaturamento {
         return mapper.paraFaturamentoResposta(cobranca, notas);
     }
 
-    private void validarPodeAlterarNotas(Servico servico, Long servicoId, Usuario autor) {
-        validarPermissaoAlteracao(servico, autor);
+    private void validarPodeAlterarNotas(Long servicoId) {
+        // Faturamento e feito apos concluir o Servico — logo, alterar notas/fechar
+        // NAO depende do Servico estar aberto. Basta a permissao FATURAMENTO_EDITAR,
+        // ja exigida pelos endpoints. So bloqueia se o faturamento estiver fechado.
         Cobranca cobranca = repositorioCobranca.findByServicoId(servicoId).orElse(null);
         if (cobranca != null && cobranca.faturamentoFechado()) {
             throw new NegocioException("Faturamento fechado: reabra para alterar as notas fiscais.");
-        }
-    }
-
-    private void validarPermissaoAlteracao(Servico servico, Usuario autor) {
-        if (servico.estaEncerrado()
-                && autor.getPapel() != Papel.GERENTE
-                && autor.getPapel() != Papel.ADMIN) {
-            throw new AccessDeniedException(
-                    "Servico encerrado: apenas gerente ou admin podem alterar o faturamento.");
         }
     }
 

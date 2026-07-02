@@ -81,6 +81,10 @@ export function DetalheServico({
   const [aba, setAba] = useState<AbaId>('dados')
 
   const mostrarFaturamento = podeVerFaturamento && cobranca != null && faturamento != null
+  const encerrado = servico.status === 'CONCLUIDO' || servico.status === 'CANCELADO'
+  // Anexos do servico seguem a regra dos custos: em servico encerrado, so gestor
+  // remove (o perfil Faturamento nao remove anexo de servico encerrado).
+  const podeRemoverAnexo = podeAlterarCustos || (podeAlterarFaturamento && (!encerrado || ehGestor))
 
   const abas: AbaConfig[] = [
     { id: 'dados', label: 'Geral', icon: <IconeGeral /> },
@@ -216,7 +220,7 @@ export function DetalheServico({
         {aba === 'anexos' && (
           <TabAnexos
             servicoId={servico.id}
-            podeRemover={podeAlterarCustos || podeAlterarFaturamento}
+            podeRemover={podeRemoverAnexo}
             anexos={anexos}
           />
         )}

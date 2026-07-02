@@ -72,7 +72,9 @@ export default async function ServicoDetalhePage({ params }: Props) {
   const ehGestor = sessao?.papel === 'GERENTE' || sessao?.papel === 'ADMIN'
   const ehAdmin = sessao?.papel === 'ADMIN'
   const podeAlterarCustos = podeEditarCustos && (!encerrado || ehGestor)
-  const podeAlterarFaturamento = podeEditarFaturamento && (!encerrado || ehGestor)
+  // Cobranca e faturamento sao feitos APOS concluir o servico — logo, quem tem
+  // FATURAMENTO_EDITAR pode alterar mesmo com o servico encerrado (backend idem).
+  const podeAlterarFaturamento = podeEditarFaturamento
 
   return (
     <div className="space-y-6">
