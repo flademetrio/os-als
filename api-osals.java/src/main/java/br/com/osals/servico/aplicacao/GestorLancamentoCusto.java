@@ -2,16 +2,23 @@ package br.com.osals.servico.aplicacao;
 
 import br.com.osals.cadastro.dominio.CategoriaCusto;
 import br.com.osals.cadastro.dominio.RepositorioCategoriaCusto;
+import br.com.osals.cadastro.dominio.TipoLancamentoCusto;
 import br.com.osals.compartilhado.excecoes.NegocioException;
 import br.com.osals.compartilhado.excecoes.RecursoNaoEncontradoException;
 import br.com.osals.configuracao.aplicacao.ServicoConfiguracao;
 import br.com.osals.configuracao.dominio.ChavesConfiguracao;
+import br.com.osals.ordemservico.dominio.OrdemServico;
+import br.com.osals.ordemservico.dominio.RepositorioOrdemServico;
 import br.com.osals.seguranca.dominio.Papel;
 import br.com.osals.seguranca.dominio.RepositorioTecnico;
 import br.com.osals.seguranca.dominio.Tecnico;
 import br.com.osals.seguranca.dominio.Usuario;
 import br.com.osals.servico.aplicacao.dto.LancamentoCustoRequisicao;
 import br.com.osals.servico.aplicacao.dto.LancamentoCustoResposta;
+import br.com.osals.servico.aplicacao.dto.LancamentoMaoDeObraRequisicao;
+import br.com.osals.servico.aplicacao.dto.MaoDeObraReferencia;
+import br.com.osals.servico.aplicacao.dto.MaoDeObraReferencia.OrdemDoDia;
+import br.com.osals.servico.aplicacao.dto.MaoDeObraReferencia.TecnicoReferencia;
 import br.com.osals.servico.aplicacao.dto.ResumoFinanceiroServico;
 import br.com.osals.servico.aplicacao.dto.ResumoFinanceiroServico.CustoPorCategoria;
 import br.com.osals.servico.dominio.LancamentoCusto;
@@ -20,6 +27,7 @@ import br.com.osals.servico.dominio.RepositorioServico;
 import br.com.osals.servico.dominio.Servico;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -51,6 +59,7 @@ public class GestorLancamentoCusto {
     private final RepositorioServico repositorioServico;
     private final RepositorioCategoriaCusto repositorioCategoria;
     private final RepositorioTecnico repositorioTecnico;
+    private final RepositorioOrdemServico repositorioOrdemServico;
     private final ServicoConfiguracao servicoConfiguracao;
     private final MapperLancamentoCusto mapper;
 
@@ -58,12 +67,14 @@ public class GestorLancamentoCusto {
                                  RepositorioServico repositorioServico,
                                  RepositorioCategoriaCusto repositorioCategoria,
                                  RepositorioTecnico repositorioTecnico,
+                                 RepositorioOrdemServico repositorioOrdemServico,
                                  ServicoConfiguracao servicoConfiguracao,
                                  MapperLancamentoCusto mapper) {
         this.repositorio = repositorio;
         this.repositorioServico = repositorioServico;
         this.repositorioCategoria = repositorioCategoria;
         this.repositorioTecnico = repositorioTecnico;
+        this.repositorioOrdemServico = repositorioOrdemServico;
         this.servicoConfiguracao = servicoConfiguracao;
         this.mapper = mapper;
     }
@@ -71,6 +82,69 @@ public class GestorLancamentoCusto {
     public List<LancamentoCustoResposta> listar(Long servicoId) {
         servicoObrigatorio(servicoId);
         return repositorio.listarDoServico(servicoId).stream().map(mapper::paraResposta).toList();
+    }
+
+    /** Referencia para o lancamento de mao de obra numa data (pela data agendada da OS). */
+    public MaoDeObraReferencia referenciaMaoDeObra(Long servicoId, LocalDate data) {
+        servicoObrigatorio(servicoId);
+        var osDoServico = repositorioOrdemServico.findByServicoIdAndDataAgendada(servicoId, data);
+
+        // Tecnicos candidatos: os das OS deste servico no dia (distintos, na ordem).
+        var candidatos = new LinkedHashMap<Long, Tecnico>();
+        for (OrdemServico os : osDoServico) {
+            for (Tecnico t : os.getTecnicos()) {
+                candidatos.putIfAbsent(t.getUsuarioId(), t);
+            }
+        }
+        if (candidatos.isEmpty()) {
+            return new MaoDeObraReferencia(List.of());
+        }
+
+        var osDoDia = repositorioOrdemServico.buscarPorDataETecnicos(data, candidatos.keySet());
+        var tecnicos = new ArrayList<TecnicoReferencia>();
+        for (Tecnico t : candidatos.values()) {
+            Long tid = t.getUsuarioId();
+            var ordens = osDoDia.stream()
+                    .filter(os -> os.getTecnicos().stream().anyMatch(x -> x.getUsuarioId().equals(tid)))
+                    .map(os -> paraOrdemDoDia(os, servicoId))
+                    .toList();
+            tecnicos.add(new TecnicoReferencia(tid, t.getUsuario().getNome(),
+                    t.getValorHoraCentavos(), ordens));
+        }
+        return new MaoDeObraReferencia(tecnicos);
+    }
+
+    /** Lanca mao de obra para varios tecnicos: cria um custo por tecnico (mesma data/horas). */
+    @Transactional
+    public List<LancamentoCustoResposta> lancarMaoDeObra(Long servicoId,
+                                                         LancamentoMaoDeObraRequisicao req, Usuario autor) {
+        Servico servico = servicoObrigatorio(servicoId);
+        validarPermissaoAlteracao(servico, autor);
+
+        CategoriaCusto categoria = repositorioCategoria.findById(req.categoriaCustoId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria de custo nao encontrada."));
+        if (!categoria.isAtivo()) {
+            throw new NegocioException("Categoria de custo inativa: " + categoria.getNome());
+        }
+        if (categoria.getTipoLancamento() != TipoLancamentoCusto.ESTRUTURADO_MAO_OBRA) {
+            throw new NegocioException("Categoria selecionada nao e de mao de obra.");
+        }
+
+        var criados = new ArrayList<LancamentoCustoResposta>();
+        for (Long tecnicoId : req.tecnicoIds().stream().distinct().toList()) {
+            Tecnico tecnico = repositorioTecnico.findById(tecnicoId)
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Tecnico nao encontrado: " + tecnicoId));
+            long valorHora = tecnico.getValorHoraCentavos();
+            long valorTotal = multiplicar(req.horas(), valorHora);
+            var lancamento = new LancamentoCusto(servico, autor);
+            lancamento.definirDataCusto(req.dataCusto());
+            lancamento.aplicarMaoDeObra(categoria, primeiroNome(tecnico.getUsuario().getNome()),
+                    tecnico, req.horas(), valorHora, valorTotal);
+            criados.add(mapper.paraResposta(repositorio.save(lancamento)));
+        }
+        log.info("Mao de obra lancada: servico={} tecnicos={} horas={}",
+                servicoId, criados.size(), req.horas());
+        return criados;
     }
 
     @Transactional
@@ -231,5 +305,27 @@ public class GestorLancamentoCusto {
         if (s == null) return null;
         var t = s.trim();
         return t.isEmpty() ? null : t;
+    }
+
+    private OrdemDoDia paraOrdemDoDia(OrdemServico os, Long servicoIdReferencia) {
+        Servico s = os.getServico();
+        return new OrdemDoDia(
+                os.getId(),
+                String.format("%04d-%05d", s.getNumero(), os.getNumero()),
+                s.getId(),
+                s.getId().equals(servicoIdReferencia),
+                s.getCliente().getNome(),
+                os.getDescricaoAtividade(),
+                os.getHoraInicioExecucao(),
+                os.getHoraFimExecucao());
+    }
+
+    /** Primeiro nome (para o detalhe do custo de mao de obra). */
+    private static String primeiroNome(String nome) {
+        if (nome == null) return "";
+        var t = nome.trim();
+        if (t.isEmpty()) return "";
+        int sp = t.indexOf(' ');
+        return sp > 0 ? t.substring(0, sp) : t;
     }
 }

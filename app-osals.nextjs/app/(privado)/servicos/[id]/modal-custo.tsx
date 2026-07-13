@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Select'
+import { FormMaoDeObra } from './form-mao-de-obra'
 
 const ESTADO_INICIAL: EstadoCusto = {}
 
@@ -54,37 +55,21 @@ export function ModalCusto({ servicoId, categorias, tecnicos, lancamento, onClos
   // se a categoria estiver inativa (e portanto fora da lista de categorias ativas).
   const tipo = editando ? lancamento.tipoLancamento : categoria?.tipoLancamento
 
-  return (
-    <Modal
-      open
-      onClose={onClose}
-      title={editando ? 'Editar custo' : 'Lancar custo'}
-      size="md"
-    >
-      <form action={dispatch} className="space-y-4">
-        {estado.erro && (
-          <Alert variant="danger" dismissible>
-            {estado.erro}
-          </Alert>
-        )}
+  // Mao de obra (novo) tem fluxo proprio: referencia + varios tecnicos + presets.
+  const ehMaoDeObraNovo = !editando && tipo === 'ESTRUTURADO_MAO_OBRA'
 
+  return (
+    <Modal open onClose={onClose} title={editando ? 'Editar custo' : 'Lancar custo'} size="md">
+      <div className="space-y-4">
         {editando ? (
-          // Categoria nao muda na edicao: select desabilitado so para exibir, e o
-          // valor vai por input oculto (select disabled nao e enviado no form).
-          <>
-            <Select label="Categoria" value={categoriaId} disabled fullWidth>
-              <option value={categoriaId}>{lancamento.categoriaNome}</option>
-            </Select>
-            <input type="hidden" name="categoriaCustoId" value={categoriaId} />
-          </>
+          <Select label="Categoria" value={categoriaId} disabled fullWidth>
+            <option value={categoriaId}>{lancamento.categoriaNome}</option>
+          </Select>
         ) : (
           <Select
             label="Categoria"
-            name="categoriaCustoId"
-            required
             value={categoriaId}
             onChange={(e) => setCategoriaId(e.target.value)}
-            error={estado.errosCampos?.categoriaCustoId}
             fullWidth
           >
             <option value="">— Selecione</option>
@@ -96,97 +81,118 @@ export function ModalCusto({ servicoId, categorias, tecnicos, lancamento, onClos
           </Select>
         )}
 
-        <Input
-          label="Data do custo"
-          name="dataCusto"
-          type="date"
-          required
-          defaultValue={lancamento?.dataCusto ?? dataHoje}
-          error={estado.errosCampos?.dataCusto}
-          fullWidth
-        />
+        {ehMaoDeObraNovo ? (
+          <FormMaoDeObra servicoId={servicoId} categoriaId={Number(categoriaId)} onClose={onClose} />
+        ) : (
+          <form action={dispatch} className="space-y-4">
+            {estado.erro && (
+              <Alert variant="danger" dismissible>
+                {estado.erro}
+              </Alert>
+            )}
 
-        {tipo === 'ESTRUTURADO_MAO_OBRA' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Select
-              label="Tecnico"
-              name="tecnicoId"
+            <input type="hidden" name="categoriaCustoId" value={categoriaId} />
+
+            <Input
+              label="Data do custo"
+              name="dataCusto"
+              type="date"
               required
-              defaultValue={lancamento?.tecnicoId ? String(lancamento.tecnicoId) : ''}
-              fullWidth
-            >
-              <option value="">— Selecione</option>
-              {tecnicos.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.nome}
-                </option>
-              ))}
-            </Select>
-            <Input
-              label="Horas"
-              name="horas"
-              required
-              placeholder="Ex.: 2,5"
-              defaultValue={lancamento?.horas != null ? String(lancamento.horas).replace('.', ',') : ''}
+              defaultValue={lancamento?.dataCusto ?? dataHoje}
+              error={estado.errosCampos?.dataCusto}
               fullWidth
             />
-          </div>
-        )}
 
-        {tipo === 'ESTRUTURADO_DESLOCAMENTO' && (
-          <>
-            <Input
-              label="Quilometragem (km)"
-              name="km"
-              required
-              placeholder="Ex.: 40"
-              defaultValue={lancamento?.km != null ? String(lancamento.km).replace('.', ',') : ''}
-              fullWidth
-            />
-            <Input
-              label="Descricao (opcional)"
-              name="descricao"
-              defaultValue={lancamento?.descricao ?? ''}
-              fullWidth
-            />
-          </>
-        )}
+            {tipo === 'ESTRUTURADO_MAO_OBRA' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Select
+                  label="Tecnico"
+                  name="tecnicoId"
+                  required
+                  defaultValue={lancamento?.tecnicoId ? String(lancamento.tecnicoId) : ''}
+                  fullWidth
+                >
+                  <option value="">— Selecione</option>
+                  {tecnicos.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.nome}
+                    </option>
+                  ))}
+                </Select>
+                <Input
+                  label="Horas"
+                  name="horas"
+                  required
+                  placeholder="Ex.: 2,5"
+                  defaultValue={
+                    lancamento?.horas != null ? String(lancamento.horas).replace('.', ',') : ''
+                  }
+                  fullWidth
+                />
+              </div>
+            )}
 
-        {tipo === 'LIVRE' && (
-          <>
-            <Input
-              label="Descricao"
-              name="descricao"
-              defaultValue={lancamento?.descricao ?? ''}
-              fullWidth
-            />
-            <Input
-              label="Valor (R$)"
-              name="valorReais"
-              required
-              placeholder="Ex.: 1.250,00"
-              defaultValue={centavosParaCampo(lancamento?.valorTotalCentavos ?? null)}
-              error={estado.errosCampos?.valorReais}
-              fullWidth
-            />
-          </>
-        )}
+            {tipo === 'ESTRUTURADO_DESLOCAMENTO' && (
+              <>
+                <Input
+                  label="Quilometragem (km)"
+                  name="km"
+                  required
+                  placeholder="Ex.: 40"
+                  defaultValue={lancamento?.km != null ? String(lancamento.km).replace('.', ',') : ''}
+                  fullWidth
+                />
+                <Input
+                  label="Descricao (opcional)"
+                  name="descricao"
+                  defaultValue={lancamento?.descricao ?? ''}
+                  fullWidth
+                />
+              </>
+            )}
 
-        {tipo && tipo !== 'LIVRE' && (
-          <p className="text-xs text-slate-500">
-            O valor total e calculado pelo sistema a partir dos dados informados.
-          </p>
-        )}
+            {tipo === 'LIVRE' && (
+              <>
+                <Input
+                  label="Descricao"
+                  name="descricao"
+                  defaultValue={lancamento?.descricao ?? ''}
+                  fullWidth
+                />
+                <Input
+                  label="Valor (R$)"
+                  name="valorReais"
+                  required
+                  placeholder="Ex.: 1.250,00"
+                  defaultValue={centavosParaCampo(lancamento?.valorTotalCentavos ?? null)}
+                  error={estado.errosCampos?.valorReais}
+                  fullWidth
+                />
+              </>
+            )}
 
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <Button type="button" variant="ghost" onClick={onClose} disabled={pendente}>
-            Cancelar
-          </Button>
-          <Button type="submit" variant="primary" loading={pendente} disabled={!editando && !categoria}>
-            {pendente ? 'Salvando...' : editando ? 'Salvar' : 'Lancar'}
-          </Button>
-        </div>
-      </form>
+            {tipo && tipo !== 'LIVRE' && (
+              <p className="text-xs text-slate-500">
+                O valor total e calculado pelo sistema a partir dos dados informados.
+              </p>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <Button type="button" variant="ghost" onClick={onClose} disabled={pendente}>
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                loading={pendente}
+                disabled={!editando && !categoria}
+              >
+                {pendente ? 'Salvando...' : editando ? 'Salvar' : 'Lancar'}
+              </Button>
+            </div>
+          </form>
+        )}
+      </div>
     </Modal>
   )
 }

@@ -239,6 +239,30 @@ export type TecnicoResumoDto = {
   ativo: boolean
 }
 
+// ===== Referência de mão de obra (para lançar custo por horas) =====
+
+export type OrdemDoDiaRef = {
+  osId: number
+  codigoExibicao: string
+  servicoId: number
+  desteServico: boolean
+  clienteNome: string
+  descricaoAtividade: string
+  horaInicioExecucao: string | null
+  horaFimExecucao: string | null
+}
+
+export type TecnicoReferencia = {
+  tecnicoId: number
+  nome: string
+  valorHoraCentavos: number
+  ordens: OrdemDoDiaRef[]
+}
+
+export type MaoDeObraReferencia = {
+  tecnicos: TecnicoReferencia[]
+}
+
 // ===== Cadastro: Peça =====
 
 export type PecaResposta = {

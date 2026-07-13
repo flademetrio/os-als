@@ -1,11 +1,14 @@
 package br.com.osals.ordemservico.dominio;
 
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface RepositorioOrdemServico
         extends JpaRepository<OrdemServico, Long>, JpaSpecificationExecutor<OrdemServico> {
@@ -20,6 +23,15 @@ public interface RepositorioOrdemServico
     Optional<OrdemServico> findWithRelacionamentosById(Long id);
 
     List<OrdemServico> findByServicoIdOrderByNumero(Long servicoId);
+
+    /** OS de um servico agendadas para uma data — base da referencia de mao de obra. */
+    List<OrdemServico> findByServicoIdAndDataAgendada(Long servicoId, LocalDate dataAgendada);
+
+    /** OS (de qualquer servico) agendadas para uma data que tenham algum dos tecnicos. */
+    @Query("select distinct o from OrdemServico o join o.tecnicos t "
+            + "where o.dataAgendada = :data and t.usuarioId in :tecnicoIds")
+    List<OrdemServico> buscarPorDataETecnicos(@Param("data") LocalDate data,
+                                              @Param("tecnicoIds") Collection<Long> tecnicoIds);
 
     // A busca filtrada vive em EspecificacoesOrdemServico + GestorOrdemServico.listar(),
     // usando JpaSpecificationExecutor para evitar o problema do Postgres com

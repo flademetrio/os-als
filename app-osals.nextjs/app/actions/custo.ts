@@ -110,6 +110,23 @@ export async function editarCusto(
   return { sucesso: true }
 }
 
+/** Lanca mao de obra para varios tecnicos de uma vez (cria um custo por tecnico). */
+export async function lancarMaoDeObra(
+  servicoId: number,
+  corpo: { categoriaCustoId: number; dataCusto: string; tecnicoIds: number[]; horas: number },
+): Promise<EstadoCusto> {
+  try {
+    await clienteApi(`/servicos/${servicoId}/custos/mao-de-obra`, { method: 'POST', body: corpo })
+  } catch (err) {
+    if (err instanceof ErroApi) return { erro: err.body.mensagem }
+    if (err instanceof ErroConexao) return { erro: 'Falha de conexao com a API.' }
+    return { erro: 'Erro ao lancar a mao de obra.' }
+  }
+
+  revalidatePath(`/servicos/${servicoId}`)
+  return { sucesso: true }
+}
+
 export async function excluirCusto(servicoId: number, custoId: number): Promise<void> {
   try {
     await clienteApi(`/servicos/${servicoId}/custos/${custoId}`, { method: 'DELETE' })

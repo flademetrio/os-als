@@ -4,12 +4,16 @@ import br.com.osals.seguranca.dominio.Usuario;
 import br.com.osals.servico.aplicacao.GestorLancamentoCusto;
 import br.com.osals.servico.aplicacao.dto.LancamentoCustoRequisicao;
 import br.com.osals.servico.aplicacao.dto.LancamentoCustoResposta;
+import br.com.osals.servico.aplicacao.dto.LancamentoMaoDeObraRequisicao;
+import br.com.osals.servico.aplicacao.dto.MaoDeObraReferencia;
 import br.com.osals.servico.aplicacao.dto.ResumoFinanceiroServico;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -59,6 +64,27 @@ public class ControladorLancamentoCusto {
         return ResponseEntity
                 .created(URI.create("/servicos/" + servicoId + "/custos/" + c.id()))
                 .body(c);
+    }
+
+    @GetMapping("/mao-de-obra/referencia")
+    @PreAuthorize("hasAuthority('CUSTO_EDITAR')")
+    @Operation(summary = "Referencia p/ lancar mao de obra: tecnicos das OS do dia e suas OS no dia.")
+    public ResponseEntity<MaoDeObraReferencia> referenciaMaoDeObra(
+            @PathVariable Long servicoId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data
+    ) {
+        return ResponseEntity.ok(gestor.referenciaMaoDeObra(servicoId, data));
+    }
+
+    @PostMapping("/custos/mao-de-obra")
+    @PreAuthorize("hasAuthority('CUSTO_EDITAR')")
+    @Operation(summary = "Lanca mao de obra para varios tecnicos (cria um custo por tecnico).")
+    public ResponseEntity<List<LancamentoCustoResposta>> lancarMaoDeObra(
+            @PathVariable Long servicoId,
+            @Valid @RequestBody LancamentoMaoDeObraRequisicao req,
+            @AuthenticationPrincipal Usuario autor
+    ) {
+        return ResponseEntity.ok(gestor.lancarMaoDeObra(servicoId, req, autor));
     }
 
     @PutMapping("/custos/{custoId}")
