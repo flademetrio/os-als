@@ -114,10 +114,14 @@ public class GestorLancamentoCusto {
         return new MaoDeObraReferencia(tecnicos);
     }
 
-    /** Lanca mao de obra para varios tecnicos: cria um custo por tecnico (mesma data/horas). */
+    /**
+     * Lanca UM custo de mao de obra agregando os tecnicos selecionados: valor =
+     * soma de (valor/hora de cada tecnico x horas), detalhe = nomes (1o nome)
+     * separados por virgula + a jornada. Um lancamento por dia.
+     */
     @Transactional
-    public List<LancamentoCustoResposta> lancarMaoDeObra(Long servicoId,
-                                                         LancamentoMaoDeObraRequisicao req, Usuario autor) {
+    public LancamentoCustoResposta lancarMaoDeObra(Long servicoId,
+                                                   LancamentoMaoDeObraRequisicao req, Usuario autor) {
         Servico servico = servicoObrigatorio(servicoId);
         validarPermissaoAlteracao(servico, autor);
 
@@ -130,21 +134,26 @@ public class GestorLancamentoCusto {
             throw new NegocioException("Categoria selecionada nao e de mao de obra.");
         }
 
-        var criados = new ArrayList<LancamentoCustoResposta>();
+        long valorTotal = 0;
+        var nomes = new ArrayList<String>();
         for (Long tecnicoId : req.tecnicoIds().stream().distinct().toList()) {
             Tecnico tecnico = repositorioTecnico.findById(tecnicoId)
                     .orElseThrow(() -> new RecursoNaoEncontradoException("Tecnico nao encontrado: " + tecnicoId));
-            long valorHora = tecnico.getValorHoraCentavos();
-            long valorTotal = multiplicar(req.horas(), valorHora);
-            var lancamento = new LancamentoCusto(servico, autor);
-            lancamento.definirDataCusto(req.dataCusto());
-            lancamento.aplicarMaoDeObra(categoria, primeiroNome(tecnico.getUsuario().getNome()),
-                    tecnico, req.horas(), valorHora, valorTotal);
-            criados.add(mapper.paraResposta(repositorio.save(lancamento)));
+            valorTotal += multiplicar(req.horas(), tecnico.getValorHoraCentavos());
+            nomes.add(primeiroNome(tecnico.getUsuario().getNome()));
         }
-        log.info("Mao de obra lancada: servico={} tecnicos={} horas={}",
-                servicoId, criados.size(), req.horas());
-        return criados;
+        String detalhe = String.join(", ", nomes) + " - " + rotuloHoras(req.horas());
+        if (detalhe.length() > 255) {
+            detalhe = detalhe.substring(0, 255);
+        }
+
+        var lancamento = new LancamentoCusto(servico, autor);
+        lancamento.definirDataCusto(req.dataCusto());
+        lancamento.aplicarMaoDeObraAgregada(categoria, detalhe, req.horas(), valorTotal);
+        var salvo = repositorio.save(lancamento);
+        log.info("Mao de obra lancada: servico={} tecnicos={} horas={} valor={}",
+                servicoId, nomes.size(), req.horas(), valorTotal);
+        return mapper.paraResposta(salvo);
     }
 
     @Transactional
@@ -229,7 +238,16 @@ public class GestorLancamentoCusto {
 
     private void aplicarMaoDeObra(LancamentoCusto lancamento, CategoriaCusto categoria,
                                   String descricao, LancamentoCustoRequisicao req) {
-        if (req.tecnicoId() == null || req.horas() == null) {
+        // Lancamento agregado (varios tecnicos) nao tem tecnico unico: na edicao,
+        // o valor total e o detalhe sao informados direto.
+        if (req.tecnicoId() == null) {
+            if (req.valorTotalCentavos() == null) {
+                throw new NegocioException("Mao de obra exige tecnico e horas, ou o valor total.");
+            }
+            lancamento.aplicarMaoDeObraAgregada(categoria, descricao, req.horas(), req.valorTotalCentavos());
+            return;
+        }
+        if (req.horas() == null) {
             throw new NegocioException("Mao de obra exige tecnico e horas.");
         }
         Tecnico tecnico = repositorioTecnico.findById(req.tecnicoId())
@@ -318,6 +336,14 @@ public class GestorLancamentoCusto {
                 os.getDescricaoAtividade(),
                 os.getHoraInicioExecucao(),
                 os.getHoraFimExecucao());
+    }
+
+    /** Rotulo da jornada para o detalhe: 9 -> "9h", 4.5 -> "4h30", 2.5 -> "2h30". */
+    private static String rotuloHoras(BigDecimal horas) {
+        int totalMin = horas.multiply(BigDecimal.valueOf(60)).setScale(0, RoundingMode.HALF_UP).intValueExact();
+        int h = totalMin / 60;
+        int m = totalMin % 60;
+        return m == 0 ? h + "h" : h + "h" + String.format("%02d", m);
     }
 
     /** Primeiro nome (para o detalhe do custo de mao de obra). */

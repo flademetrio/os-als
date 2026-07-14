@@ -103,13 +103,13 @@ export function ModalCusto({ servicoId, categorias, tecnicos, lancamento, onClos
               fullWidth
             />
 
-            {tipo === 'ESTRUTURADO_MAO_OBRA' && (
+            {tipo === 'ESTRUTURADO_MAO_OBRA' && lancamento?.tecnicoId != null && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Select
                   label="Tecnico"
                   name="tecnicoId"
                   required
-                  defaultValue={lancamento?.tecnicoId ? String(lancamento.tecnicoId) : ''}
+                  defaultValue={String(lancamento.tecnicoId)}
                   fullWidth
                 >
                   <option value="">— Selecione</option>
@@ -125,11 +125,31 @@ export function ModalCusto({ servicoId, categorias, tecnicos, lancamento, onClos
                   required
                   placeholder="Ex.: 2,5"
                   defaultValue={
-                    lancamento?.horas != null ? String(lancamento.horas).replace('.', ',') : ''
+                    lancamento.horas != null ? String(lancamento.horas).replace('.', ',') : ''
                   }
                   fullWidth
                 />
               </div>
+            )}
+
+            {tipo === 'ESTRUTURADO_MAO_OBRA' && lancamento != null && lancamento.tecnicoId == null && (
+              <>
+                <Input
+                  label="Detalhe (tecnicos)"
+                  name="descricao"
+                  defaultValue={lancamento.descricao ?? ''}
+                  fullWidth
+                />
+                <Input
+                  label="Valor (R$)"
+                  name="valorReais"
+                  required
+                  placeholder="Ex.: 1.250,00"
+                  defaultValue={centavosParaCampo(lancamento.valorTotalCentavos)}
+                  error={estado.errosCampos?.valorReais}
+                  fullWidth
+                />
+              </>
             )}
 
             {tipo === 'ESTRUTURADO_DESLOCAMENTO' && (
@@ -171,7 +191,8 @@ export function ModalCusto({ servicoId, categorias, tecnicos, lancamento, onClos
               </>
             )}
 
-            {tipo && tipo !== 'LIVRE' && (
+            {(tipo === 'ESTRUTURADO_DESLOCAMENTO' ||
+              (tipo === 'ESTRUTURADO_MAO_OBRA' && lancamento?.tecnicoId != null)) && (
               <p className="text-xs text-slate-500">
                 O valor total e calculado pelo sistema a partir dos dados informados.
               </p>

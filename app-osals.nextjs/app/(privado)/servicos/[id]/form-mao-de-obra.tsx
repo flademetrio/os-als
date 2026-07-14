@@ -202,7 +202,8 @@ export function FormMaoDeObra({
       )}
 
       <p className="text-xs text-slate-500">
-        Cria um custo de Mão de Obra por técnico selecionado (valor = valor/hora do técnico × horas).
+        Cria um único custo de Mão de Obra somando os técnicos (valor = Σ valor/hora × horas); o
+        detalhe fica com os nomes separados por vírgula.
       </p>
 
       <div className="flex items-center justify-end gap-3 pt-2">

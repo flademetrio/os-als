@@ -151,6 +151,8 @@ export function TabCustos({
 
 function detalhe(l: LancamentoCustoResposta): string {
   if (l.tipoLancamento === 'ESTRUTURADO_MAO_OBRA') {
+    // Agregado (varios tecnicos): o detalhe ja vem com os nomes + jornada.
+    if (!l.tecnicoNome) return l.descricao || '-'
     const horas = l.horas != null ? `${String(l.horas).replace('.', ',')}h` : ''
     return [l.tecnicoNome, horas].filter(Boolean).join(' — ') || '-'
   }

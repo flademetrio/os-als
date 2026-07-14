@@ -13,7 +13,7 @@ public interface RepositorioLancamentoCusto extends JpaRepository<LancamentoCust
             LEFT JOIN FETCH l.tecnico t
             LEFT JOIN FETCH t.usuario
             WHERE l.servico.id = :servicoId
-            ORDER BY l.id
+            ORDER BY l.dataCusto DESC, l.id DESC
             """)
     List<LancamentoCusto> listarDoServico(@Param("servicoId") Long servicoId);
 

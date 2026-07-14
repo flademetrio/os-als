@@ -78,8 +78,8 @@ public class ControladorLancamentoCusto {
 
     @PostMapping("/custos/mao-de-obra")
     @PreAuthorize("hasAuthority('CUSTO_EDITAR')")
-    @Operation(summary = "Lanca mao de obra para varios tecnicos (cria um custo por tecnico).")
-    public ResponseEntity<List<LancamentoCustoResposta>> lancarMaoDeObra(
+    @Operation(summary = "Lanca um custo de mao de obra agregando varios tecnicos.")
+    public ResponseEntity<LancamentoCustoResposta> lancarMaoDeObra(
             @PathVariable Long servicoId,
             @Valid @RequestBody LancamentoMaoDeObraRequisicao req,
             @AuthenticationPrincipal Usuario autor

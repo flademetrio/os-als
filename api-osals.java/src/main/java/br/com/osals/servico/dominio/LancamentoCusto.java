@@ -109,6 +109,23 @@ public class LancamentoCusto {
         this.valorKmSnapshotCentavos = null;
     }
 
+    /**
+     * Mao de obra agregada (varios tecnicos num lancamento): valor total ja somado
+     * e detalhe com os nomes. Sem tecnico unico (tecnico = null); horas informa a
+     * jornada aplicada. Editar reaproveita este caminho (valor informado direto).
+     */
+    public void aplicarMaoDeObraAgregada(CategoriaCusto categoria, String descricao,
+                                         BigDecimal horas, long valorTotalCentavos) {
+        this.categoriaCusto = categoria;
+        this.descricao = descricao;
+        this.valorTotalCentavos = valorTotalCentavos;
+        this.horas = horas;
+        this.tecnico = null;
+        this.valorHoraSnapshotCentavos = null;
+        this.km = null;
+        this.valorKmSnapshotCentavos = null;
+    }
+
     /** Lancamento de deslocamento: valor = km x valor/km (snapshot da configuracao). */
     public void aplicarDeslocamento(CategoriaCusto categoria, String descricao,
                                     BigDecimal km, long valorKmSnapshotCentavos, long valorTotalCentavos) {
