@@ -4,6 +4,7 @@ import br.com.osals.compartilhado.api.PaginaResposta;
 import br.com.osals.relatorio.aplicacao.GestorRelatorio;
 import br.com.osals.relatorio.aplicacao.dto.CustosPorClienteItem;
 import br.com.osals.relatorio.aplicacao.dto.CustosPorServicoItem;
+import br.com.osals.relatorio.aplicacao.dto.OsPorPeriodoItem;
 import br.com.osals.relatorio.aplicacao.dto.OsPorStatusRelatorio;
 import br.com.osals.relatorio.aplicacao.dto.ServicoAbertoItem;
 import br.com.osals.servico.dominio.StatusServico;
@@ -72,6 +73,15 @@ public class ControladorRelatorio {
             @RequestParam(required = false) Integer tipoServicoId
     ) {
         return ResponseEntity.ok(gestor.servicosAbertos(clienteId, tipoServicoId));
+    }
+
+    @GetMapping("/os-por-periodo")
+    @Operation(summary = "OS agendadas num periodo (pela data agendada), organizadas por data.")
+    public ResponseEntity<List<OsPorPeriodoItem>> osPorPeriodo(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim
+    ) {
+        return ResponseEntity.ok(gestor.osPorPeriodo(inicio, fim));
     }
 
     @GetMapping("/custos-por-cliente")

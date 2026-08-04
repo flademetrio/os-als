@@ -3,6 +3,12 @@ import { Card } from '@/components/ui/Card'
 
 const RELATORIOS = [
   {
+    href: '/relatorios/os-por-periodo',
+    titulo: 'OS por periodo',
+    descricao:
+      'Ordens de servico agendadas entre duas datas, organizadas por dia: cliente, atividade, tecnicos, veiculos e execucao.',
+  },
+  {
     href: '/relatorios/servicos-abertos',
     titulo: 'Servicos abertos',
     descricao:

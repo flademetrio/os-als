@@ -7,6 +7,7 @@ import br.com.osals.ordemservico.dominio.OrdemServico;
 import br.com.osals.ordemservico.dominio.StatusOrdemServico;
 import br.com.osals.relatorio.aplicacao.dto.CustosPorClienteItem;
 import br.com.osals.relatorio.aplicacao.dto.CustosPorServicoItem;
+import br.com.osals.relatorio.aplicacao.dto.OsPorPeriodoItem;
 import br.com.osals.relatorio.aplicacao.dto.OsPorStatusRelatorio;
 import br.com.osals.relatorio.aplicacao.dto.OsPorStatusRelatorio.ContagemStatus;
 import br.com.osals.relatorio.aplicacao.dto.OsPorStatusRelatorio.OsItem;
@@ -89,6 +90,38 @@ public class GestorRelatorio {
                 os.getStatus(),
                 os.getStatus().getRotulo()
         );
+    }
+
+    // ===== OS por Periodo =====
+
+    public List<OsPorPeriodoItem> osPorPeriodo(LocalDate inicio, LocalDate fim) {
+        return consultas.listarOsPorPeriodo(inicio, fim).stream()
+                .map(GestorRelatorio::paraOsPorPeriodoItem).toList();
+    }
+
+    private static OsPorPeriodoItem paraOsPorPeriodoItem(OrdemServico os) {
+        Servico s = os.getServico();
+        String tecnicos = os.getTecnicos().stream()
+                .map(t -> t.getUsuario().getNome())
+                .collect(Collectors.joining(", "));
+        String veiculos = os.getVeiculos().stream()
+                .map(v -> java.util.stream.Stream.of(v.getPlaca(), v.getModelo())
+                        .filter(x -> x != null && !x.isBlank())
+                        .collect(Collectors.joining(" ")))
+                .collect(Collectors.joining(", "));
+        return new OsPorPeriodoItem(
+                os.getId(),
+                os.getDataAgendada(),
+                String.format("%04d-%05d", s.getNumero(), os.getNumero()),
+                s.getCliente().getNome(),
+                s.getDescricao(),
+                os.getDescricaoAtividade(),
+                tecnicos,
+                veiculos,
+                os.getHoraInicioExecucao(),
+                os.getHoraFimExecucao(),
+                os.getStatus(),
+                os.getStatus().getRotulo());
     }
 
     // ===== Custos por Servico =====

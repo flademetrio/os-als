@@ -587,6 +587,21 @@ export type ServicoAbertoItem = {
   valorCentavos: number | null
 }
 
+export type OsPorPeriodoItem = {
+  osId: number
+  data: string
+  codigoExibicao: string
+  clienteNome: string
+  servicoDescricao: string
+  atividade: string
+  tecnicos: string
+  veiculos: string
+  horaInicioExecucao: string | null
+  horaFimExecucao: string | null
+  status: StatusOrdemServico
+  statusRotulo: string
+}
+
 // ===== Cobranca e Faturamento =====
 
 export type TipoCobranca = 'COBRADO' | 'GARANTIA' | 'ORCAMENTO' | 'SEM_COBRANCA'

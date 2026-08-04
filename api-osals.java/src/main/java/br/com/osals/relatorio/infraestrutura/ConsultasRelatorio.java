@@ -5,6 +5,7 @@ import br.com.osals.servico.dominio.Servico;
 import br.com.osals.servico.dominio.StatusServico;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -84,6 +85,20 @@ public class ConsultasRelatorio {
             params.put("tecnicoId", tecnicoId);
         }
         return clausulas.isEmpty() ? "" : " WHERE " + String.join(" AND ", clausulas);
+    }
+
+    // ===== OS por Periodo (pela data agendada) =====
+
+    /** OS agendadas dentro do periodo [inicio, fim], ordenadas por data e numero. */
+    public List<OrdemServico> listarOsPorPeriodo(LocalDate inicio, LocalDate fim) {
+        var query = em.createQuery(
+                "SELECT os FROM OrdemServico os"
+                        + " WHERE os.dataAgendada IS NOT NULL"
+                        + " AND os.dataAgendada >= :inicio AND os.dataAgendada <= :fim"
+                        + " ORDER BY os.dataAgendada, os.numero", OrdemServico.class);
+        query.setParameter("inicio", inicio);
+        query.setParameter("fim", fim);
+        return query.getResultList();
     }
 
     // ===== Custos por Servico =====
