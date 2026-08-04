@@ -102,7 +102,7 @@ public class GestorRelatorio {
     private static OsPorPeriodoItem paraOsPorPeriodoItem(OrdemServico os) {
         Servico s = os.getServico();
         String tecnicos = os.getTecnicos().stream()
-                .map(t -> t.getUsuario().getNome())
+                .map(t -> primeiroNome(t.getUsuario().getNome()))
                 .collect(Collectors.joining(", "));
         String veiculos = os.getVeiculos().stream()
                 .map(v -> java.util.stream.Stream.of(v.getPlaca(), v.getModelo())
@@ -228,6 +228,14 @@ public class GestorRelatorio {
     }
 
     // ===== Helpers =====
+
+    /** Primeiro nome (para as colunas de tecnicos nos relatorios). */
+    private static String primeiroNome(String nome) {
+        if (nome == null) return "";
+        var t = nome.trim();
+        int sp = t.indexOf(' ');
+        return sp > 0 ? t.substring(0, sp) : t;
+    }
 
     private static long aplicarMarkup(long custoTotalCentavos, BigDecimal markupPercentual) {
         BigDecimal fator = BigDecimal.ONE.add(markupPercentual.divide(CEM));
