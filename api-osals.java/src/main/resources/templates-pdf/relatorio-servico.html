@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="'Relatório de Serviço ' + ${s.numero}">Relatório de Serviço</title>
+    <style>/*<![CDATA[*/
+        @page { size: A4; margin: 1.2cm 1.2cm 1.4cm 1.2cm; }
+        * { box-sizing: border-box; }
+        body { font-family: sans-serif; font-size: 9.5pt; color: #1e293b; margin: 0; line-height: 1.35; }
+        .empresa { border-bottom: 2px solid #0ea5e9; padding-bottom: 5px; margin-bottom: 8px; }
+        .empresa .razao { font-size: 13pt; font-weight: bold; color: #0c4a6e; }
+        .empresa .linha { font-size: 8pt; color: #475569; }
+        .titulo { background: #0c4a6e; color: #ffffff; padding: 5px 9px; font-size: 12pt; font-weight: bold; }
+        .titulo .status { float: right; font-size: 9.5pt; font-weight: normal; }
+        h2.secao { font-size: 10pt; color: #0c4a6e; text-transform: uppercase;
+                   border-bottom: 1px solid #cbd5e1; padding-bottom: 2px; margin: 14px 0 6px 0; }
+        .grid { width: 100%; }
+        .grid td { vertical-align: top; padding: 1px 10px 3px 0; font-size: 9pt; }
+        .rotulo { color: #64748b; font-size: 7.5pt; text-transform: uppercase; display: block; }
+        .valor { color: #1e293b; }
+        .desc { white-space: pre-wrap; }
+        .os { border: 1px solid #cbd5e1; border-radius: 3px; padding: 6px 8px; margin-bottom: 7px; }
+        .os .cab { border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 4px; }
+        .os .cab .codigo { font-weight: bold; color: #0c4a6e; }
+        .os .cab .data { color: #475569; }
+        .os .cab .st { float: right; color: #475569; font-size: 8.5pt; }
+        table.dados { width: 100%; border-collapse: collapse; margin-top: 3px; }
+        table.dados th, table.dados td { border: 1px solid #cbd5e1; padding: 3px 6px; font-size: 8.5pt; text-align: left; }
+        table.dados th { background: #f1f5f9; color: #0c4a6e; }
+        table.dados td.num { text-align: right; white-space: nowrap; }
+        table.dados tr.total td { background: #f8fafc; font-weight: bold; }
+        .campo { margin-bottom: 3px; }
+        .vazio { color: #94a3b8; font-size: 9pt; }
+    /*]]>*/</style>
+</head>
+<body>
+
+    <div class="empresa">
+        <div class="razao" th:text="${empresa.razaoSocial}">Razao Social</div>
+        <div class="linha" th:text="'CNPJ: ' + ${empresa.cnpj} + '  -  IE: ' + ${empresa.inscricaoEstadual}">CNPJ</div>
+        <div class="linha" th:text="${empresa.endereco}">Endereco</div>
+    </div>
+
+    <div class="titulo">
+        <span th:text="'Relatório de Serviço ' + ${s.numero}">Relatório de Serviço</span>
+        <span class="status" th:text="${s.status}">Status</span>
+    </div>
+
+    <table class="grid">
+        <tr>
+            <td style="width:50%"><span class="rotulo">Cliente</span><span class="valor" th:text="${s.cliente}">Cliente</span></td>
+            <td style="width:25%"><span class="rotulo">Tipo</span><span class="valor" th:text="${s.tipo}">Tipo</span></td>
+            <td style="width:25%"><span class="rotulo">Empresa</span><span class="valor" th:text="${s.empresa}">Empresa</span></td>
+        </tr>
+        <tr>
+            <td><span class="rotulo">Inicio previsto</span><span class="valor" th:text="${s.inicio}">-</span></td>
+            <td><span class="rotulo">Fim previsto</span><span class="valor" th:text="${s.fim}">-</span></td>
+            <td><span class="rotulo">Aberto em</span><span class="valor" th:text="${s.aberto}">-</span></td>
+        </tr>
+        <tr>
+            <td colspan="3"><span class="rotulo">Finalizado</span><span class="valor" th:text="${s.finalizado}">-</span></td>
+        </tr>
+    </table>
+    <div style="margin-top:6px">
+        <span class="rotulo">Descricao do servico</span>
+        <span class="valor desc" th:text="${s.descricao}">Descricao</span>
+    </div>
+
+    <h2 class="secao" th:text="'Ordens de servico (' + ${#lists.size(ordens)} + ')'">Ordens de servico</h2>
+    <div th:if="${#lists.isEmpty(ordens)}" class="vazio">Nenhuma OS neste servico.</div>
+    <div class="os" th:each="o : ${ordens}">
+        <div class="cab">
+            <span class="codigo" th:text="${o.codigo}">0000-00000</span>
+            <span class="data" th:text="' - ' + ${o.data}"> - data</span>
+            <span class="st" th:text="${o.status}">Status</span>
+        </div>
+        <div class="campo"><span class="rotulo">Atividade prevista</span><span class="valor desc" th:text="${o.atividade}">-</span></div>
+        <div class="campo"><span class="rotulo">O que foi feito</span><span class="valor desc" th:text="${o.feito}">-</span></div>
+        <table class="grid">
+            <tr>
+                <td style="width:40%"><span class="rotulo">Tecnicos</span><span class="valor" th:text="${o.tecnicos}">-</span></td>
+                <td style="width:40%"><span class="rotulo">Veiculos</span><span class="valor" th:text="${o.veiculos}">-</span></td>
+                <td style="width:20%"><span class="rotulo">Execucao</span><span class="valor" th:text="${o.execucao}">-</span></td>
+            </tr>
+        </table>
+        <div class="campo" th:if="${!o.observacoes.isEmpty()}"><span class="rotulo">Observacoes</span><span class="valor desc" th:text="${o.observacoes}">-</span></div>
+        <div class="campo" th:if="${!o.impedimentos.isEmpty()}"><span class="rotulo">Impedimentos</span><span class="valor desc" th:text="${o.impedimentos}">-</span></div>
+    </div>
+
+    <h2 class="secao" th:text="'Custos (' + ${#lists.size(custos)} + ')'">Custos</h2>
+    <div th:if="${#lists.isEmpty(custos)}" class="vazio">Nenhum custo lancado.</div>
+    <table class="dados" th:unless="${#lists.isEmpty(custos)}">
+        <tr><th style="width:16%">Data</th><th style="width:24%">Categoria</th><th>Detalhe</th><th style="width:18%">Valor</th></tr>
+        <tr th:each="c : ${custos}">
+            <td th:text="${c.data}">-</td>
+            <td th:text="${c.categoria}">-</td>
+            <td th:text="${c.detalhe}">-</td>
+            <td class="num" th:text="${c.valor}">R$ 0,00</td>
+        </tr>
+        <tr class="total"><td colspan="3">Custo total</td><td class="num" th:text="${custoTotal}">R$ 0,00</td></tr>
+    </table>
+
+    <h2 class="secao">Cobranca</h2>
+    <table class="grid">
+        <tr>
+            <td style="width:25%"><span class="rotulo">Tipo</span><span class="valor" th:text="${cob.tipo}">-</span></td>
+            <td style="width:25%"><span class="rotulo">Valor cobrado</span><span class="valor" th:text="${cob.valor}">-</span></td>
+            <td style="width:25%"><span class="rotulo">Dias previstos</span><span class="valor" th:text="${cob.dias}">-</span></td>
+            <td style="width:25%"><span class="rotulo">Pessoas</span><span class="valor" th:text="${cob.pessoas}">-</span></td>
+        </tr>
+    </table>
+    <div class="campo" th:if="${!cob.obs.isEmpty()}" style="margin-top:4px"><span class="rotulo">Obs</span><span class="valor desc" th:text="${cob.obs}">-</span></div>
+
+    <h2 class="secao">Faturamento (notas fiscais)</h2>
+    <div th:unless="${fat.aplicavel}" class="vazio">Faturamento nao se aplica (cobranca nao e Cobrado).</div>
+    <div th:if="${fat.aplicavel}">
+        <div class="campo"><span class="valor"><b>Status:</b> <span th:text="${fat.status}">-</span> &#160;&#160; <b>Total das NFs:</b> <span th:text="${fat.totalNf}">R$ 0,00</span></span></div>
+        <div th:if="${#lists.isEmpty(fat.notas)}" class="vazio">Nenhuma nota fiscal lancada.</div>
+        <table class="dados" th:unless="${#lists.isEmpty(fat.notas)}">
+            <tr><th style="width:30%">NF</th><th style="width:30%">Emissao</th><th>Valor</th></tr>
+            <tr th:each="n : ${fat.notas}">
+                <td th:text="${n.numero}">-</td>
+                <td th:text="${n.data}">-</td>
+                <td class="num" th:text="${n.valor}">R$ 0,00</td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

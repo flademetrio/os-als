@@ -4,6 +4,7 @@ import br.com.osals.compartilhado.api.PaginaResposta;
 import br.com.osals.configuracao.aplicacao.ServicoConfiguracao;
 import br.com.osals.configuracao.dominio.ChavesConfiguracao;
 import br.com.osals.ordemservico.dominio.OrdemServico;
+import br.com.osals.ordemservico.dominio.RepositorioOrdemServico;
 import br.com.osals.ordemservico.dominio.StatusOrdemServico;
 import br.com.osals.relatorio.aplicacao.dto.CustosPorClienteItem;
 import br.com.osals.relatorio.aplicacao.dto.CustosPorServicoItem;
@@ -11,8 +12,15 @@ import br.com.osals.relatorio.aplicacao.dto.OsPorPeriodoItem;
 import br.com.osals.relatorio.aplicacao.dto.OsPorStatusRelatorio;
 import br.com.osals.relatorio.aplicacao.dto.OsPorStatusRelatorio.ContagemStatus;
 import br.com.osals.relatorio.aplicacao.dto.OsPorStatusRelatorio.OsItem;
+import br.com.osals.relatorio.aplicacao.dto.RelatorioServicoCompleto;
+import br.com.osals.relatorio.aplicacao.dto.RelatorioServicoCompleto.OrdemRelatorioItem;
 import br.com.osals.relatorio.aplicacao.dto.ServicoAbertoItem;
 import br.com.osals.relatorio.infraestrutura.ConsultasRelatorio;
+import br.com.osals.servico.aplicacao.GestorCobranca;
+import br.com.osals.servico.aplicacao.GestorFaturamento;
+import br.com.osals.servico.aplicacao.GestorLancamentoCusto;
+import br.com.osals.servico.aplicacao.GestorServico;
+import br.com.osals.servico.aplicacao.dto.LancamentoCustoResposta;
 import br.com.osals.servico.dominio.Servico;
 import br.com.osals.servico.dominio.StatusServico;
 import br.com.osals.servico.dominio.TipoCobranca;
@@ -22,6 +30,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,10 +50,76 @@ public class GestorRelatorio {
 
     private final ConsultasRelatorio consultas;
     private final ServicoConfiguracao servicoConfiguracao;
+    private final GestorServico gestorServico;
+    private final GestorLancamentoCusto gestorCusto;
+    private final GestorCobranca gestorCobranca;
+    private final GestorFaturamento gestorFaturamento;
+    private final RepositorioOrdemServico repositorioOrdemServico;
 
-    public GestorRelatorio(ConsultasRelatorio consultas, ServicoConfiguracao servicoConfiguracao) {
+    public GestorRelatorio(ConsultasRelatorio consultas, ServicoConfiguracao servicoConfiguracao,
+                           GestorServico gestorServico, GestorLancamentoCusto gestorCusto,
+                           GestorCobranca gestorCobranca, GestorFaturamento gestorFaturamento,
+                           RepositorioOrdemServico repositorioOrdemServico) {
         this.consultas = consultas;
         this.servicoConfiguracao = servicoConfiguracao;
+        this.gestorServico = gestorServico;
+        this.gestorCusto = gestorCusto;
+        this.gestorCobranca = gestorCobranca;
+        this.gestorFaturamento = gestorFaturamento;
+        this.repositorioOrdemServico = repositorioOrdemServico;
+    }
+
+    // ===== Dossie completo de um Servico =====
+
+    public RelatorioServicoCompleto servicoCompleto(Long servicoId) {
+        var servico = gestorServico.buscarPorId(servicoId);
+
+        // OS por data agendada (nulls por ultimo), depois numero.
+        var ordens = repositorioOrdemServico.findByServicoIdOrderByNumero(servicoId).stream()
+                .sorted(Comparator
+                        .comparing((OrdemServico o) -> o.getDataAgendada(),
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(OrdemServico::getNumero))
+                .map(GestorRelatorio::paraOrdemRelatorioItem)
+                .toList();
+
+        // Custos por data (crescente).
+        var custos = gestorCusto.listar(servicoId).stream()
+                .sorted(Comparator.comparing(LancamentoCustoResposta::dataCusto,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
+        long custoTotal = custos.stream().mapToLong(LancamentoCustoResposta::valorTotalCentavos).sum();
+
+        var cobranca = gestorCobranca.buscar(servicoId);
+        var faturamento = gestorFaturamento.buscar(servicoId);
+
+        return new RelatorioServicoCompleto(servico, ordens, custos, custoTotal, cobranca, faturamento);
+    }
+
+    private static OrdemRelatorioItem paraOrdemRelatorioItem(OrdemServico os) {
+        Servico s = os.getServico();
+        String tecnicos = os.getTecnicos().stream()
+                .map(t -> primeiroNome(t.getUsuario().getNome()))
+                .collect(Collectors.joining(", "));
+        String veiculos = os.getVeiculos().stream()
+                .map(v -> java.util.stream.Stream.of(v.getPlaca(), v.getModelo())
+                        .filter(x -> x != null && !x.isBlank())
+                        .collect(Collectors.joining(" ")))
+                .collect(Collectors.joining(", "));
+        return new OrdemRelatorioItem(
+                os.getId(),
+                String.format("%04d-%05d", s.getNumero(), os.getNumero()),
+                os.getDataAgendada(),
+                os.getDataAbertura(),
+                os.getDescricaoAtividade(),
+                os.getOQueFoiFeito(),
+                os.getObservacoes(),
+                os.getImpedimentos(),
+                tecnicos,
+                veiculos,
+                os.getHoraInicioExecucao(),
+                os.getHoraFimExecucao(),
+                os.getStatus().getRotulo());
     }
 
     // ===== OS por Status =====

@@ -3,6 +3,12 @@ import { Card } from '@/components/ui/Card'
 
 const RELATORIOS = [
   {
+    href: '/relatorios/servico',
+    titulo: 'Relatório de Serviço',
+    descricao:
+      'Escolha um cliente e um servico para ver tudo dele num relatorio: dados, OS por data (execucao, tecnicos, veiculo), custos, cobranca e notas fiscais.',
+  },
+  {
     href: '/relatorios/os-por-periodo',
     titulo: 'OS por periodo',
     descricao:

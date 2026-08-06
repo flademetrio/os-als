@@ -648,3 +648,30 @@ export type FaturamentoResposta = {
   fechadoPorNome: string | null
   notas: NotaFiscalResposta[]
 }
+
+// ===== Relatório: dossiê completo do serviço =====
+
+export type OrdemRelatorioItem = {
+  osId: number
+  codigoExibicao: string
+  dataAgendada: string | null
+  dataAbertura: string
+  descricaoAtividade: string
+  oQueFoiFeito: string | null
+  observacoes: string | null
+  impedimentos: string | null
+  tecnicos: string
+  veiculos: string
+  horaInicioExecucao: string | null
+  horaFimExecucao: string | null
+  statusRotulo: string
+}
+
+export type RelatorioServicoCompleto = {
+  servico: ServicoResposta
+  ordens: OrdemRelatorioItem[]
+  custos: LancamentoCustoResposta[]
+  custoTotalCentavos: number
+  cobranca: CobrancaResposta
+  faturamento: FaturamentoResposta
+}
