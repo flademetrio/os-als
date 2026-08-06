@@ -135,6 +135,39 @@ export async function digitarExecucaoOs(
   return { sucesso: true }
 }
 
+/** Correcao administrativa da execucao de uma OS concluida (apenas admin). */
+export async function editarExecucaoOs(
+  osId: number,
+  _estado: EstadoOrdemServico,
+  formData: FormData,
+): Promise<EstadoOrdemServico> {
+  const parse = digitacaoExecucaoSchema.safeParse(Object.fromEntries(formData))
+  if (!parse.success) return aplicarErros(parse.error)
+
+  const corpo = {
+    horaInicioExecucao: paraIso(parse.data.horaInicioExecucao),
+    horaFimExecucao: paraIso(parse.data.horaFimExecucao),
+    oQueFoiFeito: parse.data.oQueFoiFeito,
+    observacoes: parse.data.observacoes,
+    impedimentos: parse.data.impedimentos,
+  }
+
+  try {
+    await clienteApi(`/ordens-servico/${osId}/editar-execucao`, {
+      method: 'POST',
+      body: corpo,
+    })
+  } catch (err) {
+    if (err instanceof ErroApi) return { erro: err.body.mensagem }
+    if (err instanceof ErroConexao) return { erro: 'Falha de conexao com a API.' }
+    return { erro: 'Erro ao editar a execucao.' }
+  }
+
+  revalidatePath(`/ordens-servico/${osId}`)
+  revalidatePath('/ordens-servico')
+  return { sucesso: true }
+}
+
 export async function marcarDevolvidaOs(osId: number): Promise<void> {
   try {
     await clienteApi(`/ordens-servico/${osId}/marcar-devolvida`, { method: 'POST' })

@@ -120,6 +120,17 @@ public class ControladorOrdemServico {
         return ResponseEntity.ok(gestor.digitarExecucao(id, req, autor));
     }
 
+    @PostMapping("/ordens-servico/{id}/editar-execucao")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Corrige a execucao de uma OS concluida (sem mudar o status). Apenas admin.")
+    public ResponseEntity<OrdemServicoResposta> editarExecucao(
+            @PathVariable Long id,
+            @Valid @RequestBody DigitacaoExecucaoRequisicao req,
+            @AuthenticationPrincipal Usuario autor
+    ) {
+        return ResponseEntity.ok(gestor.editarExecucao(id, req, autor));
+    }
+
     @PostMapping("/ordens-servico/{id}/marcar-devolvida")
     @PreAuthorize("hasAuthority('SERVICO_GERENCIAR')")
     @Operation(summary = "Marca que o papel preenchido voltou e aguarda digitacao.")

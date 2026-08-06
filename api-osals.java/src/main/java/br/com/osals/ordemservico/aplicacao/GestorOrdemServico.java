@@ -170,6 +170,22 @@ public class GestorOrdemServico {
         return mapper.paraResposta(os);
     }
 
+    /** Correcao administrativa da execucao de uma OS concluida (sem mudar o status). */
+    @Transactional
+    public OrdemServicoResposta editarExecucao(Long id, DigitacaoExecucaoRequisicao req, Usuario autor) {
+        var os = obrigatorio(id);
+        if (req.horaInicioExecucao() != null && req.horaFimExecucao() != null
+                && req.horaFimExecucao().isBefore(req.horaInicioExecucao())) {
+            throw new NegocioException("A hora de fim nao pode ser anterior a hora de inicio.");
+        }
+        os.editarExecucaoConcluida(
+                req.horaInicioExecucao(), req.horaFimExecucao(),
+                req.oQueFoiFeito().trim(),
+                normalizar(req.observacoes()), normalizar(req.impedimentos()));
+        log.info("Execucao da OS {} editada por admin {}", id, autor.getId());
+        return mapper.paraResposta(os);
+    }
+
     @Transactional
     public OrdemServicoResposta marcarDevolvida(Long id) {
         var os = obrigatorio(id);

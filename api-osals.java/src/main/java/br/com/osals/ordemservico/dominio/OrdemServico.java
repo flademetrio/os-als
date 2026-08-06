@@ -206,6 +206,25 @@ public class OrdemServico {
         this.status = StatusOrdemServico.CONCLUIDA;
     }
 
+    /**
+     * Edita os dados de execucao de uma OS ja CONCLUIDA (correcao administrativa),
+     * sem mudar o status nem a autoria original da digitacao. So permitido quando
+     * concluida — usado por endpoint restrito a admin.
+     */
+    public void editarExecucaoConcluida(OffsetDateTime horaInicio, OffsetDateTime horaFim,
+                                        String oQueFoiFeito, String observacoes, String impedimentos) {
+        if (status != StatusOrdemServico.CONCLUIDA) {
+            throw new NegocioException(
+                    "So e possivel editar a execucao de uma OS concluida. Status atual: "
+                            + status.getRotulo() + ".");
+        }
+        this.horaInicioExecucao = horaInicio;
+        this.horaFimExecucao = horaFim;
+        this.oQueFoiFeito = oQueFoiFeito;
+        this.observacoes = observacoes;
+        this.impedimentos = impedimentos;
+    }
+
     public void cancelar() {
         transicionar(StatusOrdemServico.CANCELADA);
     }

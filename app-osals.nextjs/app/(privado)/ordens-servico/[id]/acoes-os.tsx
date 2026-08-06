@@ -61,6 +61,7 @@ export function AcoesOs({
   const [confirmarReabrir, setConfirmarReabrir] = useState(false)
   const [editando, setEditando] = useState(false)
   const [digitando, setDigitando] = useState(false)
+  const [editandoExecucao, setEditandoExecucao] = useState(false)
   const [imprimindo, setImprimindo] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [pendente, iniciar] = useTransition()
@@ -69,6 +70,7 @@ export function AcoesOs({
   const podeMostrarEditar = !encerrada && podeEditar && dadosEdicao != null
   const podeDigitar = os.status === 'IMPRESSA' || os.status === 'PENDENTE_DIGITACAO'
   const podeReabrir = ehAdmin && os.status === 'CANCELADA'
+  const podeEditarExecucao = ehAdmin && os.status === 'CONCLUIDA'
 
   /** Apos concluir a OS: fecha o modal de digitacao e leva o usuario ao servico. */
   function execucaoConcluida() {
@@ -151,6 +153,11 @@ export function AcoesOs({
             Cancelar OS
           </Button>
         )}
+        {podeEditarExecucao && (
+          <Button variant="secondary" size="sm" onClick={() => setEditandoExecucao(true)}>
+            Editar execucao
+          </Button>
+        )}
         {podeReabrir && (
           <Button variant="secondary" size="sm" onClick={() => setConfirmarReabrir(true)}>
             Reabrir OS
@@ -173,6 +180,19 @@ export function AcoesOs({
           os={os}
           onClose={() => setDigitando(false)}
           onConcluido={execucaoConcluida}
+        />
+      )}
+
+      {editandoExecucao && (
+        <ModalDigitarExecucao
+          os={os}
+          editar
+          onClose={() => setEditandoExecucao(false)}
+          onConcluido={() => {
+            setEditandoExecucao(false)
+            router.refresh()
+            onEditado?.()
+          }}
         />
       )}
 
