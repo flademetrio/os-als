@@ -240,7 +240,7 @@ function ListaSelecao({
   return (
     <div>
       <p className="text-sm font-medium text-slate-700 mb-1">{titulo}</p>
-      <div className="max-h-40 overflow-y-auto rounded-lg border border-slate-200 p-3 space-y-2">
+      <div className="max-h-40 overflow-y-auto rounded-lg border border-slate-200 p-3 flex flex-col items-start gap-2">
         {vazioLista ? (
           <p className="text-xs text-slate-400">{vazio}</p>
         ) : (
